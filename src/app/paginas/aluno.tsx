@@ -198,41 +198,6 @@ export function AlunoInicioPage() {
   );
 }
 
-export function AlunoDuplaPage() {
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            titulo="Minha dupla"
-            descricao={`${p.curso?.nome ?? ''} · ${p.turma?.nome ?? ''}`}
-          />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Card titulo={p.dupla.nome}>
-              <ul className="flex flex-col gap-2">
-                <li className="flex items-center gap-2">
-                  <Icon nome="usuario" /> {p.estudante.nome} (você)
-                </li>
-                {p.colega && (
-                  <li className="flex items-center gap-2">
-                    <Icon nome="usuario" /> {p.colega.nome}
-                  </li>
-                )}
-              </ul>
-            </Card>
-            <Card titulo="Categoria">
-              <p>{p.curso?.categoria}</p>
-              <p className="mt-2 text-sm text-text-secondary">
-                O ranking compara apenas duplas da mesma categoria.
-              </p>
-            </Card>
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
 export function AlunoDesafiosPage() {
   return (
     <ComDadosDemo carregar={carregar}>

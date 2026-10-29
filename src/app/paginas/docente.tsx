@@ -87,36 +87,6 @@ export function DocenteInicioPage() {
   );
 }
 
-export function DocenteTurmasPage() {
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader titulo="Minhas turmas" descricao="Somente turmas vinculadas ao seu perfil." />
-          {p.turmas.map((t) => (
-            <Card key={t.id} titulo={`${t.nome} — ${t.curso?.nome ?? ''}`} className="mb-4">
-              <ResponsiveTable
-                legenda={`Duplas da turma ${t.nome}`}
-                chave={(d) => d.id}
-                linhas={p.duplas.filter((d) => d.turmaId === t.id)}
-                vazio="Nenhuma dupla formada nesta turma."
-                colunas={[
-                  { id: 'nome', titulo: 'Dupla', valor: (d) => d.nome },
-                  {
-                    id: 'int',
-                    titulo: 'Integrantes',
-                    valor: (d) => d.nomesIntegrantes.join(' e '),
-                  },
-                ]}
-              />
-            </Card>
-          ))}
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
 export function DocentePresencaPage() {
   return (
     <ComDadosDemo carregar={carregar}>

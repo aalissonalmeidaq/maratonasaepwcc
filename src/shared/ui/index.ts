@@ -13,3 +13,6 @@ export { SelectField, type Opcao } from './SelectField';
 export { Spinner } from './Spinner';
 export { StatusBadge, type EstadoVisual } from './StatusBadge';
 export { TextField } from './TextField';
+export { RetornoEnvio } from './envio';
+export { useEnvio, type EstadoEnvio } from './useEnvio';
+export { TextAreaField } from './TextAreaField';

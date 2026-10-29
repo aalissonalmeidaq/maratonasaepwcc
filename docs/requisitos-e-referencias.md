@@ -2,13 +2,13 @@
 
 Fonte: PRD v1.0, Documento de Visão v1.0, Design System v1.0 e instruções do usuário (2026-10-29).
 
-| Requisito   | Descrição resumida                           | Situação após ciclo 1                                                   | Onde                                            |
+| Requisito   | Descrição resumida                           | Situação (após spec 002)                                                | Onde                                            |
 | ----------- | -------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------- |
 | RF01        | Autenticar e restringir por perfil e vínculo | **Parcial**: login Supabase, rotas por papel, RLS testada               | `modules/auth`, `modules/acesso`, migration 001 |
-| RF02        | Edições, cursos, turmas, docentes            | Esquema + RLS; telas de leitura (demo)                                  | migration 001, `paginas/coordenacao.tsx`        |
-| RF03        | Cadastrar/importar alunos e contas           | Pendente (Inc. 2; exige Edge Function)                                  | —                                               |
-| RF04        | Duplas e alterações justificadas             | Leitura demo; esquema no Inc. 2                                         | —                                               |
-| RF05        | Encontros, horários, ambientes               | Leitura demo; configurável no Inc. 2                                    | —                                               |
+| RF02        | Edições, cursos, turmas, docentes            | **Feito (spec 002)**: cursos, turmas e vínculos com RLS e auditoria     | `modules/organizacao`, migrations 001/002       |
+| RF03        | Cadastrar/importar alunos e contas           | **Feito**: conta criada por Edge Function; importação CSV pendente      | `supabase/functions/criar-conta`                |
+| RF04        | Duplas e alterações justificadas             | **Feito**: RPC atômica, justificativa e histórico (HU01)                | `modules/duplas`, migration 002                 |
+| RF05        | Encontros, horários, ambientes               | **Feito**: encontros e ambientes configuráveis                          | `modules/encontros`, migration 002              |
 | RF06        | Regulamento e comunicados                    | Resumo das regras a partir da configuração                              | `AlunoRegulamentoPage`                          |
 | RF07–RF08   | Questões e submissão única                   | Regra de pontuação pronta                                               | `modules/pontuacao`                             |
 | RF09–RF10   | Desafio e envio com comprovante do servidor  | Componente de envio pronto (sem backend)                                | `modules/desafios`                              |
@@ -28,4 +28,4 @@ Fonte: PRD v1.0, Documento de Visão v1.0, Design System v1.0 e instruções do 
 | RNF07–RNF08 | Operação/desempenho                          | Propostas em `operacao-e-homologacao.md`; metas a definir               | —                                               |
 
 Histórias: HU02 (envio), HU03 (rubrica), HU04 (prova), HU05 (ranking), HU07 (offline) têm
-regras ou componentes testados; HU01 e HU06 dependem dos incrementos 2 e 4.
+regras ou componentes testados; HU01 concluída na spec 002 (pgTAP + E2E real); HU06 depende do Incremento 4.
