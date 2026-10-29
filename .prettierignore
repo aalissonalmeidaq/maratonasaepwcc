@@ -1,0 +1,13 @@
+dist
+dev-dist
+coverage
+node_modules
+playwright-report
+test-results
+docs/referencias
+docs/VETORIZADAS CLAUDE
+.specify
+.claude
+supabase/.temp
+package-lock.json
+public/brand

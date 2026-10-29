@@ -1,0 +1,28 @@
+# Dependências e builds
+node_modules
+dist
+dev-dist
+coverage
+*.tsbuildinfo
+
+# Testes
+playwright-report
+test-results
+blob-report
+
+# Ambiente — NUNCA versionar credenciais
+.env
+.env.*
+!.env.example
+
+# Supabase local
+supabase/.temp
+supabase/.branches
+
+# Editores e SO
+.DS_Store
+Thumbs.db
+*.log
+.vscode/*
+!.vscode/extensions.json
+node_modules

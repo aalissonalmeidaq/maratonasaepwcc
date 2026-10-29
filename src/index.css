@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+@import './shared/styles/tema.css';
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: var(--line-height-tight);
+  }
+
+  /* Foco sempre visível para navegação por teclado (Design System §7). */
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  #conteudo:focus {
+    outline: none;
+  }
+
+  /* Áreas seguras de dispositivos com recorte de tela. */
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}

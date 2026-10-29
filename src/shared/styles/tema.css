@@ -1,0 +1,106 @@
+/*
+ * Tokens do Design System da Maratona SAEP.
+ * Fonte: docs/referencias/tokens_maratona.css (v1.0, proposta a validar).
+ * O teste src/shared/styles/tokens.test.ts garante que os valores abaixo são idênticos ao arquivo
+ * oficial. Para mudar uma cor, atualize primeiro o arquivo de referência aprovado.
+ */
+@theme {
+  --color-*: initial;
+  --color-navy-900: #062457;
+  --color-navy-950: #041b42;
+  --color-blue-700: #0050c7;
+  --color-blue-600: #0063e6;
+  --color-blue-500: #1676ff;
+  --color-cyan-500: #22d3ee;
+  --color-yellow-500: #ffb820;
+  --color-coral-500: #ff5866;
+  --color-purple-500: #8b6dff;
+  --color-white: #ffffff;
+  --color-gray-50: #f7f9fc;
+  --color-gray-100: #eef3f8;
+  --color-gray-200: #dce5ef;
+  --color-gray-500: #66768a;
+  --color-gray-700: #33465f;
+  --color-green-700: #087148;
+  --color-red-700: #b42332;
+  --color-amber-800: #805000;
+  --color-bg: var(--color-gray-50);
+  --color-surface: var(--color-white);
+  --color-surface-muted: var(--color-gray-100);
+  --color-text: var(--color-navy-900);
+  --color-text-secondary: var(--color-gray-700);
+  --color-border: var(--color-gray-200);
+  --color-action: var(--color-blue-700);
+  --color-action-hover: var(--color-navy-900);
+  --color-action-text: var(--color-white);
+  --color-link: var(--color-blue-700);
+  --color-success: var(--color-green-700);
+  --color-warning: var(--color-amber-800);
+  --color-error: var(--color-red-700);
+  --color-focus: #0047b3;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --font-display: 'Montserrat', Arial, sans-serif;
+  --font-body: 'Montserrat', Arial, sans-serif;
+  --font-sans: var(--font-body);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgb(6 36 87 / 10%);
+  --shadow-md: 0 4px 14px rgb(6 36 87 / 12%);
+
+  /* Pontos de quebra (Design System §6, premissas iniciais). */
+  --breakpoint-sm: 40rem;
+  --breakpoint-lg: 64rem;
+}
+
+:root {
+  color-scheme: light;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --focus-ring: 0 0 0 3px #ffffff, 0 0 0 5px var(--color-focus);
+  --sidebar-width: 16rem;
+  --topbar-height: 4.5rem;
+  --content-max: 90rem;
+  --control-min-height: 2.75rem;
+  --icon-sm: 1rem;
+  --icon-md: 1.25rem;
+  --icon-lg: 1.5rem;
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --ease-standard: ease-out;
+  --z-header: 20;
+  --z-overlay: 40;
+  --z-modal: 50;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+  }
+}
