@@ -93,7 +93,7 @@ export function EntradaPage() {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       <section className="relative hidden overflow-hidden bg-navy-900 p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <Brand variante="branca" className="w-80" />
+        <Brand variante="textoBranco" className="w-80" />
         <p className="max-w-md font-display text-3xl font-bold leading-tight">
           Cada desafio é uma oportunidade de evoluir.
         </p>

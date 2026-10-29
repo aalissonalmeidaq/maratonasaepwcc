@@ -3,12 +3,17 @@ import { cx } from './cx';
 const ARQUIVOS = {
   positivo: '/brand/maratona-horizontal.svg',
   branca: '/brand/maratona-horizontal-branca.svg',
+  /** Símbolo e "SAEP" coloridos, texto branco: versão preferida em fundo azul-marinho. */
+  textoBranco: '/brand/maratona-horizontal-texto-branco.svg',
   vertical: '/brand/maratona-vertical.svg',
   simbolo: '/brand/maratona-simbolo.svg',
 } as const;
 
 interface BrandProps {
-  /** `positivo` em fundo claro; `branca` em fundo escuro (arquivos oficiais, sem alteração). */
+  /**
+   * `positivo` em fundo claro; `textoBranco` em fundo escuro; `branca` (monocromática) quando a
+   * cor não for possível. Arquivos oficiais de docs/referencias, sem alteração.
+   */
   variante?: keyof typeof ARQUIVOS;
   className?: string;
 }

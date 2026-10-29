@@ -81,7 +81,7 @@ export function AppShell({ area }: { area: Area }) {
 
       {/* Menu lateral (desktop) */}
       <aside className="fixed inset-y-0 left-0 z-(--z-header) hidden w-(--sidebar-width) flex-col overflow-hidden bg-navy-900 px-4 py-6 lg:flex">
-        <Brand variante="branca" className="mb-8 w-48" />
+        <Brand variante="textoBranco" className="mb-8 w-48" />
         <nav aria-label={ROTULO_AREA[area]} className="flex-1">
           <Menu area={area} />
         </nav>
