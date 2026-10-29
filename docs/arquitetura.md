@@ -42,9 +42,9 @@ valem para os dois lados.
 | --- | ----------------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
 | 1   | Autenticação e usuários             | `modules/auth`                          | Adaptadores Supabase (real) e demonstração, sessão, rotas protegidas |
 | 2   | Perfis, permissões e vínculos       | `modules/acesso` + tabela `atribuicoes` | Papéis, áreas, RLS e testes pgTAP                                    |
-| 3   | Edições, cursos e turmas            | `modules/organizacao` + tabelas         | Esquema e RLS; telas de leitura (demo)                               |
-| 4   | Duplas e integrantes                | `modules/duplas`                        | Telas de leitura (demo); esquema no Inc. 2                           |
-| 5   | Encontros e ambientes               | `modules/encontros`                     | Telas de leitura (demo); esquema no Inc. 2                           |
+| 3   | Edições, cursos e turmas            | `modules/organizacao` + tabelas         | Cursos, turmas, vínculos e contas com Supabase (spec 002)            |
+| 4   | Duplas e integrantes                | `modules/duplas`                        | RPCs atômicas, histórico, telas reais (spec 002)                     |
+| 5   | Encontros e ambientes               | `modules/encontros`                     | Cadastro com validação no servidor (spec 002)                        |
 | 6   | Questões preparatórias              | `modules/questoes`                      | Regra de pontuação pronta; restante no Inc. 3                        |
 | 7   | Desafios, projetos e entregas       | `modules/desafios`                      | `EnvioEntrega` com confirmação só do servidor                        |
 | 8   | Presença e participação             | `modules/presenca`                      | Regras prontas; registro no Inc. 3                                   |
@@ -59,6 +59,12 @@ valem para os dois lados.
 | —   | Dados fictícios                     | `modules/demo`                          | Somente modo demonstração                                            |
 
 Módulos ainda sem código têm apenas `README.md` descrevendo responsabilidade e incremento.
+
+## Acesso a dados
+
+Repositórios por módulo (contrato em `domain/`, Supabase em `data/`, demonstração em
+`modules/demo`) servidos por `src/app/dados` e consumidos com TanStack Query (ADR 0007).
+Escrita de duplas somente por RPC; criação de contas somente pela Edge Function (ADR 0008).
 
 ## Composição
 

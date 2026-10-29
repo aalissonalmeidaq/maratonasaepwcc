@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { painelCoordenacao } from '@/modules/demo';
 import { maximoDaEdicao } from '@/modules/pontuacao';
-import { formatarData } from '@/shared/lib/formatacao';
 import {
   Alert,
   Button,
@@ -9,7 +8,6 @@ import {
   ConfirmDialog,
   EmConstrucao,
   PageHeader,
-  ResponsiveTable,
   StatCard,
   StatusBadge,
 } from '@/shared/ui';
@@ -92,112 +90,6 @@ export function CoordenacaoInicioPage() {
                 ))}
               </ul>
             </Card>
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
-export function CoordenacaoOrganizacaoPage() {
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            titulo="Organização da edição"
-            descricao="Cursos, categorias, turmas e docentes responsáveis."
-          />
-          <Alert tom="info" titulo="Cadastros no Incremento 2">
-            Criação e edição de cursos, turmas, estudantes e vínculos serão habilitadas com
-            validação e auditoria no servidor.
-          </Alert>
-          <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-            <ResponsiveTable
-              legenda="Turmas"
-              legendaVisivel
-              chave={(t) => t.id}
-              linhas={p.turmas}
-              colunas={[
-                { id: 'turma', titulo: 'Turma', valor: (t) => t.nome },
-                { id: 'curso', titulo: 'Curso', valor: (t) => t.curso?.nome },
-                { id: 'cat', titulo: 'Categoria', valor: (t) => t.curso?.categoria },
-                { id: 'duplas', titulo: 'Duplas', numerica: true, valor: (t) => t.duplas },
-                { id: 'doc', titulo: 'Docentes e mentoria', valor: (t) => t.docentes.join(', ') },
-              ]}
-            />
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
-export function CoordenacaoDuplasPage() {
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            titulo="Duplas"
-            descricao="Composição atual. Alterações exigirão justificativa e ficarão no histórico."
-          />
-          <div className="rounded-lg border border-border bg-surface p-4">
-            <ResponsiveTable
-              legenda="Duplas da edição"
-              chave={(d) => d.id}
-              linhas={p.duplas}
-              colunas={[
-                { id: 'nome', titulo: 'Dupla', valor: (d) => d.nome },
-                { id: 'int', titulo: 'Integrantes', valor: (d) => d.nomesIntegrantes.join(' e ') },
-                { id: 'turma', titulo: 'Turma', valor: (d) => d.turma },
-              ]}
-            />
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
-export function CoordenacaoEncontrosPage() {
-  const hoje = new Date().toISOString().slice(0, 10);
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            titulo="Encontros"
-            descricao="Quantidade, datas e ambientes são configuráveis por edição."
-          />
-          <div className="rounded-lg border border-border bg-surface p-4">
-            <ResponsiveTable
-              legenda="Encontros da edição"
-              chave={(e) => e.id}
-              linhas={p.encontros}
-              colunas={[
-                { id: 'n', titulo: 'Nº', valor: (e) => e.numero },
-                { id: 't', titulo: 'Encontro', valor: (e) => e.titulo },
-                {
-                  id: 'd',
-                  titulo: 'Data',
-                  valor: (e) => formatarData(e.data, { weekday: 'short' }),
-                },
-                { id: 'h', titulo: 'Horário', valor: (e) => e.horario },
-                { id: 'a', titulo: 'Ambiente', valor: (e) => e.ambiente },
-                {
-                  id: 'o',
-                  titulo: 'Avaliação objetiva',
-                  valor: (e) =>
-                    e.avaliacaoObjetiva === 'questoes' ? 'Questões' : 'Prova oficial (registro)',
-                },
-                {
-                  id: 's',
-                  titulo: 'Situação',
-                  valor: (e) => <StatusBadge estado={e.data < hoje ? 'concluido' : 'agendado'} />,
-                },
-              ]}
-            />
           </div>
         </>
       )}

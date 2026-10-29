@@ -105,9 +105,18 @@ supabase stop
 
 Para usar o login real localmente, crie `.env.local` com `VITE_SUPABASE_URL=http://127.0.0.1:54421`
 e a `PUBLISHABLE_KEY` de `supabase status`. Contas fictícias do seed (senha `senha-local-123`,
-**somente local**): `coordenacao@exemplo.invalid`, `docente@exemplo.invalid`,
-`aluna@exemplo.invalid`, `aluno@exemplo.invalid`. Nesta versão as telas fora da demo mostram
-"integração em desenvolvimento" (repositórios Supabase dos módulos chegam no Incremento 2).
+**somente local**): `coordenacao@exemplo.invalid`, `docente@exemplo.invalid` (turma A),
+`docente2@exemplo.invalid` (turma B), `aluna@exemplo.invalid`, `aluno@exemplo.invalid`,
+`carla@`, `davi@`, `elisa@`, `fabio@`, `iris@`, `joao@exemplo.invalid`.
+
+Com o Supabase configurado, já usam dados reais: **Organização** (cursos, turmas, vínculos e
+criação de contas), **Duplas** (formar, substituir, desfazer, histórico) e **Encontros/ambientes**
+da coordenação; **Minhas turmas** e **Encontros** da docente; **Minha dupla** e **Encontros** do
+aluno. Painéis com pontuação, ranking e premiação ainda usam somente a demonstração
+(Incrementos 3 e 4).
+
+A criação de contas usa a Edge Function `supabase/functions/criar-conta`, servida
+automaticamente pelo `supabase start` (ver [ADR 0008](docs/adr/0008-criacao-de-contas.md)).
 
 O projeto **não** se conecta a bancos remotos. Nunca rode `seed.sql` fora do ambiente local.
 
@@ -123,8 +132,18 @@ npm run test:db        # pgTAP: RLS no Supabase local (requer `supabase start`)
 npm run verify         # typecheck + lint + testes + build
 ```
 
+E2E contra o Supabase **local** (grava e desfaz dados fictícios; recusa URLs não locais):
+
+```bash
+supabase start && supabase db reset
+export E2E_SUPABASE_URL=http://127.0.0.1:54421
+export E2E_SUPABASE_ANON_KEY=<PUBLISHABLE_KEY de `supabase status`>
+npm run test:e2e:supabase
+```
+
 Organização: testes de domínio em `src/modules/*/domain/*.test.ts`; componentes em
-`*.test.tsx`; autorização em `supabase/tests/*.sql`; E2E em `e2e/`.
+`*.test.tsx`; autorização em `supabase/tests/*.sql`; E2E de demonstração em `e2e/` e contra o
+banco local em `e2e-supabase/`.
 
 ## Fluxo SDD com Spec Kit
 
@@ -140,7 +159,8 @@ Para cada incremento, no Claude Code:
 5. `/speckit-analyze` (opcional) → consistência entre artefatos
 6. `/speckit-implement` → implementação com TDD (RED → GREEN → REFACTOR)
 
-Especificação atual: [specs/001-fundacao-perfis-demo](specs/001-fundacao-perfis-demo/).
+Especificações: [001 — fundação](specs/001-fundacao-perfis-demo/) e
+[002 — organização da maratona](specs/002-organizacao-maratona/).
 Toda nova tabela vem com políticas RLS **e** testes pgTAP na mesma mudança.
 
 ## PWA e offline
@@ -165,7 +185,9 @@ Lista completa em [docs/decisoes-e-pendencias.md](docs/decisoes-e-pendencias.md)
 
 - Regulamento/projeto pedagógico **não fornecido**: regras em `piloto-2026.0-a-confirmar`.
 - Marca SENAI Ceará e ícones SVG do projeto **ausentes** (áreas e ícones provisórios).
-- Telas ainda não leem o Supabase (exceto login/papéis); cadastros, registros e publicação nos
-  próximos incrementos.
+- Organização (turmas, vínculos, contas, duplas, encontros) já usa o Supabase; atividades,
+  presença, avaliação, pontuação, ocorrências e publicação do ranking ficam para os próximos
+  incrementos.
+- Senha provisória de novas contas: entrega e troca no primeiro acesso a definir pela unidade.
 - Autenticação de demonstração **não é segura**.
 - Detalhes da premiação, escala e acesso à nota oficial a confirmar.

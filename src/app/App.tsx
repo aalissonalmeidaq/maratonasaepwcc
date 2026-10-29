@@ -4,6 +4,7 @@ import { contasDemo } from '@/modules/demo';
 import { ambiente } from '@/shared/lib/env';
 import { obterSupabase } from '@/shared/lib/supabase';
 import { AtualizacaoPwa, StatusConexao } from '@/shared/pwa';
+import { ProvedorDeDados } from './dados/repositorios';
 import { AvisoDemo } from './layout/AvisoDemo';
 import { AppRotas } from './rotas';
 
@@ -25,9 +26,11 @@ export function App() {
     <AuthProvider modo={ambiente.modo} adaptador={auth.adaptador} entrarComo={auth.entrarComo}>
       {ambiente.modo === 'demo' && <AvisoDemo />}
       <StatusConexao />
-      <BrowserRouter>
-        <AppRotas />
-      </BrowserRouter>
+      <ProvedorDeDados>
+        <BrowserRouter>
+          <AppRotas />
+        </BrowserRouter>
+      </ProvedorDeDados>
       <AtualizacaoPwa />
     </AuthProvider>
   );

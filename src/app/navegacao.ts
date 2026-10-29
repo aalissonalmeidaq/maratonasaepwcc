@@ -12,6 +12,7 @@ export const MENUS: Record<Area, ItemMenu[]> = {
   aluno: [
     { rotulo: 'Início', caminho: '/aluno', icone: 'inicio' },
     { rotulo: 'Minha dupla', caminho: '/aluno/dupla', icone: 'dupla' },
+    { rotulo: 'Encontros', caminho: '/aluno/encontros', icone: 'encontros' },
     { rotulo: 'Desafios e entregas', caminho: '/aluno/desafios', icone: 'desafio' },
     { rotulo: 'Pontuação', caminho: '/aluno/pontuacao', icone: 'pontuacao' },
     { rotulo: 'Ranking', caminho: '/aluno/ranking', icone: 'ranking' },
@@ -20,6 +21,7 @@ export const MENUS: Record<Area, ItemMenu[]> = {
   docente: [
     { rotulo: 'Início', caminho: '/docente', icone: 'inicio' },
     { rotulo: 'Minhas turmas', caminho: '/docente/turmas', icone: 'turmas' },
+    { rotulo: 'Encontros', caminho: '/docente/encontros', icone: 'encontros' },
     { rotulo: 'Presença', caminho: '/docente/presenca', icone: 'presenca' },
     { rotulo: 'Avaliações', caminho: '/docente/avaliacoes', icone: 'avaliacao' },
     { rotulo: 'Ocorrências', caminho: '/docente/ocorrencias', icone: 'ocorrencias' },

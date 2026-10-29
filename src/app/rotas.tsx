@@ -5,6 +5,7 @@ import * as Aluno from './paginas/aluno';
 import { AguardandoPermissaoPage, EntradaPage, NaoEncontradaPage } from './paginas/comum';
 import * as Coord from './paginas/coordenacao';
 import * as Docente from './paginas/docente';
+import * as Org from './paginas/organizacao';
 
 export function AppRotas() {
   return (
@@ -16,7 +17,8 @@ export function AppRotas() {
       <Route element={<RotaProtegida area="aluno" />}>
         <Route path="/aluno" element={<AppShell area="aluno" />}>
           <Route index element={<Aluno.AlunoInicioPage />} />
-          <Route path="dupla" element={<Aluno.AlunoDuplaPage />} />
+          <Route path="dupla" element={<Org.AlunoDuplaPage />} />
+          <Route path="encontros" element={<Org.EncontrosLeituraPage />} />
           <Route path="desafios" element={<Aluno.AlunoDesafiosPage />} />
           <Route path="pontuacao" element={<Aluno.AlunoPontuacaoPage />} />
           <Route path="ranking" element={<Aluno.AlunoRankingPage />} />
@@ -27,7 +29,8 @@ export function AppRotas() {
       <Route element={<RotaProtegida area="docente" />}>
         <Route path="/docente" element={<AppShell area="docente" />}>
           <Route index element={<Docente.DocenteInicioPage />} />
-          <Route path="turmas" element={<Docente.DocenteTurmasPage />} />
+          <Route path="turmas" element={<Org.DocenteTurmasPage />} />
+          <Route path="encontros" element={<Org.EncontrosLeituraPage />} />
           <Route path="presenca" element={<Docente.DocentePresencaPage />} />
           <Route path="avaliacoes" element={<Docente.DocenteAvaliacoesPage />} />
           <Route path="ocorrencias" element={<Docente.DocenteOcorrenciasPage />} />
@@ -37,9 +40,9 @@ export function AppRotas() {
       <Route element={<RotaProtegida area="coordenacao" />}>
         <Route path="/coordenacao" element={<AppShell area="coordenacao" />}>
           <Route index element={<Coord.CoordenacaoInicioPage />} />
-          <Route path="organizacao" element={<Coord.CoordenacaoOrganizacaoPage />} />
-          <Route path="duplas" element={<Coord.CoordenacaoDuplasPage />} />
-          <Route path="encontros" element={<Coord.CoordenacaoEncontrosPage />} />
+          <Route path="organizacao" element={<Org.CoordenacaoOrganizacaoPage />} />
+          <Route path="duplas" element={<Org.CoordenacaoDuplasPage />} />
+          <Route path="encontros" element={<Org.CoordenacaoEncontrosPage />} />
           <Route path="ranking" element={<Coord.CoordenacaoRankingPage />} />
           <Route path="ocorrencias" element={<Coord.CoordenacaoOcorrenciasPage />} />
           <Route path="comunicados" element={<Coord.CoordenacaoComunicadosPage />} />

@@ -9,3 +9,4 @@ export {
   type PontuacaoPorEncontro,
   type RankingDaCategoria,
 } from './consultas';
+export { criarRepositoriosDemo } from './repositorios';
