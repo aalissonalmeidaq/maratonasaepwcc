@@ -1,6 +1,6 @@
 // Módulo 15 — componentes compartilhados de interface.
 export { Alert } from './Alert';
-export { Brand, MarcaSenaiProvisoria } from './Brand';
+export { Brand, MarcaSenai } from './Brand';
 export { Button, type ButtonProps } from './Button';
 export { Card, ProgressBar, StatCard } from './Card';
 export { ConfirmDialog } from './ConfirmDialog';

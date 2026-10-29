@@ -3,16 +3,17 @@ import { expect, test, type Page } from '@playwright/test';
 async function entrarComo(page: Page, nome: RegExp) {
   await page.goto('/entrar');
   await expect(page.getByText(/modo demonstração — dados fictícios/i).first()).toBeVisible();
+  await semRolagemHorizontal(page);
   await page.getByRole('button', { name: nome }).click();
 }
 
 /** Garante que não há rolagem horizontal (SC-004). */
 async function semRolagemHorizontal(page: Page) {
-  const larguras = await page.evaluate(() => ({
-    documento: document.documentElement.scrollWidth,
-    janela: window.innerWidth,
-  }));
-  expect(larguras.documento).toBeLessThanOrEqual(larguras.janela);
+  // Compara com a largura do dispositivo: no celular o navegador alarga a própria viewport
+  // quando o conteúdo estoura, então innerWidth não serve de referência.
+  const larguraDoDispositivo = page.viewportSize()?.width ?? 0;
+  const larguraDoDocumento = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(larguraDoDocumento).toBeLessThanOrEqual(larguraDoDispositivo);
 }
 
 async function abrirMenuSeNecessario(page: Page) {
