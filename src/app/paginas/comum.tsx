@@ -51,7 +51,7 @@ function FormularioEntrada() {
         {...register('senha')}
       />
       {erro && <Alert tom="erro" titulo={erro} anunciar />}
-      <Button type="submit" carregando={isSubmitting} larguraTotal>
+      <Button type="submit" icone="entrar" carregando={isSubmitting} larguraTotal>
         Entrar
       </Button>
       <p className="text-sm text-text-secondary">
@@ -161,17 +161,23 @@ export function NaoEncontradaPage() {
 export function ComDadosDemo<T>({
   carregar,
   children,
+  foraDaDemo,
 }: {
   carregar: (sessao: Sessao) => T | null;
   children: (dados: T) => ReactNode;
+  /** Conteúdo que não depende de dados fictícios (ex.: atalhos), exibido fora da demonstração. */
+  foraDaDemo?: ReactNode;
 }) {
   const { sessao } = useAuth();
   if (!sessao?.demo) {
     return (
-      <Alert tom="info" titulo="Integração com o banco em desenvolvimento">
-        Esta tela passará a usar dados do Supabase no Incremento 2. Nenhum dado fictício é exibido
-        fora do modo demonstração.
-      </Alert>
+      <>
+        {foraDaDemo}
+        <Alert tom="info" titulo="Integração com o banco em desenvolvimento">
+          Esta tela passará a usar dados do Supabase no Incremento 2. Nenhum dado fictício é exibido
+          fora do modo demonstração.
+        </Alert>
+      </>
     );
   }
   const dados = carregar(sessao);

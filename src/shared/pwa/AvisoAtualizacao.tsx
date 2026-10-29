@@ -26,7 +26,9 @@ export function AvisoAtualizacaoView({
         <Button variante="secundario" onClick={onDispensar}>
           Depois
         </Button>
-        <Button onClick={onAtualizar}>Atualizar agora</Button>
+        <Button icone="sincronizar" onClick={onAtualizar}>
+          Atualizar agora
+        </Button>
       </div>
     </div>
   );

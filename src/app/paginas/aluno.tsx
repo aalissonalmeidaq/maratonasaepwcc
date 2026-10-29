@@ -14,6 +14,7 @@ import {
   StatCard,
   StatusBadge,
 } from '@/shared/ui';
+import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
 
 type Painel = NonNullable<ReturnType<typeof painelAluno>>;
@@ -80,13 +81,15 @@ export function TabelaRanking({
 
 export function AlunoInicioPage() {
   return (
-    <ComDadosDemo carregar={carregar}>
+    <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="aluno" />}>
       {(p: Painel) => (
         <>
           <PageHeader
+            icone="inicio"
             titulo={`Olá, ${p.estudante.nome.split(' ')[0]}!`}
             descricao="Cada desafio é uma oportunidade de evoluir."
           />
+          <Atalhos area="aluno" />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               icone="pontuacao"
@@ -118,7 +121,7 @@ export function AlunoInicioPage() {
           </div>
 
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <Card titulo="Progresso da dupla" className="lg:col-span-2">
+            <Card icone="progresso" titulo="Progresso da dupla" className="lg:col-span-2">
               <ProgressBar
                 valor={p.totais.total}
                 maximo={p.maximo}
@@ -135,7 +138,7 @@ export function AlunoInicioPage() {
                 Ver detalhes por encontro
               </Link>
             </Card>
-            <Card titulo="Próxima tarefa">
+            <Card icone="tarefa" titulo="Próxima tarefa">
               {p.proximoDesafio ? (
                 <>
                   <p className="font-semibold">{p.proximoDesafio.titulo}</p>
@@ -157,7 +160,7 @@ export function AlunoInicioPage() {
           </div>
 
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            <Card titulo="Encontros">
+            <Card icone="calendario" titulo="Encontros">
               <ul className="flex flex-col divide-y divide-border">
                 {p.porEncontro.map(({ encontro, pontuacao }) => (
                   <li
@@ -179,7 +182,7 @@ export function AlunoInicioPage() {
                 ))}
               </ul>
             </Card>
-            <Card titulo="Comunicados">
+            <Card icone="noticia" titulo="Comunicados">
               <ul className="flex flex-col gap-3">
                 {p.comunicados.map((c) => (
                   <li key={c.id}>
@@ -203,13 +206,14 @@ export function AlunoDesafiosPage() {
     <ComDadosDemo carregar={carregar}>
       {(p: Painel) => (
         <>
-          <PageHeader titulo="Desafios e entregas" />
+          <PageHeader icone="desafio" titulo="Desafios e entregas" />
           <div className="grid gap-4 lg:grid-cols-2">
             {p.desafios.map((d) => {
               const encontro = p.porEncontro.find((e) => e.encontro.id === d.encontroId);
               const aberto = !encontro?.pontuacao;
               return (
                 <Card
+                  icone="desafio"
                   key={d.id}
                   titulo={d.titulo}
                   acao={
@@ -312,12 +316,13 @@ export function AlunoPontuacaoPage() {
       {(p: Painel) => (
         <>
           <PageHeader
+            icone="pontuacao"
             titulo="Pontuação da dupla"
             descricao={`${formatarPontos(p.totais.total)} de ${p.maximo} pontos · regras ${REGRAS_PILOTO.versao}`}
           />
           <div className="grid gap-4 md:grid-cols-2">
             {p.porEncontro.map(({ encontro, pontuacao }) => (
-              <Card key={encontro.id} titulo={encontro.titulo}>
+              <Card icone="calendario" key={encontro.id} titulo={encontro.titulo}>
                 {pontuacao ? (
                   <>
                     <DetalheEncontro pontuacao={pontuacao} />
@@ -351,6 +356,7 @@ export function AlunoRankingPage() {
       {(p: Painel) => (
         <>
           <PageHeader
+            icone="ranking"
             titulo="Ranking"
             descricao={p.curso?.categoria}
             acoes={p.ranking && <StatusBadge estado={p.ranking.estado} />}
@@ -373,6 +379,7 @@ export function AlunoRegulamentoPage() {
   return (
     <>
       <PageHeader
+        icone="conhecimento"
         titulo="Regulamento e avisos"
         descricao={`Regras da edição — versão ${r.versao}`}
       />
@@ -381,7 +388,7 @@ export function AlunoRegulamentoPage() {
         publicado aqui pela coordenação.
       </Alert>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <Card titulo="Pontuação por encontro">
+        <Card icone="pontuacao" titulo="Pontuação por encontro">
           <ul className="list-disc space-y-1 pl-5 text-sm">
             <li>
               Presença: {r.presenca.pontosPorIntegrante} por integrante, até{' '}
@@ -403,7 +410,7 @@ export function AlunoRegulamentoPage() {
             <li>Total: até {maximoPorEncontro(r)} por encontro.</li>
           </ul>
         </Card>
-        <Card titulo="Prova oficial, atrasos e ocorrências">
+        <Card icone="prova" titulo="Prova oficial, atrasos e ocorrências">
           <ul className="list-disc space-y-1 pl-5 text-sm">
             <li>
               Prova oficial: {r.provaOficial.pontosRealizacao} pontos por estudante com realização

@@ -7,11 +7,13 @@ interface CardProps {
   /** Nível do título para manter a hierarquia da página. */
   nivel?: 2 | 3;
   acao?: ReactNode;
+  /** Ícone ao lado do título, nas cores da marca (decorativo). */
+  icone?: NomeIcone;
   className?: string;
   children: ReactNode;
 }
 
-export function Card({ titulo, nivel = 2, acao, className, children }: CardProps) {
+export function Card({ titulo, nivel = 2, acao, icone, className, children }: CardProps) {
   const Titulo = `h${nivel}` as const;
   return (
     <section
@@ -20,7 +22,10 @@ export function Card({ titulo, nivel = 2, acao, className, children }: CardProps
       {(titulo || acao) && (
         <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
           {titulo && (
-            <Titulo className="font-display text-lg font-semibold text-text">{titulo}</Titulo>
+            <Titulo className="flex items-center gap-2 font-display text-lg font-semibold text-text">
+              {icone && <Icon nome={icone} tamanho="lg" cor="marca" />}
+              {titulo}
+            </Titulo>
           )}
           {acao}
         </header>

@@ -12,6 +12,7 @@ import {
   StatusBadge,
 } from '@/shared/ui';
 import { TabelaRanking } from './aluno';
+import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
 
 type Painel = ReturnType<typeof painelCoordenacao>;
@@ -19,10 +20,11 @@ const carregar = () => painelCoordenacao();
 
 export function CoordenacaoInicioPage() {
   return (
-    <ComDadosDemo carregar={carregar}>
+    <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="coordenacao" />}>
       {(p: Painel) => (
         <>
-          <PageHeader titulo="Visão geral" descricao={p.edicao.nome} />
+          <PageHeader icone="painel" titulo="Visão geral" descricao={p.edicao.nome} />
+          <Atalhos area="coordenacao" />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               icone="turma"
@@ -53,7 +55,7 @@ export function CoordenacaoInicioPage() {
           </div>
 
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <Card titulo="Pendências">
+            <Card icone="aviso" titulo="Pendências">
               <ul className="flex flex-col gap-3 text-sm">
                 <li className="flex items-center justify-between gap-2">
                   Componentes de avaliação em aberto
@@ -75,7 +77,7 @@ export function CoordenacaoInicioPage() {
                 </li>
               </ul>
             </Card>
-            <Card titulo="Classificação por categoria" className="lg:col-span-2">
+            <Card icone="ranking" titulo="Classificação por categoria" className="lg:col-span-2">
               <ul className="flex flex-col gap-2">
                 {p.ranking.map((r) => (
                   <li
@@ -104,16 +106,18 @@ export function CoordenacaoRankingPage() {
       {(p: Painel) => (
         <>
           <PageHeader
+            icone="ranking"
             titulo="Ranking"
             descricao="Cálculo com as regras da edição; desempate: entrega → questões/prova → presença."
             acoes={
-              <Button variante="secundario" onClick={() => setConfirmando(true)}>
+              <Button variante="secundario" icone="noticia" onClick={() => setConfirmando(true)}>
                 Publicar como provisório
               </Button>
             }
           />
           {p.ranking.map((r) => (
             <Card
+              icone="ranking"
               key={r.categoria}
               titulo={r.categoria}
               acao={<StatusBadge estado={r.estado} />}
@@ -142,6 +146,7 @@ export function CoordenacaoPremiacaoPage() {
       {(p: Painel) => (
         <>
           <PageHeader
+            icone="trofeu"
             titulo="Premiação"
             descricao="Configuração da edição — não fixada no código."
           />
@@ -170,7 +175,7 @@ export function CoordenacaoPremiacaoPage() {
 export function CoordenacaoOcorrenciasPage() {
   return (
     <>
-      <PageHeader titulo="Ocorrências e revisões" />
+      <PageHeader icone="ocorrencia" titulo="Ocorrências e revisões" />
       <EmConstrucao
         modulo="Ocorrências, penalidades e pedidos de revisão"
         incremento="Incremento 4"
@@ -182,7 +187,7 @@ export function CoordenacaoOcorrenciasPage() {
 export function CoordenacaoComunicadosPage() {
   return (
     <>
-      <PageHeader titulo="Comunicados e regulamento" />
+      <PageHeader icone="noticia" titulo="Comunicados e regulamento" />
       <EmConstrucao modulo="Publicação de comunicados e do regulamento" incremento="Incremento 2" />
     </>
   );
@@ -191,7 +196,7 @@ export function CoordenacaoComunicadosPage() {
 export function CoordenacaoRelatoriosPage() {
   return (
     <>
-      <PageHeader titulo="Relatórios" />
+      <PageHeader icone="relatorio" titulo="Relatórios" />
       <EmConstrucao modulo="Relatórios e exportação CSV" incremento="Incremento 5" />
     </>
   );
