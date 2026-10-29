@@ -162,7 +162,7 @@ export function FormEncontro({
         <RetornoEnvio estado={estado} />
         <Button
           type="submit"
-          icone="encontros"
+          icone="calendario"
           carregando={enviando}
           disabled={Boolean(bloqueio)}
           className="sm:self-start"

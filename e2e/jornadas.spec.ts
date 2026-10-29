@@ -102,3 +102,23 @@ test.describe('jornadas por perfil (modo demonstração)', () => {
     await expect(page).toHaveURL(/\/entrar$/);
   });
 });
+
+test('menu do celular pode ser fechado pelo botão (não fica coberto)', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, 'menu recolhível só existe em telas pequenas');
+  await entrarComo(page, /ana exemplo/i);
+  await page.getByRole('button', { name: 'Abrir menu' }).click();
+  await expect(page.getByRole('link', { name: 'Ranking' })).toBeVisible();
+  const fechar = page.getByRole('button', { name: 'Fechar menu' });
+  // O botão precisa ser o elemento visível no próprio centro (não coberto pelo painel).
+  const coberto = await fechar.evaluate((b) => {
+    const r = b.getBoundingClientRect();
+    const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return !(el && b.contains(el));
+  });
+  expect(coberto).toBe(false);
+  await fechar.click();
+  await expect(page.getByRole('link', { name: 'Ranking' })).toBeHidden();
+});

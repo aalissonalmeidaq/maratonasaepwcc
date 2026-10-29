@@ -5,9 +5,9 @@ import { Icon, type NomeIcone } from './Icon';
 type Tom = 'sucesso' | 'erro' | 'alerta' | 'info';
 
 const TONS: Record<Tom, { classe: string; icone: NomeIcone }> = {
-  sucesso: { classe: 'border-green-700 bg-green-700/8 text-green-700', icone: 'sucesso' },
-  erro: { classe: 'border-red-700 bg-red-700/8 text-red-700', icone: 'erro' },
-  alerta: { classe: 'border-amber-800 bg-yellow-500/15 text-amber-800', icone: 'alerta' },
+  sucesso: { classe: 'border-green-700 bg-green-700/8 text-green-700', icone: 'correta' },
+  erro: { classe: 'border-red-700 bg-red-700/8 text-red-700', icone: 'incorreta' },
+  alerta: { classe: 'border-amber-800 bg-yellow-500/15 text-amber-800', icone: 'aviso' },
   info: { classe: 'border-blue-700 bg-blue-600/8 text-navy-900', icone: 'info' },
 };
 

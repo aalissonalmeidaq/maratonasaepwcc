@@ -498,7 +498,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
           <EmptyState
             titulo="Todos os encontros configurados já foram cadastrados."
             descricao="Para incluir outro, ajuste a quantidade de encontros na configuração da edição. Use “Editar” para alterar um encontro existente."
-            icone="encontros"
+            icone="calendario"
           />
         ) : (
           <FormEncontro

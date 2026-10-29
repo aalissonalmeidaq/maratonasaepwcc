@@ -25,7 +25,7 @@ export function CoordenacaoInicioPage() {
           <PageHeader titulo="Visão geral" descricao={p.edicao.nome} />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
-              icone="turmas"
+              icone="turma"
               rotulo="Cursos e turmas"
               valor={`${p.indicadores.cursos} / ${p.indicadores.turmas}`}
               complemento="cursos / turmas"
@@ -38,7 +38,7 @@ export function CoordenacaoInicioPage() {
               complemento={`${p.indicadores.estudantes} estudantes`}
             />
             <StatCard
-              icone="encontros"
+              icone="calendario"
               acento="roxo"
               rotulo="Encontros realizados"
               valor={`${p.indicadores.encontrosRealizados} de ${p.indicadores.encontrosTotal}`}
@@ -153,7 +153,7 @@ export function CoordenacaoPremiacaoPage() {
             {p.edicao.premiacao.map((item) => (
               <StatCard
                 key={item.posicao}
-                icone="conquista"
+                icone="medalha"
                 acento={item.posicao === 1 ? 'amarelo' : item.posicao === 2 ? 'ciano' : 'coral'}
                 rotulo={`${item.posicao}º lugar`}
                 valor={<span className="text-lg">{item.descricao}</span>}

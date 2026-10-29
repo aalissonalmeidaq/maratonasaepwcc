@@ -19,7 +19,7 @@ export function AvisoAtualizacaoView({
       className="fixed inset-x-4 bottom-4 z-(--z-overlay) mx-auto flex max-w-lg flex-col gap-3 rounded-lg bg-navy-900 p-4 text-white shadow-md sm:flex-row sm:items-center"
     >
       <span className="flex items-center gap-2 text-sm">
-        <Icon nome="atualizar" />
+        <Icon nome="sincronizar" />
         Nova versão disponível. Salve o que estiver fazendo antes de atualizar.
       </span>
       <div className="flex gap-2 sm:ml-auto">

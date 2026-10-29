@@ -31,7 +31,7 @@ export function BotaoInstalar() {
   return (
     <Button
       variante="secundario"
-      icone="instalar"
+      icone="download"
       onClick={async () => {
         await evento.prompt();
         await evento.userChoice;

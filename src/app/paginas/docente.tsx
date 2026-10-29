@@ -26,7 +26,7 @@ export function DocenteInicioPage() {
             descricao="Turmas autorizadas, presenças e avaliações pendentes."
           />
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard icone="turmas" rotulo="Turmas vinculadas" valor={p.turmas.length} />
+            <StatCard icone="turma" rotulo="Turmas vinculadas" valor={p.turmas.length} />
             <StatCard
               icone="dupla"
               acento="ciano"
@@ -77,7 +77,7 @@ export function DocenteInicioPage() {
                   ))}
                 </ul>
               ) : (
-                <EmptyState titulo="Nenhuma avaliação pendente." icone="sucesso" />
+                <EmptyState titulo="Nenhuma avaliação pendente." icone="correta" />
               )}
             </Card>
           </div>

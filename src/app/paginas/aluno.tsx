@@ -103,7 +103,7 @@ export function AlunoInicioPage() {
               complemento={p.ranking && <StatusBadge estado={p.ranking.estado} />}
             />
             <StatCard
-              icone="encontros"
+              icone="calendario"
               acento="ciano"
               rotulo="Próximo encontro"
               valor={p.proximoEncontro ? formatarData(p.proximoEncontro.data) : '—'}
@@ -140,7 +140,7 @@ export function AlunoInicioPage() {
                 <>
                   <p className="font-semibold">{p.proximoDesafio.titulo}</p>
                   <p className="mt-1 flex items-center gap-1 text-sm text-text-secondary">
-                    <Icon nome="relogio" tamanho="sm" /> Prazo:{' '}
+                    <Icon nome="horario" tamanho="sm" /> Prazo:{' '}
                     {formatarDataHora(p.proximoDesafio.prazo)}
                   </p>
                   <Link
@@ -330,7 +330,7 @@ export function AlunoPontuacaoPage() {
                     )}
                   </>
                 ) : (
-                  <EmptyState titulo="Encontro ainda não realizado." icone="encontros" />
+                  <EmptyState titulo="Encontro ainda não realizado." icone="calendario" />
                 )}
               </Card>
             ))}
