@@ -16,6 +16,34 @@ async function semRolagemHorizontal(page: Page) {
   expect(larguraDoDocumento).toBeLessThanOrEqual(larguraDoDispositivo);
 }
 
+test('encontros: tabela fica contida em tablet e desktop', async ({ page }) => {
+  await entrarComo(page, /coordenação/i);
+  await page.goto('/coordenacao/encontros');
+  await expect(page.getByRole('heading', { level: 1, name: 'Encontros' })).toBeVisible();
+  for (const width of [640, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => document.fonts.ready);
+    await semRolagemHorizontal(page);
+    await expect(page.getByRole('region', { name: 'Tabela: Encontros da edição' })).toBeVisible();
+  }
+});
+
+test('aluno busca desafios, vê vazio e limpa a busca sem perder o foco', async ({ page }) => {
+  await entrarComo(page, /ana exemplo/i);
+  await page.goto('/aluno/desafios');
+  const busca = page.getByRole('searchbox', { name: 'Buscar em Desafios e entregas' });
+  await busca.fill('projeto final');
+  await expect(page.getByRole('heading', { name: 'Projeto final (exemplo)' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Desafio 1 (exemplo)' })).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: '1 resultado' })).toBeVisible();
+  await busca.fill('nenhum-desafio-com-este-nome');
+  await expect(page.getByText(/Nenhum resultado para/)).toBeVisible();
+  await page.getByRole('button', { name: 'Limpar busca' }).click();
+  await expect(busca).toBeFocused();
+  await expect(busca).toHaveValue('');
+  await expect(page.getByRole('heading', { name: 'Desafio 1 (exemplo)' })).toBeVisible();
+});
+
 test('painel do aluno mantém atalhos legíveis com texto a 200%', async ({ page }) => {
   await entrarComo(page, /ana exemplo/i);
   await expect(page.getByRole('heading', { level: 1, name: /olá, ana/i })).toBeVisible();
