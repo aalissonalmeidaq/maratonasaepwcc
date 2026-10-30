@@ -54,7 +54,7 @@ export function FormAmbiente({
         estado={estado}
         enviando={enviando}
         rotulo={inicial ? 'Salvar alterações' : 'Adicionar ambiente'}
-        icone={inicial ? 'correta' : 'notebook'}
+        icone={inicial ? 'salvar' : 'notebook'}
         onCancelar={inicial && onCancelar}
       />
     </form>

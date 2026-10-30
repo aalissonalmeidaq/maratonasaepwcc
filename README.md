@@ -165,7 +165,7 @@ Toda nova tabela vem com políticas RLS **e** testes pgTAP na mesma mudança.
 
 ## Ícones
 
-103 ícones próprios em SVG, vetorizados a partir da prancha "100 ícones da Maratona SAEP"
+117 ícones próprios em SVG, vetorizados a partir da prancha "100 ícones da Maratona SAEP"
 (fonte única em `src/shared/ui/icones/dados.ts`). Use `<Icon nome="dupla" />` (monocromático,
 herda a cor do texto) ou `cor="marca"` (contorno azul-marinho + cor de apoio da prancha).
 Arquivos avulsos e galeria para revisão: `npm run icones` → `docs/icones/` (não edite à mão;

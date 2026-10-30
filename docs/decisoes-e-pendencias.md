@@ -34,7 +34,8 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   arquivos em `docs/padroes/svg` e galeria em `docs/padroes/galeria.html` (`npm run padroes`).
   **[validar]**
 - **13 ícones** das pranchas "Navegação e conta", "Maratona e aprendizagem" e "Avaliação e
-  administração" acrescentados (116 no total). **[validar]**
+  administração" acrescentados, mais o ícone "Salvar" criado no mesmo estilo em 2026-10-30
+  (117 no total). **[validar]**
 - **Paleta da prancha × tokens em uso:** azul-marinho `#0B2D6B` × `#062457`; amarelo `#FFC02E` ×
   `#FFB820`; borda sutil `#E6EBF2` × `#DCE5EF`. Os padrões gráficos usam a paleta da prancha; os
   tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[decidir]**

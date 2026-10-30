@@ -68,7 +68,7 @@ export function FormCurso({
         estado={estado}
         enviando={enviando}
         rotulo={inicial ? 'Salvar alterações' : 'Adicionar curso'}
-        icone={inicial ? 'correta' : 'educacao'}
+        icone={inicial ? 'salvar' : 'educacao'}
         onCancelar={inicial && onCancelar}
       />
     </form>
@@ -157,7 +157,7 @@ export function FormTurma({
         estado={estado}
         enviando={enviando}
         rotulo={inicial ? 'Salvar alterações' : 'Adicionar turma'}
-        icone={inicial ? 'correta' : 'turma'}
+        icone={inicial ? 'salvar' : 'turma'}
         onCancelar={inicial && onCancelar}
       />
     </form>
