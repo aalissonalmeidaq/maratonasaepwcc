@@ -87,12 +87,14 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 
 ## 6. Decisões da spec 002 a validar
 
-- Dupla = 2 estudantes da **mesma turma**; trios e duplas entre turmas recusados até decisão. **[validar]**
+- Dupla = 2 estudantes da **mesma turma**. Trio: decidido em 2026-10-30 (spec 002, Clarifications) —
+  um por turma, só com número ímpar de alunos ativos; **ainda não implementado**. Duplas entre
+  turmas continuam recusadas.
 - Encontros valem para todas as turmas da edição. **[validar]**
 - Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[validar]**
-- Edição de curso e turma pela interface: implementada em 2026-10-30. Mudar o curso de uma turma
-  é permitido; vínculos e duplas da turma são mantidos. **[validar]** se a troca de curso deve
-  ser bloqueada quando a turma já tiver duplas (muda a categoria do ranking).
+- Edição de curso e turma pela interface: implementada em 2026-10-30. Decidido na mesma data
+  (spec 002, Clarifications): com dupla ativa, o curso da turma não pode mudar — regra no servidor
+  **ainda não implementada**.
 - Os testes E2E reais deixam registros fictícios no banco local (rodar `supabase db reset`).
 
 ## 6.1 Spec 005 — busca e paginação

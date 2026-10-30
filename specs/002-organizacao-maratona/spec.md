@@ -8,6 +8,24 @@ duplas, encontros e ambientes, com dados reais do Supabase, autorização no ser
 
 **Rastreabilidade**: PRD RF02, RF03, RF04, RF05; HU01; RNF05; constituição V, VI, IX.
 
+## Clarifications
+
+### Session 2026-10-30
+
+- Q: Como a pessoa recebe o acesso pela primeira vez após a coordenação criar a conta? → A:
+  A coordenação entrega a senha provisória pessoalmente e, no primeiro login, o sistema exige
+  criar uma senha nova antes de qualquer outra tela.
+- Q: O que acontece com o estudante sem par quando a turma tem número ímpar de estudantes? → A:
+  Permite-se um trio: no máximo um por turma, somente quando o número de alunos ativos da turma
+  for ímpar no momento da formação.
+- Q: Uma turma que já tem duplas pode ser movida para outro curso? → A: Não. Com dupla ativa na
+  turma, o curso fica bloqueado (o servidor recusa); nome e ano letivo continuam editáveis.
+- Q: O que acontece ao remover um ambiente já marcado em algum encontro? → A: O servidor recusa
+  e a mensagem lista os encontros que usam o ambiente; a coordenação troca o ambiente deles antes.
+- Q: Como formar uma dupla em no máximo 4 ações? → A: Ao escolher os integrantes, o nome é
+  sugerido a partir dos primeiros nomes (ex.: "Ana e Bruno"); a coordenação pode trocá-lo, e ele
+  continua obrigatório e único na turma.
+
 ## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Coordenação organiza cursos e turmas (Priority: P1)
@@ -28,6 +46,9 @@ dados vindos do servidor; tentar o mesmo como docente e ser recusado pelo servid
    **Then** recebe a mensagem "Já existe um curso com esse nome nesta edição".
 3. **Given** uma docente, **When** tenta criar curso ou turma (inclusive pela API), **Then** o
    servidor recusa.
+4. **Given** uma turma com pelo menos uma dupla ativa, **When** a coordenação tenta trocar o curso
+   dela (inclusive pela API), **Then** o servidor recusa com "Esta turma já tem duplas; o curso
+   não pode ser alterado"; a mudança de nome ou de ano letivo é aceita.
 
 ---
 
@@ -53,7 +74,8 @@ a ver essa turma; desativar e verificar que deixa de ver.
 
 ### User Story 3 - Coordenação forma e altera duplas com histórico (Priority: P1) — HU01
 
-A coordenação forma duplas com dois estudantes ativos da mesma turma. Substituições e
+A coordenação forma duplas com dois estudantes ativos da mesma turma (ou um trio, quando a
+turma tem número ímpar de alunos ativos — ver FR-004). Substituições e
 desfazimento exigem justificativa e geram histórico com responsável.
 
 **Independent Test**: formar uma dupla, tentar formar outra com um dos mesmos estudantes
@@ -70,8 +92,11 @@ desfazimento exigem justificativa e geram histórico com responsável.
 4. **Given** uma dupla ativa, **When** a coordenação substitui um integrante sem justificativa
    (mínimo de 10 caracteres), **Then** a operação é recusada; com justificativa, o histórico
    registra saída, entrada, responsável, horário e motivo.
-5. **Given** um aluno, **When** consulta a própria dupla, **Then** vê o nome da dupla e do colega,
-   e não vê duplas de outras turmas.
+5. **Given** um aluno, **When** consulta a própria dupla, **Then** vê o nome da dupla e dos
+   colegas, e não vê duplas de outras turmas.
+6. **Given** uma turma com número ímpar de alunos ativos e nenhum trio ativo, **When** a
+   coordenação forma uma equipe com três estudantes, **Then** o trio é criado; **Given** uma
+   turma com número par de alunos ativos ou que já tem um trio ativo, **Then** o servidor recusa.
 
 ---
 
@@ -89,6 +114,9 @@ A quantidade de encontros é a configurada na edição, não fixa no código.
    é recusado com a orientação de ajustar a configuração da edição.
 4. **Given** um aluno ou docente da edição, **When** consulta encontros, **Then** vê data,
    horário, ambiente e orientações.
+5. **Given** um ambiente usado por pelo menos um encontro, **When** a coordenação tenta removê-lo,
+   **Then** o servidor recusa e a mensagem informa os encontros que o usam; um ambiente sem
+   encontros é removido. A coordenação também pode editar nome e observações de um ambiente.
 
 ---
 
@@ -109,10 +137,12 @@ edição.
 **Acceptance Scenarios**:
 
 1. **Given** a coordenação, **When** cria a conta de um estudante com turma, **Then** a conta,
-   o perfil e a atribuição são criados e a pessoa recebe instruções de acesso definidas pela
-   unidade.
+   o perfil e a atribuição são criados; a coordenação entrega a senha provisória pessoalmente.
 2. **Given** uma docente, **When** chama a função, **Then** recebe "não autorizado" e nada é
    criado.
+3. **Given** uma conta com senha provisória, **When** a pessoa entra pela primeira vez, **Then**
+   precisa definir uma senha nova antes de acessar qualquer outra tela; a provisória deixa de
+   valer.
 
 ### Edge Cases
 
@@ -121,7 +151,11 @@ edição.
 - Substituir integrante que não pertence à dupla → recusado.
 - Desfazer dupla mantém o histórico (integrantes recebem data de saída; nada é apagado).
 - Encontro sem ambiente definido é permitido (ambiente "a confirmar").
-- Trios e duplas mistas entre turmas: fora do escopo até decisão (PRD §19).
+- Remover ambiente em uso por encontro → recusado; nenhum encontro perde o ambiente sem ação
+  explícita da coordenação.
+- Trio: no máximo um ativo por turma e só com número ímpar de alunos ativos na formação; um trio
+  já formado continua válido se o número de alunos mudar depois.
+- Duplas mistas entre turmas: fora do escopo (recusadas).
 - Falha de rede em qualquer gravação: mensagem de erro, sem confirmação de sucesso.
 
 ## Requirements _(mandatory)_
@@ -129,40 +163,53 @@ edição.
 ### Functional Requirements
 
 - **FR-001**: Coordenação MUST criar, editar e remover cursos e turmas da edição que coordena.
+  O curso de uma turma MUST NOT mudar enquanto ela tiver dupla ativa (regra no servidor), pois o
+  curso define a categoria do ranking.
 - **FR-002**: Coordenação MUST atribuir e desativar papéis de outras pessoas; nunca os próprios.
 - **FR-003**: Um estudante MUST estar ativo em no máximo uma turma por edição.
 - **FR-004**: Formar dupla MUST ser atômico e exigir dois alunos ativos distintos da mesma
-  turma, sem dupla ativa na edição.
+  turma, sem dupla ativa na edição. Excepcionalmente, MUST aceitar três integrantes (trio) quando
+  a turma tiver número ímpar de alunos ativos e ainda não tiver trio ativo.
+- **FR-013**: Ao escolher os integrantes, o formulário MUST sugerir o nome da equipe com os
+  primeiros nomes ("Ana e Bruno"; trio: "Ana, Bruno e Carla"), sem sobrescrever um nome digitado
+  pela coordenação.
 - **FR-005**: Substituir integrante e desfazer dupla MUST exigir justificativa (≥ 10
   caracteres) e registrar histórico com responsável e horário do servidor.
 - **FR-006**: Escrita em duplas e integrantes MUST ocorrer apenas por funções do servidor que
   verificam a autorização; a API não aceita escrita direta nessas tabelas.
 - **FR-007**: Encontros MUST validar horário, número único e limite configurado na edição.
+- **FR-012**: Coordenação MUST editar e remover ambientes; remover ambiente usado por encontro
+  MUST ser recusado pelo servidor, informando os encontros afetados.
 - **FR-008**: Aluno MUST ver apenas a própria dupla, o colega e os encontros da edição; docente
   MUST ver duplas das turmas vinculadas.
 - **FR-009**: As telas MUST indicar carregamento, erro, vazio e sucesso confirmado.
 - **FR-010**: Criação de contas MUST ocorrer em função do servidor; nenhuma chave privada no
   navegador.
+- **FR-011**: Conta criada com senha provisória MUST exigir a troca da senha no primeiro login,
+  antes de qualquer outra tela; a marcação de troca pendente MUST ser controlada pelo servidor
+  (não apenas pela interface).
 
 ### Key Entities
 
 - **Ambiente**: nome, observações, edição.
 - **Encontro**: número, título, data, início, fim, ambiente, avaliação objetiva, orientações,
   situação.
-- **Dupla**: nome, turma, edição, situação.
+- **Dupla**: nome, turma, edição, situação; 2 integrantes ativos (3 quando for o trio da turma).
 - **Integrante da dupla**: estudante, entrada, saída, motivo, responsável.
 
 ## Success Criteria _(mandatory)_
 
 - **SC-001**: 100% dos cenários de autorização desta spec têm teste pgTAP passando.
 - **SC-002**: Nenhuma combinação inválida de dupla (Edge Cases) é gravada pelo servidor.
-- **SC-003**: A coordenação forma uma dupla em até 4 interações a partir da lista de duplas.
+- **SC-003**: A coordenação forma uma dupla em até 4 interações a partir da lista de duplas
+  (turma, integrante 1, integrante 2, "Formar dupla"), aceitando o nome sugerido.
 - **SC-004**: Com o Supabase local, as jornadas "formar dupla" e "aluno vê dupla" passam em E2E.
 
 ## Assumptions
 
-- Dupla = 2 estudantes da mesma turma (trios e duplas entre turmas aguardam decisão).
+- Dupla = 2 estudantes da mesma turma; trio permitido só para turma com número ímpar de alunos
+  ativos (um por turma). Duplas entre turmas não são permitidas.
 - Encontros valem para todas as turmas da edição no piloto.
-- Contas são criadas com senha provisória definida pela coordenação; política de primeiro
-  acesso/troca de senha a definir pela unidade.
+- Contas são criadas com senha provisória definida pela coordenação e entregue pessoalmente;
+  a troca é obrigatória no primeiro login (FR-011).
 - Criação de edições continua restrita à administração do banco nesta spec.
