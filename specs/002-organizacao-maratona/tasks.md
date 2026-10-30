@@ -51,11 +51,105 @@ description: 'Tarefas da spec 002 — Organização da maratona'
 - [x] T062 E2E contra Supabase local: editar curso e recarregar; nome de turma repetido recusado — FR-001
 - [x] T063 Editar e remover ambientes; migration: remoção de ambiente em uso recusada (hoje `on delete set null`) com mensagem listando encontros — FR-012
 - [-] T064 ~~Nome da dupla sugerido no formulário da coordenação~~ — superada pela spec 006
-- [ ] T065 Primeiro acesso por link de e-mail (token próprio, 7 dias, uso único): `criar-conta` sem senha + envio do convite; remover "Senha provisória"; situação "Aguardando primeiro acesso"/"Acesso ativo", corrigir e-mail e reenviar — FR-011, US6 cenários 1, 3 e 6
-- [ ] T068 "Esqueci minha senha" na tela de entrada (resposta neutra, link de uso único) — FR-014
-- [ ] T069 Importação de alunos por CSV com prévia, relatório (criadas, vinculadas, recusadas) e convite por e-mail — FR-015
+- [ ] T065 (detalhada em T070–T090) Primeiro acesso por link de e-mail (token próprio, 7 dias, uso único): `criar-conta` sem senha + envio do convite; remover "Senha provisória"; situação "Aguardando primeiro acesso"/"Acesso ativo", corrigir e-mail e reenviar — FR-011, US6 cenários 1, 3 e 6
+- [ ] T068 (detalhada em T091–T094) "Esqueci minha senha" na tela de entrada (resposta neutra, link de uso único) — FR-014
+- [ ] T069 (detalhada em T095–T100) Importação de alunos por CSV com prévia, relatório (criadas, vinculadas, recusadas) e convite por e-mail — FR-015
 - [-] T066 Trio — movida para a spec 006 (formação por convite; remove "Formar dupla" da coordenação)
 - [x] T067 Bloquear troca de curso de turma com dupla ativa (gatilho + pgTAP + mensagem) — FR-001, US1 cenário 4
+
+## Phase 8: Contas sem senha, convite, recuperação e importação (revisão 2026-10-30)
+
+**Input**: [plan.md](./plan.md) (revisão), [research.md](./research.md), [data-model.md](./data-model.md),
+[contracts/](./contracts/), [quickstart.md](./quickstart.md) · **Tests**: obrigatórios (constituição II,
+RED antes do GREEN). Todas as tarefas pertencem à **US6** (cenários 1, 3, 4, 5 e 6). T065, T068 e
+T069 acima são detalhadas aqui.
+
+### 8.1 Setup
+
+- [ ] T070 Configurar funções em `supabase/config.toml`: `[functions.definir-senha-inicial] verify_jwt = false`; `[functions.reenviar-convite]` e `[functions.importar-alunos]` com `verify_jwt = true`; variáveis locais não secretas `APP_URL=http://localhost:5173`, `EMAIL_PROVEDOR=mailpit`, `MAILPIT_URL` (endereço do Mailpit visto de dentro do Docker) em `supabase/functions/.env.example`, com `supabase/functions/.env` no `.gitignore`
+- [ ] T071 [P] Verificar no Supabase local como fica `auth.users.encrypted_password` de uma conta criada sem senha e registrar o critério de "Acesso ativo" em `specs/002-organizacao-maratona/research.md` (R4)
+- [ ] T072 [P] Incluir `supabase/functions/_shared/**/*.test.ts` no Vitest (`vite.config.ts` / `tsconfig.test.json`) para testar o código compartilhado das funções sem dependências do Deno
+
+### 8.2 Foundational (bloqueia as demais)
+
+- [ ] T073 RED pgTAP em `supabase/tests/004_convites_acesso.test.sql`: `anon`/`authenticated` não leem nem escrevem `convites_acesso`; `app.registrar_convite`, `app.consumir_convite`, `app.desfazer_consumo` e `app.usuario_por_email` negados a `authenticated`; consumir token válido devolve `usuario_id` e grava `usado_em`; segunda vez, vencido (`expira_em < now()`) ou revogado → nada; `registrar_convite` revoga o pendente anterior (no máximo um válido por pessoa); `situacao_de_acesso` devolve e-mail e `acesso_ativo` para a coordenação e 42501 para docente, aluno e coordenação de outra edição
+- [ ] T074 GREEN migration `supabase/migrations/20261030130000_convites_acesso.sql`: tabela `public.convites_acesso` com "`token_hash` text único; SHA-256 hex do token (o token puro nunca é gravado)", "`expira_em` = `criado_em + interval '7 days'`", restrição "`not (usado_em is not null and revogado_em is not null)`", índice "`unique (usuario_id) where usado_em is null and revogado_em is null`", "RLS habilitada, sem políticas"; funções `app.registrar_convite`, `app.consumir_convite`, `app.desfazer_consumo`, `app.usuario_por_email` (somente `service_role`) e `public.situacao_de_acesso(p_edicao)` (`security definer`, `search_path = ''`, só coordenação da edição); auditoria sem `token_hash`
+- [ ] T075 [P] RED/GREEN `supabase/functions/_shared/convites.ts` (+ `.test.ts`): `gerarToken()` (32 bytes, base64url), `hashDoToken()` (SHA-256 hex via `crypto.subtle`), `linkDePrimeiroAcesso(appUrl, token)` → `${appUrl}/primeiro-acesso#t=${token}`
+- [ ] T076 [P] RED/GREEN `supabase/functions/_shared/email.ts` (+ `.test.ts` com `fetch` simulado): interface `EnviadorDeEmail`, adaptador Mailpit (`POST {MAILPIT_URL}/api/v1/send`), seleção por `EMAIL_PROVEDOR` (ausente → erro "Envio de e-mail não configurado."), modelo do e-mail de convite em português com apenas nome e link
+- [ ] T077 [P] Criar `supabase/functions/_shared/autorizacao.ts`: verificação de coordenação ativa da edição com o cliente sujeito à RLS (extraída de `supabase/functions/criar-conta/index.ts`, sem mudar o comportamento)
+
+**Checkpoint**: `npm run test:db` com `004_convites_acesso` verde; testes de `_shared` verdes.
+
+### 8.3 US6 — Primeiro acesso por convite (cenários 1, 3 e 6) 🎯 MVP
+
+**Goal**: conta criada sem senha recebe convite de 7 dias; a pessoa define a própria senha; a
+coordenação vê quem está pendente e reenvia.
+**Independent Test**: [quickstart.md](./quickstart.md) cenários 1 e 2.
+
+- [ ] T078 [US6] Helper local `e2e-supabase/mailpit.ts` (recusa URL não local; busca a última mensagem por destinatário pela API HTTP do Mailpit e extrai o link)
+- [ ] T079 [US6] RED E2E em `e2e-supabase/contas.spec.ts`: `criar-conta` sem senha → 201 `conviteEnviado: true` e e-mail no Mailpit; com `senhaProvisoria` → 400; `definir-senha-inicial` com o token → 200 e login com a nova senha; reutilizar o link → 400 "Link inválido ou vencido…"; senha com menos de 10 caracteres → 422 e o link continua valendo; docente → 403
+- [ ] T080 [US6] GREEN `supabase/functions/criar-conta/index.ts`: recusar `senhaProvisoria` ("Campo não aceito"), criar usuário sem senha, `app.registrar_convite` com o hash, enviar o e-mail; resposta `{ usuarioId, conviteEnviado }` (falha de e-mail não desfaz a conta)
+- [ ] T081 [P] [US6] GREEN `supabase/functions/definir-senha-inicial/index.ts` (pública): senha ≥ 10 (422), `app.consumir_convite`, `auth.admin.updateUserById` com a senha, `app.desfazer_consumo` se o Auth recusar; mesma mensagem 400 para token inexistente, usado, revogado ou vencido; devolve só o e-mail
+- [ ] T082 [P] [US6] GREEN `supabase/functions/reenviar-convite/index.ts`: coordenação da edição e pessoa da edição (403), 409 se acesso já ativo, `novoEmail` opcional (409 se em uso), revoga e cria convite, envia
+- [ ] T083 [P] [US6] RED `src/modules/organizacao/ui/FormConta.test.tsx`: sem campo "Senha provisória"; envia `{ nome, email, papel, turmaId }`; com `conviteEnviado: true` mostra "Conta criada. Enviamos o convite para …"; com `false`, aviso para usar "Reenviar convite"
+- [ ] T084 [US6] GREEN `src/modules/organizacao/ui/Formularios.tsx` (`FormConta`), `src/modules/organizacao/domain/tipos.ts` e `src/modules/organizacao/data/repositorioSupabase.ts` (`criarConta` devolve `{ conviteEnviado }`); demonstração continua recusando escrita
+- [ ] T085 [P] [US6] RED `src/modules/auth/ui/PrimeiroAcessoPage.test.tsx`: lê o token de `#t=`; "Nova senha" e "Confirmar senha" (≥ 10 e iguais); sucesso só após o servidor, com "Entrar" e e-mail preenchido; erro do servidor exibido; sem token → orientação; link "Esqueci minha senha"; axe sem violações
+- [ ] T086 [US6] GREEN `src/modules/auth/ui/PrimeiroAcessoPage.tsx` e chamada à função em `src/modules/auth/data/` (exportados por `src/modules/auth/index.ts`)
+- [ ] T087 [US6] Rota pública `/primeiro-acesso` em `src/app/rotas.tsx` — **combinar com a outra sessão** que edita esse arquivo
+- [ ] T088 [P] [US6] RED testes da coluna "Acesso" em `src/app/paginas/organizacao.test.tsx` (ou componente extraído): `StatusBadge` "Aguardando primeiro acesso"/"Acesso ativo"; "Reenviar convite" e "Corrigir e-mail" só nas pendentes; busca encontra pela situação
+- [ ] T089 [US6] GREEN `situacaoDeAcesso(edicaoId)` e `reenviarConvite(...)` em `src/modules/organizacao/data/repositorioSupabase.ts` (+ demonstração com situações fictícias e escrita bloqueada), hook em `src/app/dados/consultas.ts`, coluna e ações em `src/app/paginas/organizacao.tsx`
+- [ ] T090 [US6] E2E em `e2e-supabase/contas.spec.ts`: corrigir e-mail e reenviar invalida o link anterior; após o primeiro acesso a situação vira "Acesso ativo"
+
+### 8.4 US6 — Recuperação de senha (cenário 4)
+
+**Goal**: "Esqueci minha senha" com resposta neutra e link de 1 hora.
+**Independent Test**: [quickstart.md](./quickstart.md) cenário 3.
+
+- [ ] T091 [P] [US6] RED `src/modules/auth/ui/EsqueciSenhaPage.test.tsx` e `src/modules/auth/ui/RedefinirSenhaPage.test.tsx`: mesma mensagem para qualquer e-mail ("Se o e-mail estiver cadastrado, enviamos um link válido por 1 hora."); redefinição com senha ≥ 10 e confirmação; link vencido orienta a pedir outro
+- [ ] T092 [US6] GREEN páginas em `src/modules/auth/ui/` e métodos `pedirRecuperacao(email)` (`resetPasswordForEmail` com `redirectTo` `/redefinir-senha`) e `redefinirSenha(senha)` em `src/modules/auth/data/adaptadorSupabase.ts` — **arquivo alterado pela outra sessão; combinar**
+- [ ] T093 [US6] Rotas `/esqueci-senha` e `/redefinir-senha` em `src/app/rotas.tsx` e link "Esqueci minha senha" na entrada (`src/app/paginas/comum.tsx`) — **combinar com a outra sessão**
+- [ ] T094 [US6] E2E em `e2e-supabase/contas.spec.ts`: e-mail cadastrado e inexistente recebem a mesma resposta; só o cadastrado recebe mensagem no Mailpit; o link redefine a senha
+
+### 8.5 US6 — Importação de alunos por CSV (cenário 5)
+
+**Goal**: importar alunos de uma turma com prévia e relatório.
+**Independent Test**: [quickstart.md](./quickstart.md) cenário 4.
+
+- [ ] T095 [P] [US6] RED `src/modules/organizacao/domain/importacao.test.ts`: separador `,` ou `;`, BOM UTF-8, aspas, cabeçalho `nome,email` opcional, linhas vazias ignoradas, e-mail inválido, nome 2–160, e-mail repetido no arquivo (sem diferenciar maiúsculas), mais de 500 linhas → arquivo recusado, número da linha original preservado
+- [ ] T096 [US6] GREEN `src/modules/organizacao/domain/importacao.ts` (TS puro), exportado por `src/modules/organizacao/index.ts`
+- [ ] T097 [US6] GREEN `supabase/functions/importar-alunos/index.ts`: coordenação (403), turma da edição (400), até 500 linhas (413), revalidação; por linha: `app.usuario_por_email` → vínculo de aluno com o cliente da coordenação (RLS + auditoria), `atribuicoes_aluno_uma_turma` → "Já ativo em outra turma desta edição.", `atribuicoes_unica` → "Já é aluno desta turma."; nova → conta sem senha + convite + e-mail; resposta `{ criadas, vinculadas, recusadas }`
+- [ ] T098 [P] [US6] RED `src/modules/organizacao/ui/ImportarAlunos.test.tsx`: turma + arquivo → prévia (válidas/recusadas com motivo) sem chamar o servidor; "Importar N alunos" envia só as válidas; relatório criadas/vinculadas/recusadas; bloqueado na demonstração; axe sem violações
+- [ ] T099 [US6] GREEN `src/modules/organizacao/ui/ImportarAlunos.tsx`, `importarAlunos(...)` no repositório e seção "Importar alunos" em `src/app/paginas/organizacao.tsx` (com entrada em `NavegacaoSecoes`)
+- [ ] T100 [US6] E2E em `e2e-supabase/contas.spec.ts` com `e2e-supabase/fixtures/alunos.csv` (2 novos, 1 existente sem turma, 1 ativo em outra turma, 1 inválido, 1 duplicado), conforme o cenário 4 do quickstart
+
+### 8.6 Polish & cross-cutting
+
+- [ ] T101 [P] ADR `docs/adr/0009-convites-de-acesso.md` (por que token próprio; hash; prazos) e atualização de `docs/adr/0008-criacao-de-contas.md`
+- [ ] T102 [P] Atualizar `README.md` e `docs/operacao-e-homologacao.md`: Mailpit local, variáveis das funções, provedor de e-mail da produção **[validar]**, confirmação do bloqueio de SMTP; `docs/decisoes-e-pendencias.md` atualizado
+- [ ] T103 E2E de autorização (quickstart cenário 5) em `e2e-supabase/contas.spec.ts`: docente recusado em `criar-conta`, `reenviar-convite` e `importar-alunos`
+- [ ] T104 Verificação final: `npm run verify`, `npm run test:e2e`, `npm run test:db`, `npm run test:e2e:supabase`; tabela de resultados em `specs/002-organizacao-maratona/tasks.md`; marcar T065, T068 e T069
+
+### Dependencies & Execution Order
+
+- 8.1 → 8.2 → (8.3, 8.4, 8.5) → 8.6. Dentro de cada bloco: RED antes do GREEN.
+- 8.3 (MVP) depende de T074–T077. 8.4 só depende do Auth (pode começar após 8.1). 8.5 depende de
+  T074 (`app.usuario_por_email`, convite) e de T080 (criação de conta sem senha reutilizada).
+- T087, T092 e T093 dependem de alinhamento com a sessão que edita `rotas.tsx`, `comum.tsx` e o
+  adaptador de autenticação.
+
+### Parallel Opportunities
+
+- 8.2: T075, T076 e T077 em paralelo (arquivos distintos) enquanto T073/T074 avançam.
+- 8.3: T081 e T082 em paralelo após T080; T083, T085 e T088 (testes de interface) em paralelo.
+- 8.5: T095 (domínio) e T098 (interface) em paralelo; T097 após T074.
+
+### Implementation Strategy
+
+1. **MVP** = 8.1 + 8.2 + 8.3: nenhuma senha passa pela coordenação; convite, primeiro acesso,
+   situação e reenvio funcionando e testados.
+2. Incremento 2 = 8.4 (recuperação), assim que as rotas forem combinadas.
+3. Incremento 3 = 8.5 (importação CSV).
+4. 8.6 fecha documentação e verificação.
 
 ## Resultado da verificação (2026-10-30, após T063 e T067)
 
