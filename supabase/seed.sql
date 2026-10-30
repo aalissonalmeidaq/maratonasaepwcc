@@ -24,7 +24,13 @@ from (values
   ('a0000000-0000-0000-0000-000000000008'::uuid, 'iris@exemplo.invalid', 'Íris Exemplo'),
   ('a0000000-0000-0000-0000-000000000009'::uuid, 'joao@exemplo.invalid', 'João Exemplo'),
   ('a0000000-0000-0000-0000-000000000010'::uuid, 'docente2@exemplo.invalid', 'Prof. Rui Exemplo'),
-  ('a0000000-0000-0000-0000-000000000011'::uuid, 'fabio@exemplo.invalid', 'Fábio Exemplo')
+  ('a0000000-0000-0000-0000-000000000011'::uuid, 'fabio@exemplo.invalid', 'Fábio Exemplo'),
+  -- Turma C (ímpar, sem equipes): convites de trio e formação pela equipe docente (spec 003).
+  ('a0000000-0000-0000-0000-000000000012'::uuid, 'gabi@exemplo.invalid', 'Gabi Exemplo'),
+  ('a0000000-0000-0000-0000-000000000013'::uuid, 'heitor@exemplo.invalid', 'Heitor Exemplo'),
+  ('a0000000-0000-0000-0000-000000000014'::uuid, 'lia@exemplo.invalid', 'Lia Exemplo'),
+  ('a0000000-0000-0000-0000-000000000015'::uuid, 'mateus@exemplo.invalid', 'Mateus Exemplo'),
+  ('a0000000-0000-0000-0000-000000000016'::uuid, 'nina@exemplo.invalid', 'Nina Exemplo')
 ) as u (id, email, nome);
 
 insert into auth.identities (id, user_id, provider_id, identity_data, provider, created_at, updated_at, last_sign_in_at)
@@ -50,7 +56,8 @@ insert into public.cursos (id, edicao_id, nome, categoria) values
 
 insert into public.turmas (id, curso_id, nome, ano_letivo) values
   ('d0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', '3º ano A (fictícia)', 2026),
-  ('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', '3º ano B (fictícia)', 2026);
+  ('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', '3º ano B (fictícia)', 2026),
+  ('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', '3º ano C (fictícia)', 2026);
 
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id)
 select u::uuid, 'b0000000-0000-0000-0000-000000000001', p::public.papel, t::uuid
@@ -58,6 +65,12 @@ from (values
   ('a0000000-0000-0000-0000-000000000001', 'coordenacao', null),
   ('a0000000-0000-0000-0000-000000000002', 'docente', 'd0000000-0000-0000-0000-000000000001'),
   ('a0000000-0000-0000-0000-000000000010', 'docente', 'd0000000-0000-0000-0000-000000000002'),
+  ('a0000000-0000-0000-0000-000000000010', 'docente', 'd0000000-0000-0000-0000-000000000003'),
+  ('a0000000-0000-0000-0000-000000000012', 'aluno', 'd0000000-0000-0000-0000-000000000003'),
+  ('a0000000-0000-0000-0000-000000000013', 'aluno', 'd0000000-0000-0000-0000-000000000003'),
+  ('a0000000-0000-0000-0000-000000000014', 'aluno', 'd0000000-0000-0000-0000-000000000003'),
+  ('a0000000-0000-0000-0000-000000000015', 'aluno', 'd0000000-0000-0000-0000-000000000003'),
+  ('a0000000-0000-0000-0000-000000000016', 'aluno', 'd0000000-0000-0000-0000-000000000003'),
   ('a0000000-0000-0000-0000-000000000003', 'aluno', 'd0000000-0000-0000-0000-000000000001'),
   ('a0000000-0000-0000-0000-000000000004', 'aluno', 'd0000000-0000-0000-0000-000000000001'),
   ('a0000000-0000-0000-0000-000000000005', 'aluno', 'd0000000-0000-0000-0000-000000000001'),

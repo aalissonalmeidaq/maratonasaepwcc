@@ -15,6 +15,7 @@ import {
   BannerDestaque,
   ListaPaginada,
 } from '@/shared/ui';
+import { useConvitesPendentes } from '../dados/consultas';
 import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
 
@@ -80,13 +81,34 @@ export function TabelaRanking({
   );
 }
 
+/** Convites de equipe recebidos que esperam resposta (FR-016). */
+function CardConvitesEquipe() {
+  const pendentes = useConvitesPendentes(true);
+  return (
+    <Card icone="dupla" titulo="Convites de equipe" className="mb-6">
+      <p>
+        {pendentes === 0
+          ? 'Nenhum convite pendente.'
+          : `Você tem ${pendentes} ${pendentes === 1 ? 'convite pendente' : 'convites pendentes'}.`}
+      </p>
+      <Link
+        to="/aluno/dupla"
+        className="mt-3 inline-flex min-h-11 items-center rounded-md font-semibold text-link underline-offset-4 hover:underline"
+      >
+        Ver convites de equipe
+      </Link>
+    </Card>
+  );
+}
+
 export function AlunoInicioPage() {
   return (
     <ComDadosDemo
       carregar={carregar}
       foraDaDemo={
         <>
-          <PageHeader titulo="Início" descricao="Acompanhe as atividades da sua dupla." />
+          <PageHeader titulo="Início" descricao="Acompanhe as atividades da sua equipe." />
+          <CardConvitesEquipe />
           <Atalhos area="aluno" />
         </>
       }
@@ -185,7 +207,7 @@ export function AlunoInicioPage() {
               />
               <StatCard
                 icone="dupla"
-                rotulo="Minha dupla"
+                rotulo="Minha equipe"
                 valor={p.dupla.nome}
                 complemento={p.colega ? `com ${p.colega.nome}` : undefined}
               />

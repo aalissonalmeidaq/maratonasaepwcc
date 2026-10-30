@@ -50,11 +50,11 @@ description: 'Tarefas da spec 002 — Organização da maratona'
 - [x] T061 Botão "Editar" nas tabelas de cursos e turmas; foco volta à linha ao sair da edição — FR-001
 - [x] T062 E2E contra Supabase local: editar curso e recarregar; nome de turma repetido recusado — FR-001
 - [x] T063 Editar e remover ambientes; migration: remoção de ambiente em uso recusada (hoje `on delete set null`) com mensagem listando encontros — FR-012
-- [-] T064 ~~Nome da dupla sugerido no formulário da coordenação~~ — superada pela spec 006
+- [-] T064 ~~Nome da dupla sugerido no formulário da coordenação~~ — superada pela spec 003
 - [x] T065 (detalhada em T070–T090) Primeiro acesso por link de e-mail (token próprio, 7 dias, uso único): `criar-conta` sem senha + envio do convite; remover "Senha provisória"; situação "Aguardando primeiro acesso"/"Acesso ativo", corrigir e-mail e reenviar — FR-011, US6 cenários 1, 3 e 6
 - [x] T068 (detalhada em T091–T094) "Esqueci minha senha" na tela de entrada (resposta neutra, link de uso único) — FR-014
 - [x] T069 (detalhada em T095–T100) Importação de alunos por CSV com prévia, relatório (criadas, vinculadas, recusadas) e convite por e-mail — FR-015
-- [-] T066 Trio — movida para a spec 006 (formação por convite; remove "Formar dupla" da coordenação)
+- [-] T066 Trio — movida para a spec 003 (formação por convite; remove "Formar dupla" da coordenação)
 - [x] T067 Bloquear troca de curso de turma com dupla ativa (gatilho + pgTAP + mensagem) — FR-001, US1 cenário 4
 
 ## Phase 8: Contas sem senha, convite, recuperação e importação (revisão 2026-10-30)

@@ -14,10 +14,10 @@ export const MENUS: Record<Area, ItemMenu[]> = {
   aluno: [
     { rotulo: 'Início', caminho: '/aluno', icone: 'inicio', descricao: 'Visão geral da dupla' },
     {
-      rotulo: 'Minha dupla',
+      rotulo: 'Minha equipe',
       caminho: '/aluno/dupla',
       icone: 'dupla',
-      descricao: 'Integrantes e turma',
+      descricao: 'Equipe, convites e turma',
     },
     {
       rotulo: 'Encontros',
@@ -97,10 +97,10 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       descricao: 'Cursos, turmas e contas',
     },
     {
-      rotulo: 'Duplas',
+      rotulo: 'Equipes',
       caminho: '/coordenacao/duplas',
       icone: 'dupla',
-      descricao: 'Formação e histórico',
+      descricao: 'Alterações e histórico',
     },
     {
       rotulo: 'Encontros',

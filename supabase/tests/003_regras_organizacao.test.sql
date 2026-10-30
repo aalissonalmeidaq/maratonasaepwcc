@@ -42,9 +42,13 @@ create function pg_temp.u(s text) returns uuid language sql immutable as $$
 $$;
 
 set local role authenticated;
+-- Equipe formada por convite entre os alunos (spec 003).
+select pg_temp.como(pg_temp.u('a1'));
+select set_config('teste.convite', public.enviar_convite_equipe(
+  '30000000-0000-0000-0003-000000000001', array[pg_temp.u('a2')])::text, true);
+select pg_temp.como(pg_temp.u('a2'));
+select public.responder_convite_equipe(current_setting('teste.convite')::uuid, true);
 select pg_temp.como(pg_temp.u('0a'));
-select public.formar_dupla('30000000-0000-0000-0003-000000000001', 'Dupla regras',
-  array[pg_temp.u('a1'), pg_temp.u('a2')]);
 
 -- ===========================================================================
 -- FR-001 — curso da turma com dupla ativa
@@ -68,7 +72,8 @@ select is(
   'FR-001: troca de curso gravada');
 
 select public.desfazer_dupla(
-  (select id from public.duplas where nome = 'Dupla regras'), 'Desfeita no teste de regras');
+  (select id from public.duplas where turma_id = '30000000-0000-0000-0003-000000000001' and ativa),
+  'Desfeita no teste de regras');
 select lives_ok(
   $$ update public.turmas set curso_id = '20000000-0000-0000-0003-000000000002'
      where id = '30000000-0000-0000-0003-000000000001' $$,

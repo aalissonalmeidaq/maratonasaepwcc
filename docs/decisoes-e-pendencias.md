@@ -12,7 +12,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 | Pranchas PNG (paleta, tipografia, ícones, interface, mockups)                          | Usadas como referência visual; dados ilustrativos ignorados                                                                                                                                                                                                  |
 | `docs/VETORIZADAS CLAUDE/`                                                             | Versão anterior dos SVGs (prefixo `saep-`), arquivos diferentes dos de `referencias/`. Usamos os de `referencias/` (mais recentes). **[validar]** qual é a versão aprovada                                                                                   |
 | **Projeto pedagógico / livro de regras / regulamento**                                 | **AUSENTE.** Regras implementadas a partir do PRD e das instruções do usuário, versão `piloto-2026.0-a-confirmar`                                                                                                                                            |
-| **Marca SENAI Ceará** (colorida e totalmente branca)                                   | **AUSENTE.** Área provisória identificada no menu e na tela de entrada; nada foi redesenhado                                                                                                                                                                 |
+| **Marca SENAI Ceará** (colorida e totalmente branca)                                   | Disponíveis em `public/brand/`: `senai-ceara-colorido.svg` para fundo claro (arquivo `logo-senai.svg` indicado pelo usuário em 30/10/2026, copiado sem alteração) e `senai-ceara-branco.svg` para fundo escuro.                                              |
 | **Ícones do projeto em SVG individual**                                                | **Vetorizados (2026-10-29)**: 103 ícones redesenhados à mão a partir da prancha em `src/shared/ui/icones/dados.ts`; arquivos em `docs/icones/svg` e galeria em `docs/icones/galeria.html`. Não é rastreio automático: **[validar]** fidelidade com a unidade |
 | Licença/arquivos de fonte                                                              | Montserrat (SIL OFL) via `@fontsource`, auto-hospedada. **[validar]** confirmação institucional                                                                                                                                                              |
 
@@ -62,7 +62,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 
 - ADR 0001 monólito modular; 0002 npm; 0003 versões e compatibilidade; 0004 modo demonstração;
   0005 PWA e cache; 0006 Supabase local, RLS e auditoria; 0007 repositórios + TanStack Query;
-  0008 criação de contas.
+  0008 criação de contas; 0009 convites de acesso; 0010 equipes por convite.
 
 ## 5. Pendências técnicas
 
@@ -92,17 +92,33 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 
 ## 6. Decisões da spec 002 a validar
 
-- Equipes formadas pelos próprios alunos por convite (decidido em 2026-10-30, spec 006): dupla,
+- Equipes formadas pelos próprios alunos por convite (decidido em 2026-10-30, spec 003): dupla,
   ou um trio por turma em turma com número ímpar de alunos ativos. A coordenação não forma
-  equipes; coordenação, docente e mentor alteram com justificativa. **Ainda não implementado** —
-  hoje a tela da coordenação ainda tem "Formar dupla". Duplas entre turmas continuam recusadas.
-  **[validar]** se docente/mentor podem formar equipe nova com alunos que sobraram.
+  equipes; coordenação, docente e mentor alteram com justificativa. **Implementado em
+  2026-10-30** (ver §6.2). Duplas entre turmas continuam recusadas.
 - Encontros valem para todas as turmas da edição. **[validar]**
 - Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[validar]**
 - Edição de curso e turma pela interface: implementada em 2026-10-30. Decidido na mesma data
   (spec 002, Clarifications): com dupla ativa, o curso da turma não pode mudar — regra no servidor
   implementada (gatilho `turmas_validar_troca_de_curso`); a tela mostra o curso bloqueado.
 - Os testes E2E reais deixam registros fictícios no banco local (rodar `supabase db reset`).
+
+## 6.2 Spec 003 — equipes por convite (implementada em 2026-10-30)
+
+- Decisões do usuário (spec 003, Clarifications): docente/mentor formam equipe nova só com
+  alunos que sobraram; a coordenação altera, mas não forma nem renomeia; o primeiro nome é
+  escolhido uma vez por um integrante e depois só docente/mentor da turma renomeiam; aluno
+  desativado continua na equipe com aviso "integrante inativo"; trio em turma que passa a ser par
+  é preservado com aviso; edição encerrada fica somente leitura; aviso de convites só no app.
+- ADR 0010: tabelas `duplas`/`dupla_integrantes` mantidas; toda RPC de equipe bloqueia a turma;
+  o cadastro/importação de alunos **não** foi alterado (mudança de paridade concorrente equivale
+  ao FR-013). A RPC `formar_dupla` foi removida.
+- Seed local: turma fictícia "3º ano C" (5 alunos, ímpar, sem equipes) para os E2E de trio e de
+  formação pelo docente. Os E2E reais exigem `supabase db reset` antes de cada execução.
+- **[validar]** Convites não expiram e não há limite de convites por aluno (a spec não define;
+  nada foi inventado).
+- **[validar]** Nomes de equipe não passam por moderação; o docente/mentor pode renomear com
+  justificativa.
 
 ## 6.1 Spec 005 — busca e paginação
 

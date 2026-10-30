@@ -24,6 +24,15 @@ describe('repositórios de demonstração', () => {
     expect(duplas[0]?.integrantes.map((i) => i.nome)).toEqual(['Ana Exemplo', 'Bruno Exemplo']);
   });
 
+  it('aluno vê os colegas da própria turma (fictícios) e nenhum convite', async () => {
+    const r = como('e01');
+    const colegas = await r.duplas.colegas('t-a');
+    expect(colegas.map((c) => c.id)).not.toContain('e01');
+    expect(colegas.every((c) => c.temEquipe)).toBe(true);
+    expect(colegas.some((c) => c.id === 'e09')).toBe(false);
+    expect(await r.duplas.convites('ed-demo')).toEqual([]);
+  });
+
   it('encontros têm horário e ambiente', async () => {
     const [primeiro] = await como('e01').encontros.encontros('ed-demo');
     expect(primeiro).toMatchObject({
@@ -39,9 +48,17 @@ describe('repositórios de demonstração', () => {
     await expect(
       r.organizacao.salvarCurso({ edicaoId: 'ed-demo', nome: 'X', categoria: 'Y' }),
     ).rejects.toThrow(/modo demonstração/i);
-    await expect(
-      r.duplas.formar({ turmaId: 't-a', nome: 'X', integrantes: ['e01', 'e02'] }),
-    ).rejects.toThrow(/modo demonstração/i);
+    await expect(r.duplas.enviarConvite({ turmaId: 't-a', convidados: ['e02'] })).rejects.toThrow(
+      /modo demonstração/i,
+    );
+    await expect(r.duplas.responderConvite({ conviteId: 'x', aceitar: true })).rejects.toThrow(
+      /modo demonstração/i,
+    );
+    await expect(r.duplas.cancelarConvite('x')).rejects.toThrow(/modo demonstração/i);
+    await expect(r.duplas.retirarAceite('x')).rejects.toThrow(/modo demonstração/i);
+    await expect(r.duplas.definirNome({ duplaId: 'd1', nome: 'X' })).rejects.toThrow(
+      /modo demonstração/i,
+    );
     expect(r.somenteLeitura).toBe(true);
   });
 });
