@@ -9,6 +9,8 @@ export { EmptyState } from './EmptyState';
 export { Icon, type NomeIcone } from './Icon';
 export { EmConstrucao, PageHeader } from './PageHeader';
 export { ResponsiveTable, type Coluna } from './ResponsiveTable';
+export { ListaPaginada, Listagem } from './Listagem';
+export { useListagem } from './useListagem';
 export { SelectField, type Opcao } from './SelectField';
 export { Spinner } from './Spinner';
 export { StatusBadge, type EstadoVisual } from './StatusBadge';

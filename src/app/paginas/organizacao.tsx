@@ -17,6 +17,7 @@ import {
   Card,
   ConfirmDialog,
   EmptyState,
+  ListaPaginada,
   PageHeader,
   ResponsiveTable,
   RetornoEnvio,
@@ -132,6 +133,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                   {
                     id: 'acoes',
                     titulo: 'Ações',
+                    buscavel: false,
                     valor: (c) => (
                       <BotaoRemover
                         rotulo={`o curso ${c.nome}`}
@@ -174,6 +176,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                   {
                     id: 'acoes',
                     titulo: 'Ações',
+                    buscavel: false,
                     valor: (t) => (
                       <BotaoRemover
                         rotulo={`a turma ${t.nome}`}
@@ -233,6 +236,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                   {
                     id: 'acoes',
                     titulo: 'Ações',
+                    buscavel: false,
                     valor: (v) => (
                       <Button
                         variante="terciario"
@@ -336,71 +340,76 @@ function Duplas({ edicao }: { edicao: Edicao }) {
         />
       </Card>
       <Consulta consulta={duplas}>
-        {(lista) =>
-          lista.length === 0 ? (
-            <EmptyState titulo="Nenhuma dupla formada." icone="dupla" />
-          ) : (
-            <ul className="grid gap-4 lg:grid-cols-2">
-              {[...lista]
-                .sort((a, b) => Number(b.ativa) - Number(a.ativa))
-                .map((d: Dupla) => (
-                  <li key={d.id}>
-                    <Card
-                      icone="dupla"
-                      titulo={d.nome}
-                      nivel={3}
-                      acao={
-                        <StatusBadge
-                          estado={d.ativa ? 'em_andamento' : 'parcial'}
-                          rotulo={d.ativa ? 'Ativa' : 'Desfeita'}
+        {(lista) => (
+          <ListaPaginada
+            rotulo="Duplas da edição"
+            itens={[...lista].sort((a, b) => Number(b.ativa) - Number(a.ativa))}
+            chave={(d) => d.id}
+            texto={(d) =>
+              [
+                d.nome,
+                d.ativa ? 'Ativa' : 'Desfeita',
+                nomeTurma(turmas.data ?? [], d.turmaId),
+                ...d.integrantes.map((i) => i.nome),
+              ].join(' ')
+            }
+            vazio="Nenhuma dupla formada."
+            vazioIcone="dupla"
+            className="grid gap-4 lg:grid-cols-2"
+          >
+            {(d: Dupla) => (
+              <Card
+                icone="dupla"
+                titulo={d.nome}
+                nivel={3}
+                acao={
+                  <StatusBadge
+                    estado={d.ativa ? 'em_andamento' : 'parcial'}
+                    rotulo={d.ativa ? 'Ativa' : 'Desfeita'}
+                  />
+                }
+              >
+                <p className="text-sm text-text-secondary">
+                  {nomeTurma(turmas.data ?? [], d.turmaId)}
+                </p>
+                <p className="mt-1">
+                  {d.integrantes.map((i) => i.nome).join(' e ') || 'Sem integrantes ativos'}
+                </p>
+                <div className="mt-3 flex flex-col gap-3">
+                  <Historico duplaId={d.id} />
+                  {d.ativa && (
+                    <>
+                      <Button
+                        variante="secundario"
+                        icone="editar"
+                        aria-expanded={aberta === d.id}
+                        onClick={() => setAberta(aberta === d.id ? null : d.id)}
+                        className="self-start"
+                      >
+                        Alterar dupla
+                      </Button>
+                      {aberta === d.id && (
+                        <AcoesDupla
+                          dupla={d}
+                          disponiveis={elegiveis.filter(
+                            (e) => e.turmaId === d.turmaId && !e.duplaAtivaId,
+                          )}
+                          bloqueio={bloqueio}
+                          onSubstituir={(x) =>
+                            gravar(() => r.duplas.substituir({ duplaId: d.id, ...x }))()
+                          }
+                          onDesfazer={(justificativa) =>
+                            gravar(() => r.duplas.desfazer({ duplaId: d.id, justificativa }))()
+                          }
                         />
-                      }
-                    >
-                      <p className="text-sm text-text-secondary">
-                        {nomeTurma(turmas.data ?? [], d.turmaId)}
-                      </p>
-                      <p className="mt-1">
-                        {d.integrantes.map((i) => i.nome).join(' e ') || 'Sem integrantes ativos'}
-                      </p>
-                      <div className="mt-3 flex flex-col gap-3">
-                        <Historico duplaId={d.id} />
-                        {d.ativa && (
-                          <>
-                            <Button
-                              variante="secundario"
-                              icone="editar"
-                              aria-expanded={aberta === d.id}
-                              onClick={() => setAberta(aberta === d.id ? null : d.id)}
-                              className="self-start"
-                            >
-                              Alterar dupla
-                            </Button>
-                            {aberta === d.id && (
-                              <AcoesDupla
-                                dupla={d}
-                                disponiveis={elegiveis.filter(
-                                  (e) => e.turmaId === d.turmaId && !e.duplaAtivaId,
-                                )}
-                                bloqueio={bloqueio}
-                                onSubstituir={(x) =>
-                                  gravar(() => r.duplas.substituir({ duplaId: d.id, ...x }))()
-                                }
-                                onDesfazer={(justificativa) =>
-                                  gravar(() =>
-                                    r.duplas.desfazer({ duplaId: d.id, justificativa }),
-                                  )()
-                                }
-                              />
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </Card>
-                  </li>
-                ))}
-            </ul>
-          )
-        }
+                      )}
+                    </>
+                  )}
+                </div>
+              </Card>
+            )}
+          </ListaPaginada>
+        )}
       </Consulta>
     </>
   );
@@ -460,7 +469,7 @@ function TabelaEncontros({
             return <StatusBadge estado={b.estado} rotulo={b.rotulo} />;
           },
         },
-        ...(acoes ? [{ id: 'acoes', titulo: 'Ações', valor: acoes }] : []),
+        ...(acoes ? [{ id: 'acoes', titulo: 'Ações', valor: acoes, buscavel: false }] : []),
       ]}
     />
   );
