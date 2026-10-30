@@ -14,6 +14,7 @@ import {
   FormCurso,
   FormTurma,
   FormVinculo,
+  ImportarAlunos,
   AcoesDeAcesso,
   SituacaoDeAcessoBadge,
   textoDaSituacao,
@@ -170,6 +171,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
           { id: 'turmas', rotulo: 'Turmas', icone: 'turma' },
           { id: 'vinculos', rotulo: 'Pessoas e vínculos', icone: 'usuarios' },
           { id: 'criar-conta', rotulo: 'Criar conta', icone: 'editarUsuario' },
+          { id: 'importar-alunos', rotulo: 'Importar alunos', icone: 'importar' },
         ]}
       />
       <div className="grid gap-6">
@@ -377,6 +379,16 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
             turmas={turmas.data ?? []}
             bloqueio={bloqueio}
             onCriar={(d) => gravar(() => r.organizacao.criarConta({ ...d, edicaoId: edicao.id }))()}
+          />
+        </Card>
+
+        <Card id="importar-alunos" icone="importar" titulo="Importar alunos (CSV)">
+          <ImportarAlunos
+            turmas={turmas.data ?? []}
+            bloqueio={bloqueio}
+            onImportar={(turmaId, linhas) =>
+              gravar(() => r.organizacao.importarAlunos({ edicaoId: edicao.id, turmaId, linhas }))()
+            }
           />
         </Card>
       </div>

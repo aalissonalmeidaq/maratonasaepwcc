@@ -20,6 +20,8 @@ export default defineConfig({
   testDir: './e2e-supabase',
   fullyParallel: false,
   workers: 1,
+  // A primeira abertura de cada área compila as telas sob demanda no servidor de desenvolvimento.
+  timeout: 60_000,
   reporter: [['list']],
   use: { baseURL: `http://localhost:${PORT}`, locale: 'pt-BR', trace: 'retain-on-failure' },
   projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'] } }],

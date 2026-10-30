@@ -181,3 +181,30 @@ test('corrigir e-mail e reenviar invalida o link anterior; após o acesso a situ
     (await funcao(request, 'reenviar-convite', { edicaoId: EDICAO, usuarioId }, jwt)).status(),
   ).toBe(409);
 });
+
+test('importar-alunos: docente recusado; acima de 500 linhas recusado', async ({ request }) => {
+  const jwtDocente = await tokenObrigatorio(request, 'docente@exemplo.invalid');
+  const linha = { linha: 2, nome: 'Aluno Teste', email: 'x@exemplo.invalid' };
+  expect(
+    (
+      await funcao(
+        request,
+        'importar-alunos',
+        { edicaoId: EDICAO, turmaId: TURMA_A, linhas: [linha] },
+        jwtDocente,
+      )
+    ).status(),
+  ).toBe(403);
+  const jwt = await tokenObrigatorio(request, 'coordenacao@exemplo.invalid');
+  const muitas = Array.from({ length: 501 }, (_, i) => ({ ...linha, linha: i + 2 }));
+  expect(
+    (
+      await funcao(
+        request,
+        'importar-alunos',
+        { edicaoId: EDICAO, turmaId: TURMA_A, linhas: muitas },
+        jwt,
+      )
+    ).status(),
+  ).toBe(413);
+});
