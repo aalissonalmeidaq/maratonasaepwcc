@@ -2,7 +2,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(34);
+select plan(35);
 
 -- ---------------------------------------------------------------------------
 -- Cenário fictício: edição E1 (4 encontros), curso C1, turmas T1 e T2.
@@ -79,50 +79,61 @@ select throws_ok(
   '23505', null, 'US2: estudante não fica ativo em duas turmas da mesma edição');
 
 -- ===========================================================================
--- US3 — duplas
+-- US3 — equipes (formadas por convite entre alunos desde a spec 003)
 -- ===========================================================================
-select lives_ok(
-  $$ select public.formar_dupla('30000000-0000-0000-0002-000000000001', 'Dupla Teste',
-       array['00000000-0000-0000-0002-0000000000a1', '00000000-0000-0000-0002-0000000000a2']::uuid[]) $$,
-  'US3: coordenação forma dupla com dois alunos da turma');
-select is(
-  (select count(*)::int from public.dupla_integrantes i join public.duplas d on d.id = i.dupla_id
-   where d.nome = 'Dupla Teste' and i.saida_em is null),
-  2, 'US3: dupla criada com os dois integrantes');
+create function pg_temp.equipe_de_a1() returns uuid language sql security definer as $f$
+  select dupla_id from public.dupla_integrantes
+  where estudante_id = '00000000-0000-0000-0002-0000000000a1' order by entrada_em limit 1;
+$f$;
 
-select throws_ok(
-  $$ select public.formar_dupla('30000000-0000-0000-0002-000000000001', 'Dupla Falha',
-       array['00000000-0000-0000-0002-0000000000a1', '00000000-0000-0000-0002-0000000000a3']::uuid[]) $$,
-  '23514', null, 'US3: estudante já em dupla ativa não entra em outra');
+select pg_temp.como(pg_temp.u('a1'));
+select lives_ok(
+  $$ select set_config('teste.convite', public.enviar_convite_equipe('30000000-0000-0000-0002-000000000001',
+       array['00000000-0000-0000-0002-0000000000a2']::uuid[])::text, true) $$,
+  'US3: aluno convida colega da turma (spec 003)');
+select pg_temp.como(pg_temp.u('a2'));
+select lives_ok(
+  $$ select public.responder_convite_equipe(current_setting('teste.convite')::uuid, true) $$,
+  'US3: aceite do convite forma a equipe');
 select is(
-  (select count(*)::int from public.duplas where nome = 'Dupla Falha'),
-  0, 'US3: falha não grava nada (atomicidade)');
+  (select count(*)::int from public.dupla_integrantes where dupla_id = pg_temp.equipe_de_a1()
+   and saida_em is null),
+  2, 'US3: equipe criada com os dois integrantes');
+
+select pg_temp.como(pg_temp.u('a3'));
 select throws_ok(
-  $$ select public.formar_dupla('30000000-0000-0000-0002-000000000001', 'Dupla Mista',
-       array['00000000-0000-0000-0002-0000000000a3', '00000000-0000-0000-0002-0000000000a4']::uuid[]) $$,
+  $$ select public.enviar_convite_equipe('30000000-0000-0000-0002-000000000001',
+       array['00000000-0000-0000-0002-0000000000a1']::uuid[]) $$,
+  '23514', null, 'US3: estudante já em equipe ativa não entra em outra');
+select is(
+  (select count(*)::int from public.convites_equipe), 0,
+  'US3: falha não grava nada (atomicidade)');
+select throws_ok(
+  $$ select public.enviar_convite_equipe('30000000-0000-0000-0002-000000000001',
+       array['00000000-0000-0000-0002-0000000000a4']::uuid[]) $$,
   '23514', null, 'US3: estudantes de turmas diferentes são recusados');
 select throws_ok(
-  $$ select public.formar_dupla('30000000-0000-0000-0002-000000000001', 'Dupla Repetida',
-       array['00000000-0000-0000-0002-0000000000a3', '00000000-0000-0000-0002-0000000000a3']::uuid[]) $$,
+  $$ select public.enviar_convite_equipe('30000000-0000-0000-0002-000000000001',
+       array['00000000-0000-0000-0002-0000000000a3']::uuid[]) $$,
   '23514', null, 'US3: o mesmo estudante duas vezes é recusado');
 select throws_ok(
-  $$ select public.formar_dupla('30000000-0000-0000-0002-000000000001', 'Dupla Trio',
-       array['00000000-0000-0000-0002-0000000000a3', '00000000-0000-0000-0002-0000000000a5',
-             '00000000-0000-0000-0002-0000000000a4']::uuid[]) $$,
-  '23514', null, 'US3: composição diferente de dois integrantes é recusada');
+  $$ select public.enviar_convite_equipe('30000000-0000-0000-0002-000000000001',
+       array['00000000-0000-0000-0002-0000000000a5', '00000000-0000-0000-0002-0000000000a4',
+             '00000000-0000-0000-0002-0000000000a2']::uuid[]) $$,
+  '23514', null, 'US3: composição acima do permitido é recusada');
+
+select pg_temp.como(pg_temp.u('0a'));
 select throws_ok(
   $$ insert into public.duplas (edicao_id, turma_id, nome) values
      ('10000000-0000-0000-0002-000000000001', '30000000-0000-0000-0002-000000000001', 'Direta') $$,
   '42501', null, 'US3: escrita direta na tabela de duplas é negada (somente RPC)');
 
 select throws_ok(
-  $$ select public.substituir_integrante(
-       (select id from public.duplas where nome = 'Dupla Teste'),
+  $$ select public.substituir_integrante(pg_temp.equipe_de_a1(),
        '00000000-0000-0000-0002-0000000000a2', '00000000-0000-0000-0002-0000000000a5', 'curta') $$,
   '23514', null, 'US3: substituição sem justificativa suficiente é recusada');
 select lives_ok(
-  $$ select public.substituir_integrante(
-       (select id from public.duplas where nome = 'Dupla Teste'),
+  $$ select public.substituir_integrante(pg_temp.equipe_de_a1(),
        '00000000-0000-0000-0002-0000000000a2', '00000000-0000-0000-0002-0000000000a5',
        'Transferência de turno solicitada pela família') $$,
   'US3: substituição com justificativa');
@@ -136,17 +147,13 @@ select ok(
           and justificativa like 'Transferência%'),
   'US3: substituição auditada com justificativa');
 select throws_ok(
-  $$ select public.substituir_integrante(
-       (select id from public.duplas where nome = 'Dupla Teste'),
+  $$ select public.substituir_integrante(pg_temp.equipe_de_a1(),
        '00000000-0000-0000-0002-0000000000a3', '00000000-0000-0000-0002-0000000000a2',
        'Integrante que não pertence à dupla') $$,
   '23514', null, 'US3: substituir quem não é integrante é recusado');
 
 select pg_temp.como(pg_temp.u('0b'));
-select throws_ok(
-  $$ select public.formar_dupla('30000000-0000-0000-0002-000000000001', 'Dupla Docente',
-       array['00000000-0000-0000-0002-0000000000a2', '00000000-0000-0000-0002-0000000000a3']::uuid[]) $$,
-  '42501', null, 'US3: docente não forma duplas');
+select hasnt_function('public', 'formar_dupla', 'US3: não há mais formação de equipe pela gestão via formar_dupla');
 select is((select count(*)::int from public.duplas where ativa), 1, 'FR-008: docente vê duplas da turma vinculada');
 
 -- Leitura do aluno
@@ -199,12 +206,12 @@ select throws_ok(
 -- ===========================================================================
 select pg_temp.como(pg_temp.u('0a'));
 select lives_ok(
-  $$ select public.desfazer_dupla((select id from public.duplas where nome = 'Dupla Teste'),
+  $$ select public.desfazer_dupla(pg_temp.equipe_de_a1(),
        'Reorganização aprovada pela coordenação') $$,
   'US3: coordenação desfaz dupla com justificativa');
 select is(
   (select count(*)::int from public.dupla_integrantes i join public.duplas d on d.id = i.dupla_id
-   where d.nome = 'Dupla Teste' and not d.ativa and i.saida_em is not null),
+   where d.id = pg_temp.equipe_de_a1() and not d.ativa and i.saida_em is not null),
   3, 'US3: dupla desfeita preserva todo o histórico de integrantes');
 
 reset role;

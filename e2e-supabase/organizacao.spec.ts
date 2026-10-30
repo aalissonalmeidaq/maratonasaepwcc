@@ -3,7 +3,6 @@ import { ultimoEmailPara } from './mailpit';
 
 // Contas fictícias do supabase/seed.sql (somente ambiente local).
 const SENHA = 'senha-local-123';
-const NOME_DUPLA = `Dupla E2E ${Date.now() % 100000}`;
 
 test.describe.configure({ mode: 'serial' });
 
@@ -15,70 +14,77 @@ async function entrar(page: Page, email: string) {
   await expect(page.getByRole('button', { name: 'Sair' })).toBeVisible();
 }
 
-test('coordenação forma dupla com confirmação do servidor (US3)', async ({ page }) => {
+test('coordenação não forma equipes: elas nascem de convites (FR-007)', async ({ page }) => {
   await entrar(page, 'coordenacao@exemplo.invalid');
   await page.goto('/coordenacao/duplas');
-  await page.getByLabel('Turma').selectOption({ label: '3º ano A (fictícia)' });
-  await page.getByLabel('Nome da dupla').fill(NOME_DUPLA);
-  await page.getByLabel('Integrante 1').selectOption({ label: 'Elisa Exemplo' });
-  await page.getByLabel('Integrante 2').selectOption({ label: 'Fábio Exemplo' });
-  await page.getByRole('button', { name: 'Formar dupla' }).click();
-
-  await expect(page.getByRole('status').filter({ hasText: 'Dupla formada.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: NOME_DUPLA })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Equipes', level: 1 })).toBeVisible();
+  await expect(page.getByText(/formadas pelos alunos por convite/)).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Formar/ })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Dupla Órbita' })).toBeVisible();
 });
 
-test('servidor recusa estudante que já está em dupla ativa', async ({ page }) => {
-  await entrar(page, 'coordenacao@exemplo.invalid');
-  await page.goto('/coordenacao/duplas');
-  await page.getByLabel('Turma').selectOption({ label: '3º ano A (fictícia)' });
-  // Elisa e Fábio agora estão em dupla: não devem mais aparecer como opção.
-  const opcoes = await page.getByLabel('Integrante 1').locator('option').allTextContents();
-  expect(opcoes).not.toContain('Elisa Exemplo');
-  expect(opcoes).not.toContain('Fábio Exemplo');
-});
-
-test('aluna vê a própria dupla e o colega (FR-008)', async ({ page }) => {
-  await entrar(page, 'elisa@exemplo.invalid');
+test('aluna vê a própria equipe e o colega (FR-008)', async ({ page }) => {
+  await entrar(page, 'aluna@exemplo.invalid');
   await page.goto('/aluno/dupla');
-  await expect(page.getByRole('heading', { name: NOME_DUPLA })).toBeVisible();
-  await expect(page.getByText('Fábio Exemplo')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Dupla Órbita' })).toBeVisible();
+  await expect(page.getByText('Bruno Exemplo')).toBeVisible();
   await page.goto('/coordenacao/duplas');
   await expect(page.getByRole('heading', { name: /acesso não autorizado/i })).toBeVisible();
 });
 
-test('docente vê a dupla na turma vinculada', async ({ page }) => {
+test('docente vê a equipe na turma vinculada', async ({ page }) => {
   await entrar(page, 'docente@exemplo.invalid');
   await page.goto('/docente/turmas');
-  await expect(page.getByText(NOME_DUPLA).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Dupla Órbita' })).toBeVisible();
 });
 
-test('docente de outra turma não vê a dupla', async ({ page }) => {
+test('docente de outra turma não vê a equipe', async ({ page }) => {
   await entrar(page, 'docente2@exemplo.invalid');
   await page.goto('/docente/turmas');
   await expect(page.getByRole('heading', { name: '3º ano B (fictícia)' })).toBeVisible();
-  await expect(page.getByText(NOME_DUPLA)).toHaveCount(0);
+  await expect(page.getByText('Dupla Órbita')).toHaveCount(0);
 });
 
-test('coordenação desfaz a dupla com justificativa e mantém o histórico', async ({ page }) => {
+test('docente forma equipe com alunos que sobraram, com justificativa (FR-010)', async ({
+  page,
+}) => {
+  await entrar(page, 'docente2@exemplo.invalid');
+  await page.goto('/docente/turmas');
+  const turmaC = page.getByRole('region', { name: 'Formar equipe com quem sobrou' }).filter({
+    has: page.getByLabel('Mateus Exemplo'),
+  });
+  await turmaC.getByLabel('Mateus Exemplo').check();
+  await turmaC.getByLabel('Nina Exemplo').check();
+  await turmaC.getByLabel('Justificativa').fill('Alunos que sobraram na turma C');
+  await turmaC.getByRole('button', { name: 'Formar equipe' }).click();
+  // Sem alunos restantes, o formulário dá lugar ao aviso, mas a confirmação continua visível.
+  await expect(page.getByRole('status').filter({ hasText: 'Equipe formada.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Mateus e Nina' })).toBeVisible();
+});
+
+test('coordenação desfaz a equipe com justificativa e mantém o histórico', async ({ page }) => {
   await entrar(page, 'coordenacao@exemplo.invalid');
   await page.goto('/coordenacao/duplas');
   const cartao = page
     .locator('li')
-    .filter({ has: page.getByRole('heading', { name: NOME_DUPLA }) });
-  await cartao.getByRole('button', { name: 'Alterar dupla' }).click();
-  await cartao.getByLabel('Desfazer dupla').check();
+    .filter({ has: page.getByRole('heading', { name: 'Mateus e Nina' }) });
+  await cartao.getByRole('button', { name: 'Alterar equipe' }).click();
+  await expect(cartao.getByLabel('Remover integrante')).toHaveCount(0);
+  await cartao.getByLabel('Desfazer equipe').check();
 
   await cartao.getByLabel('Justificativa').fill('curta');
-  await cartao.getByRole('button', { name: 'Desfazer dupla' }).click();
+  await cartao.getByRole('button', { name: 'Desfazer equipe' }).click();
   await expect(cartao.getByText(/pelo menos 10 caracteres/)).toBeVisible();
 
   await cartao.getByLabel('Justificativa').fill('Limpeza do teste automatizado E2E');
-  await cartao.getByRole('button', { name: 'Desfazer dupla' }).click();
-  await expect(cartao.getByText('Desfeita')).toBeVisible();
+  await cartao.getByRole('button', { name: 'Desfazer equipe' }).click();
+  await expect(page.getByRole('heading', { name: 'Mateus e Nina' })).toHaveCount(0);
 
-  await cartao.getByRole('button', { name: 'Ver histórico' }).click();
-  await expect(cartao.getByText(/Motivo: Limpeza do teste automatizado E2E/).first()).toBeVisible();
+  const desfeitas = page.locator('section, div').filter({
+    has: page.getByRole('heading', { name: 'Equipes desfeitas' }),
+  });
+  await desfeitas.getByRole('button', { name: 'Ver histórico' }).last().click();
+  await expect(page.getByText(/Motivo: Limpeza do teste automatizado E2E/).first()).toBeVisible();
 });
 
 test('encontros: edição completa não oferece novo encontro (US4)', async ({ page }) => {

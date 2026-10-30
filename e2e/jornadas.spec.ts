@@ -68,7 +68,7 @@ test('painel do aluno mantém atalhos legíveis com texto a 200%', async ({ page
 
 async function abrirMenuSeNecessario(page: Page) {
   // Aguarda o layout autenticado antes de decidir (isVisible não espera).
-  await expect(page.getByRole('button', { name: 'Sair' })).toBeVisible();
+  await expect(page.locator('#conteudo')).toBeVisible();
   const botao = page.getByRole('button', { name: 'Abrir menu' });
   if (await botao.isVisible()) await botao.click();
 }
@@ -116,6 +116,35 @@ test.describe('jornadas por perfil (modo demonstração)', () => {
     await expect(page.getByRole('button', { name: /enviar entrega/i }).first()).toBeDisabled();
   });
 
+  test('aluno vê a própria equipe; a demonstração não grava nome nem convites (spec 003)', async ({
+    page,
+  }) => {
+    await entrarComo(page, /ana exemplo/i);
+    await navegarPeloMenu(page, 'Minha equipe');
+    await expect(page.getByRole('heading', { level: 1, name: 'Minha equipe' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Dupla Órbita' })).toBeVisible();
+    await expect(page.getByText('Bruno Exemplo')).toBeVisible();
+    await expect(page.getByLabel('Nome da equipe')).toHaveCount(0);
+    await semRolagemHorizontal(page);
+  });
+
+  test('coordenação vê equipes por turma; alterações ficam bloqueadas na demonstração', async ({
+    page,
+  }) => {
+    await entrarComo(page, /coordenação/i);
+    await navegarPeloMenu(page, 'Equipes');
+    await expect(page.getByRole('heading', { level: 1, name: 'Equipes' })).toBeVisible();
+    await expect(page.getByText(/formadas pelos alunos por convite/)).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Formar/ })).toHaveCount(0);
+    const cartao = page
+      .locator('li')
+      .filter({ has: page.getByRole('heading', { name: 'Dupla Órbita' }) });
+    await cartao.getByRole('button', { name: 'Alterar equipe' }).click();
+    await expect(cartao.getByText(/modo demonstração/i)).toBeVisible();
+    await expect(cartao.getByRole('button', { name: 'Registrar substituição' })).toBeDisabled();
+    await semRolagemHorizontal(page);
+  });
+
   test('docente vê turmas vinculadas e rubricas', async ({ page }) => {
     await entrarComo(page, /lúcia exemplo/i);
     await expect(page).toHaveURL(/\/docente$/);
@@ -150,6 +179,7 @@ test.describe('jornadas por perfil (modo demonstração)', () => {
 
   test('sair encerra a sessão de demonstração', async ({ page }) => {
     await entrarComo(page, /lúcia exemplo/i);
+    await abrirMenuSeNecessario(page);
     await page.getByRole('button', { name: 'Sair' }).click();
     await expect(page).toHaveURL(/\/entrar$/);
     await page.goto('/docente');

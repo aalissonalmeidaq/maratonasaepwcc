@@ -84,7 +84,7 @@ Artefatos de design: [data-model.md](./data-model.md), [contracts/](./contracts/
   trabalho da sessão que editava `rotas.tsx` e `comum.tsx`.
 - Produção depende do provedor de e-mail dos convites e do SMTP do Auth **[validar]**.
 - Contas existentes (seed e já criadas com senha) aparecem como "Acesso ativo" sem migração.
-- A formação de equipes passou para a spec 006; o formulário "Formar dupla" da coordenação será
+- A formação de equipes passou para a spec 003; o formulário "Formar dupla" da coordenação será
   removido lá, não aqui.
 
 ## Complexity Tracking

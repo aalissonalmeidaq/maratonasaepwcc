@@ -112,8 +112,37 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
         motivo: null,
       }));
     },
-    formar: recusar,
+    // Colegas fictícios da turma: no modo demonstração todos já estão em duplas.
+    async colegas(turmaId) {
+      const id = usuarioAtual();
+      const comEquipe = new Set(duplas.flatMap((d) => d.integrantes));
+      return pessoas
+        .filter((p) => p.papeis.includes('aluno') && p.turmas.includes(turmaId) && p.id !== id)
+        .map((p) => ({ id: p.id, nome: p.nome, temEquipe: comEquipe.has(p.id) }));
+    },
+    async convites() {
+      return [];
+    },
+    enviarConvite: recusar,
+    responderConvite: recusar,
+    cancelarConvite: recusar,
+    retirarAceite: recusar,
+    // Turmas fictícias com número par de alunos: só duplas.
+    async permiteTrio() {
+      return false;
+    },
     substituir: recusar,
+    incluir: recusar,
+    remover: recusar,
+    formarPorDocente: recusar,
+    definirNome: recusar,
+    renomear: recusar,
+    async equipesGestao(turmaId) {
+      const lista = await repositorioDuplas.duplas('ed-demo');
+      return lista
+        .filter((d) => d.turmaId === turmaId)
+        .map((d) => ({ ...d, trioEmTurmaPar: false }));
+    },
     desfazer: recusar,
   };
 

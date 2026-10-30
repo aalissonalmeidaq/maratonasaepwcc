@@ -1,7 +1,14 @@
 import { useState, type ReactNode } from 'react';
 import { ROTULO_PAPEL } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
-import { AcoesDupla, FormDupla, type Dupla, type RegistroHistorico } from '@/modules/duplas';
+import {
+  AcoesDupla,
+  ConvitesEquipe,
+  FormEquipeDocente,
+  NomeEquipe,
+  nomeDeExibicao,
+  type RegistroHistorico,
+} from '@/modules/duplas';
 import {
   FormAmbiente,
   FormEncontro,
@@ -24,11 +31,11 @@ import {
 } from '@/modules/organizacao';
 import { formatarData, formatarDataHora } from '@/shared/lib/formatacao';
 import {
+  Alert,
   Button,
   Card,
   ConfirmDialog,
   EmptyState,
-  ListaPaginada,
   NavegacaoSecoes,
   PageHeader,
   ResponsiveTable,
@@ -38,15 +45,19 @@ import {
 } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
 import {
-  estudantesElegiveis,
   useAmbientes,
   useBloqueioDeEscrita,
+  useColegas,
+  useConvites,
   useCursos,
+  useEquipesGestao,
+  usePermiteTrio,
   useDuplas,
   useEdicaoAtual,
   useEncontros,
   useGravar,
   usePessoas,
+  useReler,
   useSituacaoDeAcesso,
   useTurmas,
   useVinculos,
@@ -443,100 +454,173 @@ function Historico({ duplaId }: { duplaId: string }) {
   );
 }
 
-function Duplas({ edicao }: { edicao: Edicao }) {
+const MENSAGEM_EDICAO_ENCERRADA = 'Edição encerrada: somente consulta.';
+
+/** Bloqueio de escrita na gestão de equipes: offline/demonstração ou edição encerrada (FR-017). */
+function useBloqueioDeEquipes(edicao: Edicao) {
+  const bloqueio = useBloqueioDeEscrita();
+  return edicao.estado === 'encerrada' ? MENSAGEM_EDICAO_ENCERRADA : bloqueio;
+}
+
+/** Equipes ativas de uma turma para coordenação, docente e mentor (US4). */
+function GestaoEquipesDaTurma({
+  turma,
+  bloqueio,
+  podeFormar,
+}: {
+  turma: Turma;
+  bloqueio?: string;
+  /** Docente/mentor formam equipe com quem sobrou (FR-010); a coordenação não. */
+  podeFormar: boolean;
+}) {
   const r = useRepositorios();
   const gravar = useGravar();
-  const bloqueio = useBloqueioDeEscrita();
-  const turmas = useTurmas(edicao.id);
-  const vinculos = useVinculos(edicao.id);
-  const duplas = useDuplas(edicao.id);
+  const equipes = useEquipesGestao(turma.id);
+  const colegas = useColegas(turma.id);
+  const permiteTrio = usePermiteTrio(turma.id);
   const [aberta, setAberta] = useState<string | null>(null);
-  const elegiveis = estudantesElegiveis(vinculos.data ?? [], duplas.data ?? []);
+  const semEquipe = (colegas.data ?? []).filter((c) => !c.temEquipe);
+  const trio = permiteTrio.data ?? false;
 
   return (
-    <>
-      <PageHeader
-        icone="dupla"
-        titulo="Duplas"
-        descricao="Alterações exigem justificativa e ficam no histórico."
-      />
-      <Card icone="dupla" titulo="Formar dupla" className="mb-6">
-        <FormDupla
-          turmas={turmas.data ?? []}
-          estudantes={elegiveis}
-          bloqueio={bloqueio}
-          onFormar={(d) => gravar(() => r.duplas.formar(d))()}
-        />
-      </Card>
-      <Consulta consulta={duplas}>
-        {(lista) => (
-          <ListaPaginada
-            rotulo="Duplas da edição"
-            itens={[...lista].sort((a, b) => Number(b.ativa) - Number(a.ativa))}
-            chave={(d) => d.id}
-            texto={(d) =>
-              [
-                d.nome,
-                d.ativa ? 'Ativa' : 'Desfeita',
-                nomeTurma(turmas.data ?? [], d.turmaId),
-                ...d.integrantes.map((i) => i.nome),
-              ].join(' ')
-            }
-            vazio="Nenhuma dupla formada."
-            vazioIcone="dupla"
-            className="grid gap-4 lg:grid-cols-2"
-          >
-            {(d: Dupla) => (
-              <Card
-                icone="dupla"
-                titulo={d.nome}
-                nivel={3}
-                acao={
-                  <StatusBadge
-                    estado={d.ativa ? 'em_andamento' : 'parcial'}
-                    rotulo={d.ativa ? 'Ativa' : 'Desfeita'}
-                  />
-                }
-              >
-                <p className="text-sm text-text-secondary">
-                  {nomeTurma(turmas.data ?? [], d.turmaId)}
-                </p>
-                <p className="mt-1 font-medium">
-                  {d.integrantes.map((i) => i.nome).join(' e ') || 'Sem integrantes ativos'}
-                </p>
-                <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-3 border-t border-border pt-4">
-                  {d.ativa && (
+    <div className="flex flex-col gap-4">
+      <Consulta consulta={equipes}>
+        {(lista) =>
+          lista.length === 0 ? (
+            <p className="text-sm text-text-secondary">Nenhuma equipe formada nesta turma.</p>
+          ) : (
+            <ul aria-label={`Equipes da turma ${turma.nome}`} className="grid gap-4 lg:grid-cols-2">
+              {lista.map((d) => (
+                <li key={d.id} className="rounded-lg border border-border p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-semibold">{nomeDeExibicao(d)}</h3>
+                    <StatusBadge
+                      estado="em_andamento"
+                      rotulo={d.integrantes.length === 3 ? 'Trio' : 'Dupla'}
+                    />
+                  </div>
+                  <ul className="mt-2 flex flex-col gap-1 text-sm">
+                    {d.integrantes.map((i) => (
+                      <li key={i.estudanteId}>
+                        {i.nome}
+                        {i.integranteInativo && (
+                          <strong className="text-amber-800"> (integrante inativo)</strong>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  {d.trioEmTurmaPar && (
+                    <div className="mt-3">
+                      <Alert
+                        tom="alerta"
+                        titulo="Trio em turma com número par de alunos ativos: avalie o ajuste."
+                      />
+                    </div>
+                  )}
+                  <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-3 border-t border-border pt-4">
                     <Button
                       variante="secundario"
                       icone="editar"
                       aria-expanded={aberta === d.id}
                       onClick={() => setAberta(aberta === d.id ? null : d.id)}
                     >
-                      Alterar dupla
+                      Alterar equipe
                     </Button>
-                  )}
-                  <Historico duplaId={d.id} />
-                </div>
-                {d.ativa && aberta === d.id && (
-                  <div className="mt-4">
-                    <AcoesDupla
-                      dupla={d}
-                      disponiveis={elegiveis.filter(
-                        (e) => e.turmaId === d.turmaId && !e.duplaAtivaId,
-                      )}
-                      bloqueio={bloqueio}
-                      onSubstituir={(x) =>
-                        gravar(() => r.duplas.substituir({ duplaId: d.id, ...x }))()
-                      }
-                      onDesfazer={(justificativa) =>
-                        gravar(() => r.duplas.desfazer({ duplaId: d.id, justificativa }))()
-                      }
-                    />
+                    <Historico duplaId={d.id} />
                   </div>
-                )}
+                  {aberta === d.id && (
+                    <div className="mt-4">
+                      <AcoesDupla
+                        dupla={d}
+                        disponiveis={semEquipe}
+                        permiteTrio={trio}
+                        bloqueio={bloqueio}
+                        onSubstituir={(x) =>
+                          gravar(() => r.duplas.substituir({ duplaId: d.id, ...x }))()
+                        }
+                        onIncluir={(x) => gravar(() => r.duplas.incluir({ duplaId: d.id, ...x }))()}
+                        onRemover={(x) => gravar(() => r.duplas.remover({ duplaId: d.id, ...x }))()}
+                        onDesfazer={(justificativa) =>
+                          gravar(() => r.duplas.desfazer({ duplaId: d.id, justificativa }))()
+                        }
+                        onRenomear={
+                          podeFormar
+                            ? (x) => gravar(() => r.duplas.renomear({ duplaId: d.id, ...x }))()
+                            : undefined
+                        }
+                      />
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </Consulta>
+      {podeFormar && (
+        <section aria-labelledby={`formar-${turma.id}`} className="border-t border-border pt-4">
+          <h3 id={`formar-${turma.id}`} className="mb-3 font-semibold">
+            Formar equipe com quem sobrou
+          </h3>
+          <Consulta consulta={colegas}>
+            {() => (
+              <FormEquipeDocente
+                disponiveis={semEquipe}
+                permiteTrio={trio}
+                bloqueio={bloqueio}
+                onFormar={(x) =>
+                  gravar(() => r.duplas.formarPorDocente({ turmaId: turma.id, ...x }))()
+                }
+              />
+            )}
+          </Consulta>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function Duplas({ edicao }: { edicao: Edicao }) {
+  const bloqueio = useBloqueioDeEquipes(edicao);
+  const turmas = useTurmas(edicao.id);
+  const duplas = useDuplas(edicao.id);
+  const desfeitas = (duplas.data ?? []).filter((d) => !d.ativa);
+
+  return (
+    <>
+      <PageHeader
+        icone="dupla"
+        titulo="Equipes"
+        descricao="As equipes são formadas pelos alunos por convite. Alterações exigem justificativa e ficam no histórico."
+      />
+      {edicao.estado === 'encerrada' && (
+        <div className="mb-6">
+          <Alert tom="info" titulo={MENSAGEM_EDICAO_ENCERRADA} />
+        </div>
+      )}
+      <Consulta consulta={turmas}>
+        {(lista) => (
+          <div className="flex flex-col gap-6">
+            {lista.map((t) => (
+              <Card key={t.id} icone="turma" titulo={t.nome}>
+                <GestaoEquipesDaTurma turma={t} bloqueio={bloqueio} podeFormar={false} />
+              </Card>
+            ))}
+            {desfeitas.length > 0 && (
+              <Card icone="cronograma" titulo="Equipes desfeitas">
+                <ul className="flex flex-col gap-4">
+                  {desfeitas.map((d) => (
+                    <li key={d.id} className="flex flex-wrap items-center gap-3">
+                      <span className="font-medium">
+                        {d.nome ?? 'Equipe sem nome'} — {nomeTurma(lista, d.turmaId)}
+                      </span>
+                      <Historico duplaId={d.id} />
+                    </li>
+                  ))}
+                </ul>
               </Card>
             )}
-          </ListaPaginada>
+          </div>
         )}
       </Consulta>
     </>
@@ -779,7 +863,7 @@ function EncontrosLeitura({ edicao }: { edicao: Edicao }) {
 
 function TurmasDocente({ edicao }: { edicao: Edicao }) {
   const turmas = useTurmas(edicao.id);
-  const duplas = useDuplas(edicao.id);
+  const bloqueio = useBloqueioDeEquipes(edicao);
   return (
     <>
       <PageHeader
@@ -787,6 +871,11 @@ function TurmasDocente({ edicao }: { edicao: Edicao }) {
         titulo="Minhas turmas"
         descricao="Somente turmas vinculadas ao seu perfil."
       />
+      {edicao.estado === 'encerrada' && (
+        <div className="mb-6">
+          <Alert tom="info" titulo={MENSAGEM_EDICAO_ENCERRADA} />
+        </div>
+      )}
       <Consulta consulta={turmas}>
         {(lista) =>
           lista.length === 0 ? (
@@ -798,24 +887,7 @@ function TurmasDocente({ edicao }: { edicao: Edicao }) {
             <div className="grid gap-4">
               {lista.map((t) => (
                 <Card icone="turma" key={t.id} titulo={t.nome}>
-                  <Consulta consulta={duplas}>
-                    {(ds) => (
-                      <ResponsiveTable
-                        legenda={`Duplas da turma ${t.nome}`}
-                        chave={(d) => d.id}
-                        linhas={ds.filter((d) => d.turmaId === t.id && d.ativa)}
-                        vazio="Nenhuma dupla formada nesta turma."
-                        colunas={[
-                          { id: 'nome', titulo: 'Dupla', valor: (d) => d.nome },
-                          {
-                            id: 'int',
-                            titulo: 'Integrantes',
-                            valor: (d) => d.integrantes.map((i) => i.nome).join(' e '),
-                          },
-                        ]}
-                      />
-                    )}
-                  </Consulta>
+                  <GestaoEquipesDaTurma turma={t} bloqueio={bloqueio} podeFormar />
                 </Card>
               ))}
             </div>
@@ -830,40 +902,112 @@ export function DocenteTurmasPage() {
   return <ComEdicao>{(edicao) => <TurmasDocente edicao={edicao} />}</ComEdicao>;
 }
 
-function DuplaDoAluno({ edicao }: { edicao: Edicao }) {
+function EquipeDoAluno({ edicao }: { edicao: Edicao }) {
   const { sessao } = useAuth();
+  const eu = sessao?.usuarioId ?? '';
+  const r = useRepositorios();
+  const gravar = useGravar();
+  const reler = useReler();
+  const bloqueioDeEscrita = useBloqueioDeEscrita();
+  const encerrada = edicao.estado === 'encerrada';
+  const bloqueio = encerrada ? MENSAGEM_EDICAO_ENCERRADA : bloqueioDeEscrita;
   const duplas = useDuplas(edicao.id);
   const turmas = useTurmas(edicao.id);
+  const turma = turmas.data?.[0];
+  const colegas = useColegas(turma?.id);
+  const convites = useConvites(edicao.id);
+  const permiteTrio = usePermiteTrio(turma?.id);
+
   return (
     <>
-      <PageHeader icone="dupla" titulo="Minha dupla" descricao={edicao.nome} />
+      <PageHeader icone="dupla" titulo="Minha equipe" descricao={edicao.nome} />
+      {encerrada && (
+        <div className="mb-6">
+          <Alert tom="info" titulo={MENSAGEM_EDICAO_ENCERRADA} />
+        </div>
+      )}
       <Consulta consulta={duplas}>
         {(lista) => {
           const minha = lista.find(
-            (d) => d.ativa && d.integrantes.some((i) => i.estudanteId === sessao?.usuarioId),
+            (d) => d.ativa && d.integrantes.some((i) => i.estudanteId === eu),
           );
-          if (!minha) {
+          if (minha) {
+            return (
+              <Card
+                icone="dupla"
+                titulo={nomeDeExibicao(minha)}
+                acao={
+                  <StatusBadge
+                    estado="concluido"
+                    rotulo={minha.integrantes.length === 3 ? 'Trio' : 'Dupla'}
+                  />
+                }
+              >
+                <p className="text-sm text-text-secondary">
+                  {turma ? turma.nome : nomeTurma(turmas.data ?? [], minha.turmaId)}
+                </p>
+                <ul className="mt-3 flex flex-col gap-1">
+                  {minha.integrantes.map((i) => (
+                    <li key={i.estudanteId}>
+                      {i.nome}
+                      {i.estudanteId === eu && ' (você)'}
+                    </li>
+                  ))}
+                </ul>
+                {minha.nome === null && (
+                  <div className="mt-6 border-t border-border pt-4">
+                    <NomeEquipe
+                      bloqueio={bloqueio}
+                      onDefinir={(nome) =>
+                        gravar(() => r.duplas.definirNome({ duplaId: minha.id, nome }))()
+                      }
+                    />
+                  </div>
+                )}
+              </Card>
+            );
+          }
+          if (!turma) {
             return (
               <EmptyState
-                titulo="Você ainda não está em uma dupla ativa."
-                descricao="A formação das duplas é feita pela coordenação."
+                titulo="Você ainda não está vinculado a uma turma nesta edição."
+                descricao="Procure a coordenação."
                 icone="dupla"
               />
             );
           }
           return (
-            <Card icone="dupla" titulo={minha.nome}>
-              <p className="text-sm text-text-secondary">
-                {nomeTurma(turmas.data ?? [], minha.turmaId)}
+            <Card icone="dupla" titulo="Formar equipe">
+              <p className="mb-4 text-sm text-text-secondary">
+                Convide colegas da sua turma. A equipe é formada quando o convite é aceito; depois
+                disso, só a equipe docente ou a coordenação podem alterá-la.
               </p>
-              <ul className="mt-3 flex flex-col gap-1">
-                {minha.integrantes.map((i) => (
-                  <li key={i.estudanteId}>
-                    {i.nome}
-                    {i.estudanteId === sessao?.usuarioId && ' (você)'}
-                  </li>
-                ))}
-              </ul>
+              <Consulta consulta={colegas}>
+                {(listaColegas) => (
+                  <Consulta consulta={convites}>
+                    {(listaConvites) => (
+                      <ConvitesEquipe
+                        eu={eu}
+                        colegas={listaColegas}
+                        convites={listaConvites}
+                        permiteTrio={permiteTrio.data ?? false}
+                        bloqueio={bloqueio}
+                        onErro={reler}
+                        onEnviar={(convidados) =>
+                          gravar(() => r.duplas.enviarConvite({ turmaId: turma.id, convidados }))()
+                        }
+                        onResponder={(conviteId, aceitar) =>
+                          gravar(() => r.duplas.responderConvite({ conviteId, aceitar }))()
+                        }
+                        onCancelar={(conviteId) =>
+                          gravar(() => r.duplas.cancelarConvite(conviteId))()
+                        }
+                        onRetirar={(conviteId) => gravar(() => r.duplas.retirarAceite(conviteId))()}
+                      />
+                    )}
+                  </Consulta>
+                )}
+              </Consulta>
             </Card>
           );
         }}
@@ -873,5 +1017,5 @@ function DuplaDoAluno({ edicao }: { edicao: Edicao }) {
 }
 
 export function AlunoDuplaPage() {
-  return <ComEdicao>{(edicao) => <DuplaDoAluno edicao={edicao} />}</ComEdicao>;
+  return <ComEdicao>{(edicao) => <EquipeDoAluno edicao={edicao} />}</ComEdicao>;
 }

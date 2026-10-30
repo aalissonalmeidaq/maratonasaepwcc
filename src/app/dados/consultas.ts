@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/modules/auth';
-import type { EstudanteElegivel } from '@/modules/duplas';
+import { convitesRecebidosPendentes } from '@/modules/duplas';
 import { edicaoAtual } from '@/modules/organizacao';
 import { useOnline } from '@/shared/pwa';
 import { useRepositorios } from './useRepositorios';
@@ -54,6 +54,46 @@ export const useDuplas = (edicaoId?: string) => {
   const r = useRepositorios();
   return useDaEdicao('duplas', edicaoId, (id) => r.duplas.duplas(id));
 };
+/** Colegas da turma do aluno, com a indicação de quem já tem equipe (FR-005). */
+export function useColegas(turmaId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('colegas', turmaId),
+    queryFn: () => r.duplas.colegas(turmaId as string),
+    enabled: Boolean(turmaId),
+  });
+}
+/** Equipes ativas da turma com avisos para a gestão (FR-011/013). */
+export function useEquipesGestao(turmaId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('equipes-gestao', turmaId),
+    queryFn: () => r.duplas.equipesGestao(turmaId as string),
+    enabled: Boolean(turmaId),
+  });
+}
+export function usePermiteTrio(turmaId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('permite-trio', turmaId),
+    queryFn: () => r.duplas.permiteTrio(turmaId as string),
+    enabled: Boolean(turmaId),
+  });
+}
+export const useConvites = (edicaoId?: string) => {
+  const r = useRepositorios();
+  return useDaEdicao('convites', edicaoId, (id) => r.duplas.convites(id));
+};
+/** Quantidade de convites de equipe recebidos que esperam a resposta do aluno (FR-016). */
+export function useConvitesPendentes(ativo: boolean): number {
+  const { sessao } = useAuth();
+  const edicao = useEdicaoAtual();
+  const convites = useConvites(ativo ? edicao.data?.id : undefined);
+  return convitesRecebidosPendentes(convites.data ?? [], sessao?.usuarioId ?? '').length;
+}
 export const useEncontros = (edicaoId?: string) => {
   const r = useRepositorios();
   return useDaEdicao('encontros', edicaoId, (id) => r.encontros.encontros(id));
@@ -66,6 +106,13 @@ export function usePessoas() {
   const r = useRepositorios();
   const chave = useChave();
   return useQuery({ queryKey: chave('pessoas'), queryFn: () => r.organizacao.pessoas() });
+}
+
+/** Relê do servidor os dados da pessoa atual (ex.: depois de uma falha de gravação). */
+export function useReler() {
+  const cliente = useQueryClient();
+  const chave = useChave();
+  return () => void cliente.invalidateQueries({ queryKey: chave() });
 }
 
 /** Grava e, após a confirmação do servidor, recarrega os dados da pessoa atual. */
@@ -87,27 +134,4 @@ export function useBloqueioDeEscrita(): string | undefined {
   if (somenteLeitura) return 'Indisponível no modo demonstração: nenhuma alteração é gravada.';
   if (!online) return 'Sem conexão: gravações exigem conexão com o servidor.';
   return undefined;
-}
-
-/** Alunos ativos com a dupla ativa de cada um (para formar e alterar duplas). */
-export function estudantesElegiveis(
-  vinculos: {
-    usuarioId: string;
-    nome: string;
-    papel: string;
-    turmaId: string | null;
-    ativo: boolean;
-  }[],
-  duplas: { id: string; ativa: boolean; integrantes: { estudanteId: string }[] }[],
-): EstudanteElegivel[] {
-  return vinculos
-    .filter((v) => v.papel === 'aluno' && v.ativo && v.turmaId)
-    .map((v) => ({
-      id: v.usuarioId,
-      nome: v.nome,
-      turmaId: v.turmaId as string,
-      duplaAtivaId:
-        duplas.find((d) => d.ativa && d.integrantes.some((i) => i.estudanteId === v.usuarioId))
-          ?.id ?? null,
-    }));
 }

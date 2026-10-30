@@ -16,18 +16,18 @@ duplas, encontros e ambientes, com dados reais do Supabase, autorização no ser
 - Q: Como a pessoa recebe o acesso pela primeira vez após a coordenação criar a conta? → A:
   Superada pelo último esclarecimento desta sessão: link de primeiro acesso por e-mail (sem senha
   provisória).
-- Q: Quem forma as duplas e trios? → A: Os próprios alunos, por convites entre si (spec 006).
+- Q: Quem forma as duplas e trios? → A: Os próprios alunos, por convites entre si (spec 003).
   A coordenação cria turmas, cadastra os alunos e vê e altera equipes, mas não as forma; docente e
   mentor também alteram. Substitui a formação pela coordenação desta spec.
 - Q: O que acontece com o estudante sem par quando a turma tem número ímpar de estudantes? → A:
   Um trio por turma, só com número ímpar de alunos ativos, formado por convite a dois colegas
-  (regras na spec 006).
+  (regras na spec 003).
 - Q: Uma turma que já tem duplas pode ser movida para outro curso? → A: Não. Com dupla ativa na
   turma, o curso fica bloqueado (o servidor recusa); nome e ano letivo continuam editáveis.
 - Q: O que acontece ao remover um ambiente já marcado em algum encontro? → A: O servidor recusa
   e a mensagem lista os encontros que usam o ambiente; a coordenação troca o ambiente deles antes.
 - Q: Como formar uma dupla em no máximo 4 ações? → A: Pergunta superada: a coordenação não forma
-  equipes (spec 006). O nome é escolhido pela própria equipe depois de formada.
+  equipes (spec 003). O nome é escolhido pela própria equipe depois de formada.
 - Q: Se alguém esquecer a senha, como recupera o acesso? → A: Pelo link "Esqueci minha senha" na
   tela de entrada, enviado ao e-mail da conta, para definir uma senha nova.
 - Q: Como a coordenação faz o cadastro prévio dos alunos de uma turma? → A: Importação de planilha
@@ -95,9 +95,9 @@ a ver essa turma; desativar e verificar que deixa de ver.
 
 ### User Story 3 - Alteração de duplas com histórico (Priority: P1) — HU01
 
-**Formação substituída pela spec 006**: duplas e trios são formados pelos alunos por convite.
+**Formação substituída pela spec 003**: duplas e trios são formados pelos alunos por convite.
 Esta história mantém as regras de integridade da equipe e as alterações (substituir, desfazer)
-com justificativa e histórico, feitas pela coordenação e — conforme a spec 006 — por docente e
+com justificativa e histórico, feitas pela coordenação e — conforme a spec 003 — por docente e
 mentor da turma. Os cenários 1–3 continuam valendo como regras do servidor para qualquer
 formação.
 
@@ -117,7 +117,7 @@ formação.
    registra saída, entrada, responsável, horário e motivo.
 5. **Given** um aluno, **When** consulta a própria dupla, **Then** vê o nome da dupla e dos
    colegas, e não vê duplas de outras turmas.
-6. Trio (um por turma, só em turma com número ímpar de alunos ativos): ver spec 006.
+6. Trio (um por turma, só em turma com número ímpar de alunos ativos): ver spec 003.
 
 ---
 
@@ -186,7 +186,7 @@ edição.
 - Encontro sem ambiente definido é permitido (ambiente "a confirmar").
 - Remover ambiente em uso por encontro → recusado; nenhum encontro perde o ambiente sem ação
   explícita da coordenação.
-- Trio: regras e formação por convite na spec 006.
+- Trio: regras e formação por convite na spec 003.
 - Duplas mistas entre turmas: fora do escopo (recusadas).
 - Falha de rede em qualquer gravação: mensagem de erro, sem confirmação de sucesso.
 - "Esqueci minha senha" com e-mail sem conta → mesma resposta neutra (não revela quem tem conta);
@@ -211,7 +211,7 @@ edição.
 - **FR-002**: Coordenação MUST atribuir e desativar papéis de outras pessoas; nunca os próprios.
 - **FR-003**: Um estudante MUST estar ativo em no máximo uma turma por edição.
 - **FR-004**: Formar dupla MUST ser atômico e exigir alunos ativos distintos da mesma turma,
-  sem equipe ativa na edição. Quem forma e o trio: spec 006 (a coordenação não forma equipes).
+  sem equipe ativa na edição. Quem forma e o trio: spec 003 (a coordenação não forma equipes).
 - **FR-005**: Substituir integrante e desfazer dupla MUST exigir justificativa (≥ 10
   caracteres) e registrar histórico com responsável e horário do servidor.
 - **FR-006**: Escrita em duplas e integrantes MUST ocorrer apenas por funções do servidor que
@@ -230,7 +230,7 @@ edição.
 - **FR-012**: Coordenação MUST editar e remover ambientes; remover ambiente usado por encontro
   MUST ser recusado pelo servidor, informando os encontros afetados.
 - **FR-013**: Removido (sugestão de nome no formulário da coordenação; a formação passou para
-  a spec 006).
+  a spec 003).
 - **FR-014**: A tela de entrada MUST oferecer "Esqueci minha senha", que envia ao e-mail da conta
   um link de uso único, válido por 1 hora, para definir senha nova (mínimo de 10 caracteres); a
   resposta MUST ser a mesma exista ou não a conta.
@@ -253,16 +253,16 @@ edição.
   para regras do banco (RLS e funções) e E2E contra o Supabase local para as funções do servidor
   (`criar-conta`, `reenviar-convite`, `definir-senha-inicial`, `importar-alunos`).
 - **SC-002**: Nenhuma combinação inválida de dupla (Edge Cases) é gravada pelo servidor.
-- **SC-003**: Superado pela spec 006 (SC-001: aluno envia convite em até 3 interações).
+- **SC-003**: Superado pela spec 003 (SC-001: aluno envia convite em até 3 interações).
 - **SC-004**: Com o Supabase local, passam em E2E: o aluno vê a própria equipe e os colegas (e não
   vê equipes de outras turmas), e a coordenação altera uma equipe com justificativa e histórico.
-  A jornada "coordenação forma dupla" vale só até a spec 006 substituí-la pela formação por
+  A jornada "coordenação forma dupla" vale só até a spec 003 substituí-la pela formação por
   convite.
 
 ## Assumptions
 
 - Dupla = 2 estudantes da mesma turma; trio só em turma com número ímpar de alunos ativos (um
-  por turma). Formação por convite entre alunos (spec 006). Duplas entre turmas não são
+  por turma). Formação por convite entre alunos (spec 003). Duplas entre turmas não são
   permitidas.
 - Encontros valem para todas as turmas da edição no piloto.
 - Contas são criadas sem senha; o primeiro acesso é por link enviado ao e-mail da conta (FR-011).

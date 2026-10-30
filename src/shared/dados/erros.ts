@@ -7,8 +7,8 @@ const RESTRICOES: Record<string, string> = {
   ambientes_edicao_id_nome_key: 'Já existe um ambiente com esse nome nesta edição.',
   encontros_numero_unico: 'Já existe um encontro com esse número.',
   encontros_horario_valido: 'O término deve ser depois do início.',
-  duplas_nome_ativo_por_turma: 'Já existe uma dupla ativa com esse nome nesta turma.',
-  integrantes_um_por_edicao: 'Um dos estudantes já participa de outra dupla ativa nesta edição.',
+  duplas_nome_ativo_por_turma: 'Já existe uma equipe com esse nome nesta turma.',
+  integrantes_um_por_edicao: 'Um dos estudantes já participa de outra equipe ativa nesta edição.',
   atribuicoes_aluno_tem_turma: 'Alunos precisam estar vinculados a uma turma.',
   atribuicoes_coordenacao_sem_turma: 'A coordenação não é vinculada a uma turma específica.',
 };
