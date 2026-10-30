@@ -91,6 +91,34 @@ describe('FormTurma — edição (FR-001)', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Turma atualizada.');
   });
 
+  it('com duplas ativas, o curso fica bloqueado e explicado; nome e ano seguem editáveis', async () => {
+    const user = userEvent.setup();
+    const onSalvar = vi.fn().mockResolvedValue(undefined);
+    render(
+      <FormTurma
+        cursos={cursos}
+        inicial={turma}
+        cursoBloqueado
+        onSalvar={onSalvar}
+        onCancelar={vi.fn()}
+      />,
+    );
+    const curso = screen.getByLabelText('Curso');
+    expect(curso).toBeDisabled();
+    expect(curso).toHaveAccessibleDescription(
+      'Esta turma já tem duplas; o curso não pode ser alterado.',
+    );
+    expect(screen.getByLabelText('Nome da turma')).toHaveFocus();
+    await user.type(screen.getByLabelText('Nome da turma'), ' (manhã)');
+    await user.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+    expect(onSalvar).toHaveBeenCalledWith({
+      id: 't1',
+      cursoId: 'c1',
+      nome: '3º A (manhã)',
+      anoLetivo: 2026,
+    });
+  });
+
   it('valida o nome também na edição', async () => {
     const user = userEvent.setup();
     const onSalvar = vi.fn();

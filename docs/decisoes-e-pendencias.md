@@ -96,7 +96,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[validar]**
 - Edição de curso e turma pela interface: implementada em 2026-10-30. Decidido na mesma data
   (spec 002, Clarifications): com dupla ativa, o curso da turma não pode mudar — regra no servidor
-  **ainda não implementada**.
+  implementada (gatilho `turmas_validar_troca_de_curso`); a tela mostra o curso bloqueado.
 - Os testes E2E reais deixam registros fictícios no banco local (rodar `supabase db reset`).
 
 ## 6.1 Spec 005 — busca e paginação

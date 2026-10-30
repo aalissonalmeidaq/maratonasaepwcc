@@ -2,7 +2,13 @@ import { useState, type ReactNode } from 'react';
 import { ROTULO_PAPEL } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
 import { AcoesDupla, FormDupla, type Dupla, type RegistroHistorico } from '@/modules/duplas';
-import { FormAmbiente, FormEncontro, situacaoEncontro, type Encontro } from '@/modules/encontros';
+import {
+  FormAmbiente,
+  FormEncontro,
+  situacaoEncontro,
+  type Ambiente,
+  type Encontro,
+} from '@/modules/encontros';
 import {
   FormConta,
   FormCurso,
@@ -22,7 +28,6 @@ import {
   NavegacaoSecoes,
   PageHeader,
   ResponsiveTable,
-  RetornoEnvio,
   StatusBadge,
   useEnvio,
   type EstadoVisual,
@@ -73,14 +78,17 @@ function BotaoRemover({
   bloqueio?: string;
 }) {
   const [aberto, setAberto] = useState(false);
-  const { estado, enviando, enviar } = useEnvio();
+  const { estado, enviando, enviar, limpar } = useEnvio();
   return (
     <>
       <Button
         variante="terciario"
         icone="excluir"
         disabled={Boolean(bloqueio)}
-        onClick={() => setAberto(true)}
+        onClick={() => {
+          limpar();
+          setAberto(true);
+        }}
       >
         Remover<span className="sr-only"> {rotulo}</span>
       </Button>
@@ -91,12 +99,12 @@ function BotaoRemover({
         descricao={descricao}
         rotuloConfirmar="Remover"
         carregando={enviando}
+        erro={estado.tipo === 'erro' ? estado.mensagem : undefined}
         onCancelar={() => setAberto(false)}
         onConfirmar={async () => {
           if (await enviar(remover, 'Removido.')) setAberto(false);
         }}
       />
-      {estado.tipo === 'erro' && <RetornoEnvio estado={estado} />}
     </>
   );
 }
@@ -143,6 +151,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
   const turmas = useTurmas(edicao.id);
   const vinculos = useVinculos(edicao.id);
   const pessoas = usePessoas();
+  const duplas = useDuplas(edicao.id);
   const [cursoEmEdicao, setCursoEmEdicao] = useState<Curso | null>(null);
   const [turmaEmEdicao, setTurmaEmEdicao] = useState<Turma | null>(null);
 
@@ -261,6 +270,10 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
             <FormTurma
               key={turmaEmEdicao?.id ?? 'nova'}
               inicial={turmaEmEdicao ?? undefined}
+              cursoBloqueado={
+                turmaEmEdicao !== null &&
+                (duplas.data ?? []).some((d) => d.turmaId === turmaEmEdicao.id && d.ativa)
+              }
               cursos={cursos.data ?? []}
               bloqueio={bloqueio}
               onSalvar={(d) => gravar(() => r.organizacao.salvarTurma(d))()}
@@ -562,6 +575,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
   const encontros = useEncontros(edicao.id);
   const ambientes = useAmbientes(edicao.id);
   const [editando, setEditando] = useState<Encontro | null>(null);
+  const [ambienteEmEdicao, setAmbienteEmEdicao] = useState<Ambiente | null>(null);
   const salvar = (d: Parameters<typeof r.encontros.salvarEncontro>[1]) =>
     gravar(() => r.encontros.salvarEncontro(edicao.id, d))();
 
@@ -621,7 +635,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
           />
         )}
       </Card>
-      <Card icone="notebook" titulo="Ambientes">
+      <Card id="ambientes" icone="notebook" titulo="Ambientes">
         <Consulta consulta={ambientes}>
           {(lista) => (
             <ResponsiveTable
@@ -632,14 +646,44 @@ function Encontros({ edicao }: { edicao: Edicao }) {
               colunas={[
                 { id: 'n', titulo: 'Ambiente', valor: (a) => a.nome },
                 { id: 'o', titulo: 'Observações', valor: (a) => a.observacoes ?? '—' },
+                {
+                  id: 'acoes',
+                  titulo: 'Ações',
+                  buscavel: false,
+                  compacta: true,
+                  valor: (a) => (
+                    <div className="flex flex-wrap gap-1">
+                      <BotaoEditar
+                        id={a.id}
+                        rotulo={`o ambiente ${a.nome}`}
+                        onEditar={() => setAmbienteEmEdicao(a)}
+                      />
+                      <BotaoRemover
+                        rotulo={`o ambiente ${a.nome}`}
+                        descricao="Ambientes usados em encontros não podem ser removidos: troque o ambiente desses encontros antes. A operação fica registrada na auditoria."
+                        bloqueio={bloqueio}
+                        remover={gravar(() => r.encontros.removerAmbiente(a.id))}
+                      />
+                    </div>
+                  ),
+                },
               ]}
             />
           )}
         </Consulta>
         <div className="mt-4 border-t border-border pt-4">
+          <TituloDoFormulario>
+            {ambienteEmEdicao ? `Editar ambiente “${ambienteEmEdicao.nome}”` : 'Novo ambiente'}
+          </TituloDoFormulario>
           <FormAmbiente
+            key={ambienteEmEdicao?.id ?? 'novo'}
+            inicial={ambienteEmEdicao ?? undefined}
             bloqueio={bloqueio}
             onSalvar={(d) => gravar(() => r.encontros.salvarAmbiente(edicao.id, d))()}
+            onCancelar={() => {
+              if (ambienteEmEdicao) devolverFoco(ambienteEmEdicao.id);
+              setAmbienteEmEdicao(null);
+            }}
           />
         </div>
       </Card>

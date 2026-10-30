@@ -124,4 +124,20 @@ describe('ConfirmDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Publicar' }));
     expect(onConfirmar).toHaveBeenCalledOnce();
   });
+
+  it('mostra a recusa do servidor dentro do diálogo, onde a pessoa está olhando', () => {
+    render(
+      <ConfirmDialog
+        aberto
+        titulo="Remover o ambiente Lab?"
+        descricao="A operação fica registrada."
+        rotuloConfirmar="Remover"
+        erro="Este ambiente está em uso nos encontros: 1 — Abertura."
+        onConfirmar={vi.fn()}
+        onCancelar={vi.fn()}
+      />,
+    );
+    const dialogo = screen.getByRole('dialog', { name: 'Remover o ambiente Lab?' });
+    expect(within(dialogo).getByRole('alert')).toHaveTextContent('em uso nos encontros');
+  });
 });

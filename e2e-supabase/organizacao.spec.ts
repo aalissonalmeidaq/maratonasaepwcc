@@ -151,23 +151,59 @@ test('coordenação edita curso e o novo nome vem do servidor após recarregar (
   await expect(page.getByRole('cell', { name: original, exact: true })).toHaveCount(0);
 });
 
-test('coordenação edita turma: o nome repetido no curso é recusado pelo servidor', async ({
+test('turma com duplas: curso bloqueado; nome editável e foco devolvido (FR-001)', async ({
   page,
 }) => {
   await entrar(page, 'coordenacao@exemplo.invalid');
   await page.goto('/coordenacao/organizacao');
   const turmas = page.locator('#turmas');
   await turmas.getByRole('button', { name: 'Editar a turma 3º ano A (fictícia)' }).click();
-  await turmas
-    .getByLabel('Curso', { exact: true })
-    .selectOption({ label: 'Curso Técnico Exemplo B' });
-  await turmas.getByLabel('Nome da turma').fill('3º ano B (fictícia)');
-  await turmas.getByRole('button', { name: 'Salvar alterações' }).click();
+  const curso = turmas.getByLabel('Curso', { exact: true });
+  await expect(curso).toBeDisabled();
   await expect(
-    turmas.getByRole('alert').filter({ hasText: 'Já existe uma turma com esse nome neste curso.' }),
+    turmas.getByText('Esta turma já tem duplas; o curso não pode ser alterado.'),
   ).toBeVisible();
+  await expect(turmas.getByLabel('Nome da turma')).toBeFocused();
   await turmas.getByRole('button', { name: 'Cancelar' }).click();
   await expect(
     turmas.getByRole('button', { name: 'Editar a turma 3º ano A (fictícia)' }),
   ).toBeFocused();
+});
+
+test('ambientes: edita; em uso não é removido e lista os encontros (FR-012)', async ({ page }) => {
+  const nome = `Sala E2E ${Date.now() % 100000}`;
+  await entrar(page, 'coordenacao@exemplo.invalid');
+  await page.goto('/coordenacao/encontros');
+  const ambientes = page.locator('#ambientes');
+
+  await ambientes.getByLabel('Nome do ambiente').fill(nome);
+  await ambientes.getByRole('button', { name: 'Adicionar ambiente' }).click();
+  await expect(ambientes.getByRole('status').filter({ hasText: 'Ambiente salvo.' })).toBeVisible();
+
+  await ambientes.getByRole('button', { name: `Editar o ambiente ${nome}` }).click();
+  await ambientes.getByLabel('Observações').fill('Bloco C');
+  await ambientes.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(
+    ambientes.getByRole('status').filter({ hasText: 'Ambiente atualizado.' }),
+  ).toBeVisible();
+  await ambientes.getByRole('button', { name: 'Concluir' }).click();
+  await ambientes.getByRole('searchbox', { name: 'Buscar em Ambientes' }).fill(nome);
+  await expect(ambientes.getByRole('cell', { name: 'Bloco C', exact: true })).toBeVisible();
+  await ambientes.getByRole('searchbox', { name: 'Buscar em Ambientes' }).fill('');
+
+  await ambientes
+    .getByRole('button', { name: 'Remover o ambiente Laboratório 1 (exemplo)' })
+    .click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Remover' }).click();
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Este ambiente está em uso nos encontros: 1 —' }),
+  ).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click();
+  await expect(
+    ambientes.getByRole('cell', { name: 'Laboratório 1 (exemplo)', exact: true }),
+  ).toBeVisible();
+
+  await ambientes.getByRole('button', { name: `Remover o ambiente ${nome}` }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Remover' }).click();
+  await expect(ambientes.getByRole('cell', { name: nome, exact: true })).toHaveCount(0);
 });

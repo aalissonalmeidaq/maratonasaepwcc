@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { Alert } from './Alert';
 import { Button } from './Button';
 
 interface ConfirmDialogProps {
@@ -10,6 +11,8 @@ interface ConfirmDialogProps {
   rotuloCancelar?: string;
   destrutivo?: boolean;
   carregando?: boolean;
+  /** Recusa do servidor, exibida dentro do diálogo (fora dele ficaria encoberta). */
+  erro?: string;
   onConfirmar: () => void;
   onCancelar: () => void;
 }
@@ -26,6 +29,7 @@ export function ConfirmDialog({
   rotuloCancelar = 'Cancelar',
   destrutivo = false,
   carregando = false,
+  erro,
   onConfirmar,
   onCancelar,
 }: ConfirmDialogProps) {
@@ -82,6 +86,11 @@ export function ConfirmDialog({
         <p id={`${id}-descricao`} className="mt-2 text-text-secondary">
           {descricao}
         </p>
+        {erro && (
+          <div className="mt-4">
+            <Alert tom="erro" titulo={erro} anunciar />
+          </div>
+        )}
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <Button ref={cancelar} variante="secundario" onClick={onCancelar}>
             {rotuloCancelar}

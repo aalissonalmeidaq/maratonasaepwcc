@@ -49,11 +49,24 @@ description: 'Tarefas da spec 002 — Organização da maratona'
 - [x] T060 RED/GREEN edição de curso e turma nos formulários (preenchidos, foco no primeiro campo, confirmação só após o servidor, Cancelar/Concluir) — FR-001
 - [x] T061 Botão "Editar" nas tabelas de cursos e turmas; foco volta à linha ao sair da edição — FR-001
 - [x] T062 E2E contra Supabase local: editar curso e recarregar; nome de turma repetido recusado — FR-001
-- [ ] T063 Editar e remover ambientes; migration: remoção de ambiente em uso recusada (hoje `on delete set null`) com mensagem listando encontros — FR-012
+- [x] T063 Editar e remover ambientes; migration: remoção de ambiente em uso recusada (hoje `on delete set null`) com mensagem listando encontros — FR-012
 - [-] T064 ~~Nome da dupla sugerido no formulário da coordenação~~ — superada pela spec 006
 - [ ] T065 Troca obrigatória da senha provisória no primeiro login, controlada pelo servidor — FR-011, US6 cenário 3
 - [-] T066 Trio — movida para a spec 006 (formação por convite; remove "Formar dupla" da coordenação)
-- [ ] T067 Bloquear troca de curso de turma com dupla ativa (gatilho + pgTAP + mensagem) — FR-001, US1 cenário 4
+- [x] T067 Bloquear troca de curso de turma com dupla ativa (gatilho + pgTAP + mensagem) — FR-001, US1 cenário 4
+
+## Resultado da verificação (2026-10-30, após T063 e T067)
+
+| Verificação                        | Resultado                                             |
+| ---------------------------------- | ----------------------------------------------------- |
+| `npm run typecheck` / `lint`       | sem erros nem avisos                                  |
+| `npm run test`                     | 31 arquivos, 320 testes                               |
+| `npm run test:db` (pgTAP)          | 68/68 (12 novos em `003_regras_organizacao.test.sql`) |
+| `npm run test:e2e:supabase` (real) | 16 passando                                           |
+
+TDD: pgTAP em RED (4 falhas) antes da migration `20261030120000_regras_turma_ambiente.sql`;
+testes dos formulários em RED antes do código. Achado na verificação: o erro de remoção
+aparecia fora do diálogo de confirmação (encoberto); passou a ser exibido dentro dele.
 
 ## Resultado da verificação (2026-10-30, após T060–T062)
 

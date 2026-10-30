@@ -1,58 +1,13 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { ROTULO_PAPEL, type Papel } from '@/modules/acesso';
 import {
-  Alert,
-  Button,
-  RetornoEnvio,
+  RodapeDoFormulario as Rodape,
   SelectField,
   TextField,
   useEnvio,
-  type NomeIcone,
+  useFocoNaEdicao,
 } from '@/shared/ui';
 import type { Curso, Pessoa, Turma } from '../domain/tipos';
-
-function Rodape({
-  bloqueio,
-  estado,
-  enviando,
-  rotulo,
-  icone,
-  onCancelar,
-}: {
-  bloqueio?: string;
-  estado: ReturnType<typeof useEnvio>['estado'];
-  enviando: boolean;
-  rotulo: string;
-  icone?: NomeIcone;
-  /** Presente na edição: sai sem gravar ("Cancelar") ou depois de gravar ("Concluir"). */
-  onCancelar?: () => void;
-}) {
-  return (
-    <div className="flex flex-col gap-3 sm:col-span-full">
-      {bloqueio && <Alert tom="info" titulo={bloqueio} />}
-      <RetornoEnvio estado={estado} />
-      <div className="flex flex-wrap gap-2">
-        <Button type="submit" icone={icone} carregando={enviando} disabled={Boolean(bloqueio)}>
-          {rotulo}
-        </Button>
-        {onCancelar && (
-          <Button variante="secundario" onClick={onCancelar} disabled={enviando}>
-            {estado.tipo === 'sucesso' ? 'Concluir' : 'Cancelar'}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/** Na edição, leva o foco ao primeiro campo assim que o formulário aparece. */
-function useFocoNaEdicao<T extends HTMLElement>(editando: boolean) {
-  const ref = useRef<T>(null);
-  useEffect(() => {
-    if (editando) ref.current?.focus();
-  }, [editando]);
-  return ref;
-}
 
 export function FormCurso({
   inicial,
@@ -126,10 +81,13 @@ export function FormTurma({
   onSalvar,
   onCancelar,
   bloqueio,
+  cursoBloqueado = false,
 }: {
   cursos: Curso[];
   /** Turma em edição; sem ela, o formulário cadastra uma nova. */
   inicial?: Turma;
+  /** A turma tem dupla ativa: o servidor recusa a troca de curso (spec 002, FR-001). */
+  cursoBloqueado?: boolean;
   onSalvar: (d: {
     id?: string;
     cursoId: string;
@@ -142,7 +100,8 @@ export function FormTurma({
   const [cursoId, setCursoId] = useState(inicial?.cursoId ?? '');
   const [nome, setNome] = useState(inicial?.nome ?? '');
   const [ano, setAno] = useState(inicial?.anoLetivo ? String(inicial.anoLetivo) : '');
-  const primeiro = useFocoNaEdicao<HTMLSelectElement>(Boolean(inicial));
+  const campoCurso = useFocoNaEdicao<HTMLSelectElement>(Boolean(inicial) && !cursoBloqueado);
+  const campoNome = useFocoNaEdicao<HTMLInputElement>(Boolean(inicial) && cursoBloqueado);
   const [erro, setErro] = useState<{ cursoId?: string; nome?: string }>({});
   const { estado, enviando, enviar } = useEnvio();
 
@@ -166,15 +125,20 @@ export function FormTurma({
   return (
     <form onSubmit={aoEnviar} noValidate className="grid gap-4 sm:grid-cols-3">
       <SelectField
-        ref={primeiro}
+        ref={campoCurso}
         rotulo="Curso"
         placeholder="Selecione"
         opcoes={cursos.map((c) => ({ valor: c.id, rotulo: c.nome }))}
         value={cursoId}
         onChange={(e) => setCursoId(e.target.value)}
         erro={erro.cursoId}
+        disabled={cursoBloqueado}
+        dica={
+          cursoBloqueado ? 'Esta turma já tem duplas; o curso não pode ser alterado.' : undefined
+        }
       />
       <TextField
+        ref={campoNome}
         rotulo="Nome da turma"
         value={nome}
         onChange={(e) => setNome(e.target.value)}
