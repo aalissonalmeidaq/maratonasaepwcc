@@ -56,6 +56,7 @@ valem para os dois lados.
 | 14  | Relatórios e acompanhamento         | `modules/relatorios`                    | Inc. 5                                                               |
 | 15  | Componentes compartilhados          | `shared/ui`, `shared/pwa`               | Prontos (botões, campos, tabela, diálogo, badges…)                   |
 | 16  | Auditoria e histórico               | tabela `auditoria` + gatilhos           | Gatilhos ativos em edições, cursos, turmas, atribuições              |
+| 17  | Painel da turma                     | `modules/painel-turma`                  | Leitura por RPC com acesso no servidor (spec 004)                    |
 | —   | Dados fictícios                     | `modules/demo`                          | Somente modo demonstração                                            |
 
 Módulos ainda sem código têm apenas `README.md` descrevendo responsabilidade e incremento.

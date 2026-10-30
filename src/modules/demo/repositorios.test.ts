@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { edicao as edicaoDemo } from './dados';
 import { criarRepositoriosDemo } from './repositorios';
 
 const como = (usuarioId: string) => criarRepositoriosDemo(() => usuarioId);
@@ -60,5 +61,54 @@ describe('repositórios de demonstração', () => {
       /modo demonstração/i,
     );
     expect(r.somenteLeitura).toBe(true);
+  });
+
+  describe('painel da turma (spec 004)', () => {
+    it('docente vê a própria turma na visão de gestão; indicadores batem com as listas', async () => {
+      const p = await como('u-doc-a').painelTurma.painel('t-a');
+      expect(p.visao).toBe('gestao');
+      expect(p.alunos).toHaveLength(8);
+      expect(p.equipes).toHaveLength(4);
+      expect(p.convitesPendentes).toBe(0);
+      expect(p.encontros.length).toBeGreaterThan(0);
+    });
+
+    it('docente não vê turma não vinculada', async () => {
+      await expect(como('u-doc-a').painelTurma.painel('t-b')).rejects.toThrow(
+        'Você não tem acesso a esta turma.',
+      );
+    });
+
+    it('aluno vê a própria turma sem convites; não vê outra turma', async () => {
+      const p = await como('e01').painelTurma.painel('t-a');
+      expect(p.visao).toBe('aluno');
+      expect(p.convitesPendentes).toBeNull();
+      await expect(como('e01').painelTurma.painel('t-b')).rejects.toThrow(
+        'Você não tem acesso a esta turma.',
+      );
+    });
+
+    it('pontuação fictícia: só equipes da turma, por posição, com o estado da edição', async () => {
+      const p = await como('u-doc-a').painelTurma.painel('t-a');
+      expect(p.pontuacao?.ficticia).toBe(true);
+      expect(p.pontuacao?.estado).toBe(edicaoDemo.estadoRanking);
+      const equipes = p.pontuacao?.equipes ?? [];
+      expect(equipes.map((e) => e.equipeId).sort()).toEqual(['d1', 'd2', 'd3', 'd4']);
+      const posicoes = equipes.map((e) => e.posicao);
+      expect(posicoes).toEqual([...posicoes].sort((a, b) => a - b));
+    });
+
+    it('aluno vê a classificação publicada, inclusive parcial (PRD RF16/HU05)', async () => {
+      const p = await como('e01').painelTurma.painel('t-a');
+      expect(edicaoDemo.estadoRanking).toBe('parcial');
+      expect(p.pontuacao?.publicada).toBe(true);
+      expect(p.pontuacao?.equipes.map((e) => e.equipeId).sort()).toEqual(['d1', 'd2', 'd3', 'd4']);
+    });
+
+    it('turma inexistente', async () => {
+      await expect(como('u-coord').painelTurma.painel('t-x')).rejects.toThrow(
+        'Turma não encontrada.',
+      );
+    });
   });
 });

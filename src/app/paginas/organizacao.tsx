@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { Link } from 'react-router';
 import { ROTULO_PAPEL } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
 import {
@@ -53,7 +54,6 @@ import {
   useEquipesGestao,
   usePermiteTrio,
   useDuplas,
-  useEdicaoAtual,
   useEncontros,
   useGravar,
   usePessoas,
@@ -63,24 +63,10 @@ import {
   useVinculos,
 } from '../dados/consultas';
 import { useRepositorios } from '../dados/useRepositorios';
+import { ComEdicao } from './ComEdicao';
 
-/** Carrega a edição em uso e entrega para a tela. */
-function ComEdicao({ children }: { children: (edicao: Edicao) => ReactNode }) {
-  return (
-    <Consulta consulta={useEdicaoAtual()}>
-      {(edicao) =>
-        edicao ? (
-          children(edicao)
-        ) : (
-          <EmptyState
-            titulo="Nenhuma edição disponível para o seu perfil."
-            descricao="Procure a coordenação."
-          />
-        )
-      }
-    </Consulta>
-  );
-}
+const estiloLink =
+  'inline-flex min-h-11 items-center px-2 font-semibold text-link underline-offset-4 hover:underline';
 
 function BotaoRemover({
   rotulo,
@@ -267,6 +253,9 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                     compacta: true,
                     valor: (t) => (
                       <div className="flex flex-wrap gap-1">
+                        <Link to={`/coordenacao/turmas/${t.id}`} className={estiloLink}>
+                          Painel<span className="sr-only"> da turma {t.nome}</span>
+                        </Link>
                         <BotaoEditar
                           id={t.id}
                           rotulo={`a turma ${t.nome}`}
@@ -886,7 +875,16 @@ function TurmasDocente({ edicao }: { edicao: Edicao }) {
           ) : (
             <div className="grid gap-4">
               {lista.map((t) => (
-                <Card icone="turma" key={t.id} titulo={t.nome}>
+                <Card
+                  icone="turma"
+                  key={t.id}
+                  titulo={t.nome}
+                  acao={
+                    <Link to={`/docente/turmas/${t.id}`} className={estiloLink}>
+                      Abrir painel da turma<span className="sr-only"> {t.nome}</span>
+                    </Link>
+                  }
+                >
                   <GestaoEquipesDaTurma turma={t} bloqueio={bloqueio} podeFormar />
                 </Card>
               ))}

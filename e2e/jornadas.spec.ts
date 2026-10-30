@@ -210,7 +210,7 @@ test('menu do celular pode ser fechado pelo botão (não fica coberto)', async (
 test('atalhos do painel levam às seções do perfil', async ({ page }) => {
   await entrarComo(page, /ana exemplo/i);
   const atalhos = page.getByRole('navigation', { name: 'Acesso rápido' });
-  await expect(atalhos.getByRole('link')).toHaveCount(6);
+  await expect(atalhos.getByRole('link')).toHaveCount(7);
   await atalhos.getByRole('link', { name: 'Ranking' }).click();
   await expect(page).toHaveURL(/\/aluno\/ranking$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Ranking' })).toBeVisible();
@@ -231,4 +231,65 @@ test('edição devolve foco ao botão visível', async ({ page }) => {
   await expect(campo).toBeFocused();
   await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
   await expect(editar).toBeFocused();
+});
+
+test.describe('painel da turma (spec 004)', () => {
+  test('docente chega ao painel em duas interações a partir do início (SC-001)', async ({
+    page,
+  }) => {
+    await entrarComo(page, /lúcia exemplo/i);
+    await page
+      .getByRole('navigation', { name: 'Acesso rápido' })
+      .getByRole('link', { name: 'Minhas turmas' })
+      .click();
+    await page
+      .getByRole('link', { name: /Abrir painel da turma/ })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/docente\/turmas\/t-a$/);
+    await expect(
+      page.getByRole('heading', { level: 1, name: '3º ano A (fictícia)' }),
+    ).toBeVisible();
+    await expect(page.getByText('Alunos ativos', { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('list', { name: 'Equipes da turma', exact: true }).getByRole('heading'),
+    ).toHaveCount(4);
+    await expect(page.getByText('Todos os alunos ativos têm equipe.')).toBeVisible();
+    const pontuacao = page.getByRole('region', { name: 'Pontuação e classificação' });
+    await expect(pontuacao.getByText('Dados fictícios')).toBeVisible();
+    await expect(
+      pontuacao.getByText('Pontuação das equipes da turma', { exact: true }),
+    ).toHaveCount(1);
+    await expect(pontuacao.getByText('Dupla Órbita').filter({ visible: true })).toHaveCount(1);
+    await semRolagemHorizontal(page);
+  });
+
+  test('docente não abre o painel de turma não vinculada', async ({ page }) => {
+    await entrarComo(page, /lúcia exemplo/i);
+    await page.goto('/docente/turmas/t-b');
+    await expect(page.getByText('Você não tem acesso a esta turma.')).toBeVisible();
+  });
+
+  test('aluno vê a própria turma sem dados da gestão', async ({ page }) => {
+    await entrarComo(page, /ana exemplo/i);
+    await page
+      .getByRole('navigation', { name: 'Acesso rápido' })
+      .getByRole('link', { name: 'Minha turma' })
+      .click();
+    await expect(
+      page.getByRole('heading', { level: 1, name: '3º ano A (fictícia)' }),
+    ).toBeVisible();
+    await expect(page.getByRole('list', { name: 'Equipes da turma', exact: true })).toBeVisible();
+    await expect(page.getByText('Convites pendentes')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Alterar equipes' })).toHaveCount(0);
+    // Cenário 5 da US3: o ranking publicado (inclusive parcial, PRD RF16/HU05) aparece ao aluno
+    // com o estado e o selo de dados fictícios, só com totais.
+    const pontuacao = page.getByRole('region', { name: 'Pontuação e classificação' });
+    await expect(pontuacao.getByText('Dados fictícios')).toBeVisible();
+    await expect(pontuacao.getByText('Parcial')).toBeVisible();
+    await expect(
+      pontuacao.getByText('Pontuação das equipes da turma', { exact: true }),
+    ).toHaveCount(1);
+    await semRolagemHorizontal(page);
+  });
 });
