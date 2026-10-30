@@ -54,7 +54,6 @@ import {
   useEquipesGestao,
   usePermiteTrio,
   useDuplas,
-  useEdicaoAtual,
   useEncontros,
   useGravar,
   usePessoas,
@@ -64,27 +63,10 @@ import {
   useVinculos,
 } from '../dados/consultas';
 import { useRepositorios } from '../dados/useRepositorios';
+import { ComEdicao } from './ComEdicao';
 
 const estiloLink =
   'inline-flex min-h-11 items-center px-2 font-semibold text-link underline-offset-4 hover:underline';
-
-/** Carrega a edição em uso e entrega para a tela. */
-export function ComEdicao({ children }: { children: (edicao: Edicao) => ReactNode }) {
-  return (
-    <Consulta consulta={useEdicaoAtual()}>
-      {(edicao) =>
-        edicao ? (
-          children(edicao)
-        ) : (
-          <EmptyState
-            titulo="Nenhuma edição disponível para o seu perfil."
-            descricao="Procure a coordenação."
-          />
-        )
-      }
-    </Consulta>
-  );
-}
 
 function BotaoRemover({
   rotulo,

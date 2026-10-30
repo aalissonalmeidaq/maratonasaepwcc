@@ -6,7 +6,7 @@ import type { Edicao, Turma } from '@/modules/organizacao';
 import { EmptyState, PageHeader, SelectField } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
 import { usePainelTurma, useTurmas } from '../dados/consultas';
-import { ComEdicao } from './organizacao';
+import { ComEdicao } from './ComEdicao';
 
 const hoje = () => new Date().toLocaleDateString('sv-SE');
 
@@ -14,14 +14,24 @@ const descricaoDaTurma = ({ turma }: DadosPainelTurma) =>
   [turma.cursoNome, turma.categoria, turma.anoLetivo].filter(Boolean).join(' · ');
 
 /** Troca de turma para quem acompanha mais de uma (Edge Cases da spec 004). */
-function SeletorDeTurma({ turmas, atual, base }: { turmas: Turma[]; atual: string; base: string }) {
+export function SeletorDeTurma({
+  turmas,
+  atual,
+  base,
+}: {
+  turmas: Turma[];
+  atual: string;
+  base: string;
+}) {
   const navegar = useNavigate();
   if (turmas.length < 2) return null;
   return (
     <div className="mb-6 max-w-sm">
       <SelectField
         rotulo="Trocar de turma"
-        value={atual}
+        // Turma fora da lista (ex.: de outra edição): nenhuma outra aparece como aberta.
+        value={turmas.some((t) => t.id === atual) ? atual : ''}
+        placeholder="Escolha uma turma"
         opcoes={turmas.map((t) => ({ valor: t.id, rotulo: t.nome }))}
         onChange={(e) => void navegar(`${base}/${e.target.value}`)}
       />
