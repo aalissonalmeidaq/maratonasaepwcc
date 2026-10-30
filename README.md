@@ -163,6 +163,14 @@ Especificações: [001 — fundação](specs/001-fundacao-perfis-demo/) e
 [002 — organização da maratona](specs/002-organizacao-maratona/).
 Toda nova tabela vem com políticas RLS **e** testes pgTAP na mesma mudança.
 
+## Ícones
+
+103 ícones próprios em SVG, vetorizados a partir da prancha "100 ícones da Maratona SAEP"
+(fonte única em `src/shared/ui/icones/dados.ts`). Use `<Icon nome="dupla" />` (monocromático,
+herda a cor do texto) ou `cor="marca"` (contorno azul-marinho + cor de apoio da prancha).
+Arquivos avulsos e galeria para revisão: `npm run icones` → `docs/icones/` (não edite à mão;
+um teste garante que estão em sincronia com a fonte).
+
 ## PWA e offline
 
 - Instalável quando o navegador oferece (botão "Instalar aplicativo"); no iOS use "Adicionar à
@@ -184,7 +192,7 @@ Ver [docs/operacao-e-homologacao.md](docs/operacao-e-homologacao.md) (projeto Su
 Lista completa em [docs/decisoes-e-pendencias.md](docs/decisoes-e-pendencias.md). Principais:
 
 - Regulamento/projeto pedagógico **não fornecido**: regras em `piloto-2026.0-a-confirmar`.
-- Marca SENAI Ceará e ícones SVG do projeto **ausentes** (áreas e ícones provisórios).
+- Marca SENAI Ceará **ausente** (área provisória). Ícones vetorizados aguardam validação da unidade.
 - Organização (turmas, vínculos, contas, duplas, encontros) já usa o Supabase; atividades,
   presença, avaliação, pontuação, ocorrências e publicação do ranking ficam para os próximos
   incrementos.

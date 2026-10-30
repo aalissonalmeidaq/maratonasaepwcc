@@ -11,6 +11,7 @@ import {
   StatCard,
   StatusBadge,
 } from '@/shared/ui';
+import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
 
 type Painel = ReturnType<typeof painelDocente>;
@@ -18,15 +19,17 @@ const carregar = (s: { usuarioId: string }) => painelDocente(s.usuarioId);
 
 export function DocenteInicioPage() {
   return (
-    <ComDadosDemo carregar={carregar}>
+    <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="docente" />}>
       {(p: Painel) => (
         <>
           <PageHeader
+            icone="inicio"
             titulo={`Olá, ${p.docente?.nome ?? 'docente'}`}
             descricao="Turmas autorizadas, presenças e avaliações pendentes."
           />
+          <Atalhos area="docente" />
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard icone="turmas" rotulo="Turmas vinculadas" valor={p.turmas.length} />
+            <StatCard icone="turma" rotulo="Turmas vinculadas" valor={p.turmas.length} />
             <StatCard
               icone="dupla"
               acento="ciano"
@@ -41,7 +44,7 @@ export function DocenteInicioPage() {
             />
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            <Card titulo="Próximo encontro">
+            <Card icone="calendario" titulo="Próximo encontro">
               {p.proximoEncontro ? (
                 <>
                   <p className="font-semibold">{p.proximoEncontro.titulo}</p>
@@ -54,7 +57,7 @@ export function DocenteInicioPage() {
                 <EmptyState titulo="Nenhum encontro futuro." />
               )}
             </Card>
-            <Card titulo="Avaliações a concluir">
+            <Card icone="avaliacao" titulo="Avaliações a concluir">
               {p.entregasAAvaliar.length ? (
                 <ul className="flex flex-col gap-2">
                   {p.entregasAAvaliar.map((e) => (
@@ -77,7 +80,7 @@ export function DocenteInicioPage() {
                   ))}
                 </ul>
               ) : (
-                <EmptyState titulo="Nenhuma avaliação pendente." icone="sucesso" />
+                <EmptyState titulo="Nenhuma avaliação pendente." icone="correta" />
               )}
             </Card>
           </div>
@@ -93,6 +96,7 @@ export function DocentePresencaPage() {
       {(p: Painel) => (
         <>
           <PageHeader
+            icone="presenca"
             titulo="Presença"
             descricao={p.ultimoEncontro ? `Registros do ${p.ultimoEncontro.titulo}` : undefined}
           />
@@ -130,7 +134,7 @@ export function DocentePresencaPage() {
 function TabelaCriterios({ titulo, criterios }: { titulo: string; criterios: CriterioRubrica[] }) {
   const total = criterios.reduce((t, c) => t + c.maximo, 0);
   return (
-    <Card titulo={`${titulo} — até ${total} pontos`}>
+    <Card icone="avaliacao" titulo={`${titulo} — até ${total} pontos`}>
       <ResponsiveTable
         legenda={titulo}
         chave={(c) => c.id}
@@ -149,6 +153,7 @@ export function DocenteAvaliacoesPage() {
   return (
     <>
       <PageHeader
+        icone="avaliacao"
         titulo="Avaliações e rubricas"
         descricao={`Critérios da edição (regras ${r.versao}).`}
       />
@@ -168,7 +173,7 @@ export function DocenteAvaliacoesPage() {
 export function DocenteOcorrenciasPage() {
   return (
     <>
-      <PageHeader titulo="Ocorrências" />
+      <PageHeader icone="ocorrencia" titulo="Ocorrências" />
       <EmConstrucao modulo="Registro de ocorrências e evidências" incremento="Incremento 4" />
     </>
   );

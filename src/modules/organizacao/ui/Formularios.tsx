@@ -1,6 +1,14 @@
 import { useState, type FormEvent } from 'react';
 import { ROTULO_PAPEL, type Papel } from '@/modules/acesso';
-import { Alert, Button, RetornoEnvio, SelectField, TextField, useEnvio } from '@/shared/ui';
+import {
+  Alert,
+  Button,
+  RetornoEnvio,
+  SelectField,
+  TextField,
+  useEnvio,
+  type NomeIcone,
+} from '@/shared/ui';
 import type { Curso, Pessoa, Turma } from '../domain/tipos';
 
 function Rodape({
@@ -8,11 +16,13 @@ function Rodape({
   estado,
   enviando,
   rotulo,
+  icone,
 }: {
   bloqueio?: string;
   estado: ReturnType<typeof useEnvio>['estado'];
   enviando: boolean;
   rotulo: string;
+  icone?: NomeIcone;
 }) {
   return (
     <div className="flex flex-col gap-3 sm:col-span-full">
@@ -20,6 +30,7 @@ function Rodape({
       <RetornoEnvio estado={estado} />
       <Button
         type="submit"
+        icone={icone}
         carregando={enviando}
         disabled={Boolean(bloqueio)}
         className="sm:self-start"
@@ -76,7 +87,13 @@ export function FormCurso({
         onChange={(e) => setCategoria(e.target.value)}
         erro={erro.categoria}
       />
-      <Rodape bloqueio={bloqueio} estado={estado} enviando={enviando} rotulo="Adicionar curso" />
+      <Rodape
+        bloqueio={bloqueio}
+        estado={estado}
+        enviando={enviando}
+        rotulo="Adicionar curso"
+        icone="educacao"
+      />
     </form>
   );
 }
@@ -133,7 +150,13 @@ export function FormTurma({
         value={ano}
         onChange={(e) => setAno(e.target.value)}
       />
-      <Rodape bloqueio={bloqueio} estado={estado} enviando={enviando} rotulo="Adicionar turma" />
+      <Rodape
+        bloqueio={bloqueio}
+        estado={estado}
+        enviando={enviando}
+        rotulo="Adicionar turma"
+        icone="turma"
+      />
     </form>
   );
 }
@@ -207,7 +230,13 @@ export function FormVinculo({
         onChange={(e) => setTurmaId(e.target.value)}
       />
       {erro && <p className="text-sm font-medium text-error sm:col-span-full">{erro}</p>}
-      <Rodape bloqueio={bloqueio} estado={estado} enviando={enviando} rotulo="Registrar vínculo" />
+      <Rodape
+        bloqueio={bloqueio}
+        estado={estado}
+        enviando={enviando}
+        rotulo="Registrar vínculo"
+        icone="usuarios"
+      />
     </form>
   );
 }
@@ -312,7 +341,13 @@ export function FormConta({
         onChange={(e) => setTurmaId(e.target.value)}
         erro={erros.turma}
       />
-      <Rodape bloqueio={bloqueio} estado={estado} enviando={enviando} rotulo="Criar conta" />
+      <Rodape
+        bloqueio={bloqueio}
+        estado={estado}
+        enviando={enviando}
+        rotulo="Criar conta"
+        icone="editarUsuario"
+      />
     </form>
   );
 }

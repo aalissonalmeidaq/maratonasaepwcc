@@ -73,7 +73,12 @@ function BotaoRemover({
   const { estado, enviando, enviar } = useEnvio();
   return (
     <>
-      <Button variante="terciario" disabled={Boolean(bloqueio)} onClick={() => setAberto(true)}>
+      <Button
+        variante="terciario"
+        icone="excluir"
+        disabled={Boolean(bloqueio)}
+        onClick={() => setAberto(true)}
+      >
         Remover<span className="sr-only"> {rotulo}</span>
       </Button>
       <ConfirmDialog
@@ -111,9 +116,9 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
 
   return (
     <>
-      <PageHeader titulo="Organização da edição" descricao={edicao.nome} />
+      <PageHeader icone="gestao" titulo="Organização da edição" descricao={edicao.nome} />
       <div className="grid gap-6">
-        <Card titulo="Cursos e categorias">
+        <Card icone="educacao" titulo="Cursos e categorias">
           <Consulta consulta={cursos}>
             {(lista) => (
               <ResponsiveTable
@@ -150,7 +155,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
           </div>
         </Card>
 
-        <Card titulo="Turmas">
+        <Card icone="turma" titulo="Turmas">
           <Consulta consulta={turmas}>
             {(lista) => (
               <ResponsiveTable
@@ -191,7 +196,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
           </div>
         </Card>
 
-        <Card titulo="Criar conta">
+        <Card icone="editarUsuario" titulo="Criar conta">
           <FormConta
             turmas={turmas.data ?? []}
             bloqueio={bloqueio}
@@ -199,7 +204,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
           />
         </Card>
 
-        <Card titulo="Pessoas e vínculos">
+        <Card icone="usuarios" titulo="Pessoas e vínculos">
           <Consulta consulta={vinculos}>
             {(lista) => (
               <ResponsiveTable
@@ -278,6 +283,7 @@ function Historico({ duplaId }: { duplaId: string }) {
       <div>
         <Button
           variante="terciario"
+          icone="cronograma"
           onClick={() =>
             r.duplas.historico(duplaId).then(setRegistros, (e: Error) => setErro(e.message))
           }
@@ -317,10 +323,11 @@ function Duplas({ edicao }: { edicao: Edicao }) {
   return (
     <>
       <PageHeader
+        icone="dupla"
         titulo="Duplas"
         descricao="Alterações exigem justificativa e ficam no histórico."
       />
-      <Card titulo="Formar dupla" className="mb-6">
+      <Card icone="dupla" titulo="Formar dupla" className="mb-6">
         <FormDupla
           turmas={turmas.data ?? []}
           estudantes={elegiveis}
@@ -339,6 +346,7 @@ function Duplas({ edicao }: { edicao: Edicao }) {
                 .map((d: Dupla) => (
                   <li key={d.id}>
                     <Card
+                      icone="dupla"
                       titulo={d.nome}
                       nivel={3}
                       acao={
@@ -360,6 +368,7 @@ function Duplas({ edicao }: { edicao: Edicao }) {
                           <>
                             <Button
                               variante="secundario"
+                              icone="editar"
                               aria-expanded={aberta === d.id}
                               onClick={() => setAberta(aberta === d.id ? null : d.id)}
                               className="self-start"
@@ -470,6 +479,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
   return (
     <>
       <PageHeader
+        icone="calendario"
         titulo="Encontros"
         descricao={`A edição está configurada com ${edicao.quantidadeEncontros} encontros (regras ${edicao.regrasVersao}).`}
       />
@@ -479,7 +489,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
             <TabelaEncontros
               encontros={lista}
               acoes={(e) => (
-                <Button variante="terciario" onClick={() => setEditando(e)}>
+                <Button variante="terciario" icone="editar" onClick={() => setEditando(e)}>
                   Editar<span className="sr-only"> {e.titulo}</span>
                 </Button>
               )}
@@ -487,9 +497,18 @@ function Encontros({ edicao }: { edicao: Edicao }) {
           )}
         </Consulta>
       </Card>
-      <Card titulo={editando ? `Editar ${editando.titulo}` : 'Novo encontro'} className="mb-6">
+      <Card
+        icone="calendario"
+        titulo={editando ? `Editar ${editando.titulo}` : 'Novo encontro'}
+        className="mb-6"
+      >
         {editando && (
-          <Button variante="terciario" onClick={() => setEditando(null)} className="mb-2">
+          <Button
+            variante="terciario"
+            icone="fechar"
+            onClick={() => setEditando(null)}
+            className="mb-2"
+          >
             Cancelar edição
           </Button>
         )}
@@ -498,7 +517,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
           <EmptyState
             titulo="Todos os encontros configurados já foram cadastrados."
             descricao="Para incluir outro, ajuste a quantidade de encontros na configuração da edição. Use “Editar” para alterar um encontro existente."
-            icone="encontros"
+            icone="calendario"
           />
         ) : (
           <FormEncontro
@@ -513,7 +532,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
           />
         )}
       </Card>
-      <Card titulo="Ambientes">
+      <Card icone="notebook" titulo="Ambientes">
         <Consulta consulta={ambientes}>
           {(lista) => (
             <ResponsiveTable
@@ -551,7 +570,7 @@ function EncontrosLeitura({ edicao }: { edicao: Edicao }) {
   const encontros = useEncontros(edicao.id);
   return (
     <>
-      <PageHeader titulo="Encontros" descricao={edicao.nome} />
+      <PageHeader icone="calendario" titulo="Encontros" descricao={edicao.nome} />
       <Consulta consulta={encontros}>
         {(lista) => (
           <>
@@ -561,7 +580,13 @@ function EncontrosLeitura({ edicao }: { edicao: Edicao }) {
             {lista
               .filter((e) => e.orientacoes)
               .map((e) => (
-                <Card key={e.id} titulo={`Orientações — ${e.titulo}`} nivel={3} className="mb-3">
+                <Card
+                  icone="documento"
+                  key={e.id}
+                  titulo={`Orientações — ${e.titulo}`}
+                  nivel={3}
+                  className="mb-3"
+                >
                   <p className="whitespace-pre-line text-sm">{e.orientacoes}</p>
                 </Card>
               ))}
@@ -581,7 +606,11 @@ function TurmasDocente({ edicao }: { edicao: Edicao }) {
   const duplas = useDuplas(edicao.id);
   return (
     <>
-      <PageHeader titulo="Minhas turmas" descricao="Somente turmas vinculadas ao seu perfil." />
+      <PageHeader
+        icone="turma"
+        titulo="Minhas turmas"
+        descricao="Somente turmas vinculadas ao seu perfil."
+      />
       <Consulta consulta={turmas}>
         {(lista) =>
           lista.length === 0 ? (
@@ -592,7 +621,7 @@ function TurmasDocente({ edicao }: { edicao: Edicao }) {
           ) : (
             <div className="grid gap-4">
               {lista.map((t) => (
-                <Card key={t.id} titulo={t.nome}>
+                <Card icone="turma" key={t.id} titulo={t.nome}>
                   <Consulta consulta={duplas}>
                     {(ds) => (
                       <ResponsiveTable
@@ -631,7 +660,7 @@ function DuplaDoAluno({ edicao }: { edicao: Edicao }) {
   const turmas = useTurmas(edicao.id);
   return (
     <>
-      <PageHeader titulo="Minha dupla" descricao={edicao.nome} />
+      <PageHeader icone="dupla" titulo="Minha dupla" descricao={edicao.nome} />
       <Consulta consulta={duplas}>
         {(lista) => {
           const minha = lista.find(
@@ -647,7 +676,7 @@ function DuplaDoAluno({ edicao }: { edicao: Edicao }) {
             );
           }
           return (
-            <Card titulo={minha.nome}>
+            <Card icone="dupla" titulo={minha.nome}>
               <p className="text-sm text-text-secondary">
                 {nomeTurma(turmas.data ?? [], minha.turmaId)}
               </p>

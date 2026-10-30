@@ -101,6 +101,7 @@ export function AcoesDupla({
       <Button
         type="submit"
         variante={acao === 'desfazer' ? 'destrutivo' : 'primario'}
+        icone={acao === 'desfazer' ? 'excluir' : 'sincronizar'}
         carregando={enviando}
         disabled={Boolean(bloqueio)}
         className="sm:self-start"

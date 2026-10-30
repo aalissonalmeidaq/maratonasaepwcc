@@ -3,7 +3,7 @@ import { NavLink, Outlet } from 'react-router';
 import { ROTULO_PAPEL, type Area } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
 import { BotaoInstalar } from '@/shared/pwa';
-import { Brand, Button, Icon, MarcaSenaiProvisoria, cx } from '@/shared/ui';
+import { Brand, Button, Icon, MarcaSenai, cx } from '@/shared/ui';
 import { MENUS, ROTULO_AREA } from '../navegacao';
 
 function Menu({ area, aoNavegar }: { area: Area; aoNavegar?: () => void }) {
@@ -81,12 +81,12 @@ export function AppShell({ area }: { area: Area }) {
 
       {/* Menu lateral (desktop) */}
       <aside className="fixed inset-y-0 left-0 z-(--z-header) hidden w-(--sidebar-width) flex-col overflow-hidden bg-navy-900 px-4 py-6 lg:flex">
-        <Brand variante="branca" className="mb-8 w-48" />
+        <Brand variante="textoBranco" className="mb-8 w-full" />
         <nav aria-label={ROTULO_AREA[area]} className="flex-1">
           <Menu area={area} />
         </nav>
         <div className="relative z-10 mt-6">
-          <MarcaSenaiProvisoria fundo="escuro" />
+          <MarcaSenai fundo="escuro" className="w-28" />
         </div>
         <Faixas />
       </aside>
@@ -107,7 +107,7 @@ export function AppShell({ area }: { area: Area }) {
               rotulo={menuAberto ? 'Fechar menu' : 'Abrir menu'}
             />
           </button>
-          <Brand variante="positivo" className="w-32 lg:hidden" />
+          <Brand variante="positivo" className="w-40 lg:hidden" />
           <p className="hidden text-sm font-semibold text-text-secondary lg:block">
             {ROTULO_AREA[area]}
           </p>
@@ -124,24 +124,25 @@ export function AppShell({ area }: { area: Area }) {
             </Button>
           </div>
         </div>
-      </header>
 
-      {/* Menu recolhível (celular e tablet) */}
-      {menuAberto && (
-        <div
-          id="menu-movel"
-          ref={painelMenu}
-          className="fixed inset-x-0 top-16 bottom-0 z-(--z-overlay) overflow-y-auto bg-navy-900 px-4 py-4 lg:hidden"
-        >
-          <nav aria-label={ROTULO_AREA[area]}>
-            <Menu area={area} aoNavegar={() => setMenuAberto(false)} />
-          </nav>
-          <div className="mt-6 sm:hidden">
-            <p className="text-sm font-semibold text-white">{sessao?.nome}</p>
-            {papel && <p className="text-xs text-white/75">{ROTULO_PAPEL[papel]}</p>}
+        {/* Menu recolhível (celular e tablet): ancorado logo abaixo do cabeçalho, para nunca
+            cobrir o botão de fechar, qualquer que seja a altura dos avisos acima. */}
+        {menuAberto && (
+          <div
+            id="menu-movel"
+            ref={painelMenu}
+            className="absolute inset-x-0 top-full z-(--z-overlay) h-[calc(100dvh-4rem)] overflow-y-auto bg-navy-900 px-4 py-4 lg:hidden"
+          >
+            <nav aria-label={ROTULO_AREA[area]}>
+              <Menu area={area} aoNavegar={() => setMenuAberto(false)} />
+            </nav>
+            <div className="mt-6 sm:hidden">
+              <p className="text-sm font-semibold text-white">{sessao?.nome}</p>
+              {papel && <p className="text-xs text-white/75">{ROTULO_PAPEL[papel]}</p>}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </header>
 
       <main
         id="conteudo"

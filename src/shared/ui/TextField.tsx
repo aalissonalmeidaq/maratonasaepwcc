@@ -30,7 +30,7 @@ export function CampoBase({
       )}
       {erro && (
         <p id={`${id}-erro`} className="flex items-center gap-1 text-sm font-medium text-error">
-          <Icon nome="erro" tamanho="sm" />
+          <Icon nome="incorreta" tamanho="sm" />
           {erro}
         </p>
       )}

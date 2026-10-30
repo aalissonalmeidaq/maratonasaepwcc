@@ -18,7 +18,12 @@ export function Consulta<T>({
         titulo={consulta.error.message || 'Não foi possível carregar os dados.'}
         anunciar
       >
-        <Button variante="secundario" className="mt-2" onClick={() => void consulta.refetch()}>
+        <Button
+          variante="secundario"
+          icone="tentar"
+          className="mt-2"
+          onClick={() => void consulta.refetch()}
+        >
           Tentar novamente
         </Button>
       </Alert>
