@@ -190,6 +190,8 @@ edição.
 - Falha de rede em qualquer gravação: mensagem de erro, sem confirmação de sucesso.
 - "Esqueci minha senha" com e-mail sem conta → mesma resposta neutra (não revela quem tem conta);
   link vencido ou já usado → mensagem clara e opção de pedir outro.
+- Modo demonstração: primeiro acesso, recuperação, reenvio e importação ficam indisponíveis, com
+  aviso; nada é apresentado como enviado ou concluído.
 - Importação CSV: e-mail que já tem conta → só cria o vínculo de aluno na turma (sem novo convite);
   se a pessoa já estiver ativa em outra turma da edição → linha recusada com o motivo.
 - Importação CSV: e-mail repetido no arquivo, e-mail inválido, nome vazio,
@@ -245,10 +247,15 @@ edição.
 
 ## Success Criteria _(mandatory)_
 
-- **SC-001**: 100% dos cenários de autorização desta spec têm teste pgTAP passando.
+- **SC-001**: 100% dos cenários de autorização desta spec têm teste automatizado passando: pgTAP
+  para regras do banco (RLS e funções) e E2E contra o Supabase local para as funções do servidor
+  (`criar-conta`, `reenviar-convite`, `definir-senha-inicial`, `importar-alunos`).
 - **SC-002**: Nenhuma combinação inválida de dupla (Edge Cases) é gravada pelo servidor.
 - **SC-003**: Superado pela spec 006 (SC-001: aluno envia convite em até 3 interações).
-- **SC-004**: Com o Supabase local, as jornadas "formar dupla" e "aluno vê dupla" passam em E2E.
+- **SC-004**: Com o Supabase local, passam em E2E: o aluno vê a própria equipe e os colegas (e não
+  vê equipes de outras turmas), e a coordenação altera uma equipe com justificativa e histórico.
+  A jornada "coordenação forma dupla" vale só até a spec 006 substituí-la pela formação por
+  convite.
 
 ## Assumptions
 
@@ -260,6 +267,8 @@ edição.
 - O prazo dos links de e-mail do Supabase Auth é único e limitado a 24 h; o convite de 7 dias
   exige um token próprio (tabela com RLS + função do servidor), enquanto a recuperação (1 h) usa
   o mecanismo padrão. Detalhar no plano.
-- Primeiro acesso e recuperação por e-mail (FR-011, FR-014) exigem e-mails reais nas contas e envio configurado (SMTP) na
-  homologação/produção; no ambiente local, as mensagens ficam na caixa de teste do Supabase.
+- Primeiro acesso e recuperação por e-mail (FR-011, FR-014) exigem e-mails reais nas contas e,
+  na homologação/produção, dois envios configurados: um provedor de e-mail para os convites
+  (enviados pelas funções do servidor) e o SMTP próprio do Supabase Auth para a recuperação. No
+  ambiente local, as duas mensagens ficam na caixa de teste (Mailpit).
 - Criação de edições continua restrita à administração do banco nesta spec.

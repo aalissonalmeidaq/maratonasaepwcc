@@ -92,11 +92,11 @@ coordenação vê quem está pendente e reenvia.
 - [ ] T081 [P] [US6] GREEN `supabase/functions/definir-senha-inicial/index.ts` (pública): senha ≥ 10 (422), `app.consumir_convite`, `auth.admin.updateUserById` com a senha, `app.desfazer_consumo` se o Auth recusar; mesma mensagem 400 para token inexistente, usado, revogado ou vencido; devolve só o e-mail
 - [ ] T082 [P] [US6] GREEN `supabase/functions/reenviar-convite/index.ts`: coordenação da edição e pessoa da edição (403), 409 se acesso já ativo, `novoEmail` opcional (409 se em uso), revoga e cria convite, envia
 - [ ] T083 [P] [US6] RED `src/modules/organizacao/ui/FormConta.test.tsx`: sem campo "Senha provisória"; envia `{ nome, email, papel, turmaId }`; com `conviteEnviado: true` mostra "Conta criada. Enviamos o convite para …"; com `false`, aviso para usar "Reenviar convite"
-- [ ] T084 [US6] GREEN `src/modules/organizacao/ui/Formularios.tsx` (`FormConta`), `src/modules/organizacao/domain/tipos.ts` e `src/modules/organizacao/data/repositorioSupabase.ts` (`criarConta` devolve `{ conviteEnviado }`); demonstração continua recusando escrita
-- [ ] T085 [P] [US6] RED `src/modules/auth/ui/PrimeiroAcessoPage.test.tsx`: lê o token de `#t=`; "Nova senha" e "Confirmar senha" (≥ 10 e iguais); sucesso só após o servidor, com "Entrar" e e-mail preenchido; erro do servidor exibido; sem token → orientação; link "Esqueci minha senha"; axe sem violações
+- [ ] T084 [US6] GREEN `src/modules/organizacao/ui/Formularios.tsx` (`FormConta`), `src/modules/organizacao/domain/tipos.ts` e `src/modules/organizacao/data/repositorioSupabase.ts` (`criarConta` devolve `{ conviteEnviado }`); demonstração continua recusando escrita; atualizar o E2E "coordenação cria conta pela interface" em `e2e-supabase/organizacao.spec.ts` (sem "Senha provisória"; confere "Enviamos o convite para …" e o e-mail no Mailpit)
+- [ ] T085 [P] [US6] RED `src/modules/auth/ui/PrimeiroAcessoPage.test.tsx`: lê o token de `#t=`; "Nova senha" e "Confirmar senha" (≥ 10 e iguais); sucesso só após o servidor, com "Entrar" e e-mail preenchido; erro do servidor exibido; sem token → orientação; link "Esqueci minha senha"; axe sem violações; no modo demonstração, a página informa "Indisponível no modo demonstração" e não chama nem simula o servidor
 - [ ] T086 [US6] GREEN `src/modules/auth/ui/PrimeiroAcessoPage.tsx` e chamada à função em `src/modules/auth/data/` (exportados por `src/modules/auth/index.ts`)
 - [ ] T087 [US6] Rota pública `/primeiro-acesso` em `src/app/rotas.tsx` — **combinar com a outra sessão** que edita esse arquivo
-- [ ] T088 [P] [US6] RED testes da coluna "Acesso" em `src/app/paginas/organizacao.test.tsx` (ou componente extraído): `StatusBadge` "Aguardando primeiro acesso"/"Acesso ativo"; "Reenviar convite" e "Corrigir e-mail" só nas pendentes; busca encontra pela situação
+- [ ] T088 [P] [US6] RED testes da coluna "Acesso" em `src/app/paginas/organizacao.test.tsx` (ou componente extraído): `StatusBadge` "Aguardando primeiro acesso"/"Acesso ativo"; "Reenviar convite" e "Corrigir e-mail" só nas pendentes; busca encontra pela situação; no modo demonstração, situações fictícias identificadas como tais e ações bloqueadas com o aviso existente
 - [ ] T089 [US6] GREEN `situacaoDeAcesso(edicaoId)` e `reenviarConvite(...)` em `src/modules/organizacao/data/repositorioSupabase.ts` (+ demonstração com situações fictícias e escrita bloqueada), hook em `src/app/dados/consultas.ts`, coluna e ações em `src/app/paginas/organizacao.tsx`
 - [ ] T090 [US6] E2E em `e2e-supabase/contas.spec.ts`: corrigir e-mail e reenviar invalida o link anterior; após o primeiro acesso a situação vira "Acesso ativo"
 
@@ -105,7 +105,7 @@ coordenação vê quem está pendente e reenvia.
 **Goal**: "Esqueci minha senha" com resposta neutra e link de 1 hora.
 **Independent Test**: [quickstart.md](./quickstart.md) cenário 3.
 
-- [ ] T091 [P] [US6] RED `src/modules/auth/ui/EsqueciSenhaPage.test.tsx` e `src/modules/auth/ui/RedefinirSenhaPage.test.tsx`: mesma mensagem para qualquer e-mail ("Se o e-mail estiver cadastrado, enviamos um link válido por 1 hora."); redefinição com senha ≥ 10 e confirmação; link vencido orienta a pedir outro
+- [ ] T091 [P] [US6] RED `src/modules/auth/ui/EsqueciSenhaPage.test.tsx` e `src/modules/auth/ui/RedefinirSenhaPage.test.tsx`: mesma mensagem para qualquer e-mail ("Se o e-mail estiver cadastrado, enviamos um link válido por 1 hora."); redefinição com senha ≥ 10 e confirmação; link vencido orienta a pedir outro; no modo demonstração, as duas páginas informam "Indisponível no modo demonstração" sem simular envio
 - [ ] T092 [US6] GREEN páginas em `src/modules/auth/ui/` e métodos `pedirRecuperacao(email)` (`resetPasswordForEmail` com `redirectTo` `/redefinir-senha`) e `redefinirSenha(senha)` em `src/modules/auth/data/adaptadorSupabase.ts` — **arquivo alterado pela outra sessão; combinar**
 - [ ] T093 [US6] Rotas `/esqueci-senha` e `/redefinir-senha` em `src/app/rotas.tsx` e link "Esqueci minha senha" na entrada (`src/app/paginas/comum.tsx`) — **combinar com a outra sessão**
 - [ ] T094 [US6] E2E em `e2e-supabase/contas.spec.ts`: e-mail cadastrado e inexistente recebem a mesma resposta; só o cadastrado recebe mensagem no Mailpit; o link redefine a senha
@@ -125,7 +125,7 @@ coordenação vê quem está pendente e reenvia.
 ### 8.6 Polish & cross-cutting
 
 - [ ] T101 [P] ADR `docs/adr/0009-convites-de-acesso.md` (por que token próprio; hash; prazos) e atualização de `docs/adr/0008-criacao-de-contas.md`
-- [ ] T102 [P] Atualizar `README.md` e `docs/operacao-e-homologacao.md`: Mailpit local, variáveis das funções, provedor de e-mail da produção **[validar]**, confirmação do bloqueio de SMTP; `docs/decisoes-e-pendencias.md` atualizado
+- [ ] T102 [P] Atualizar `README.md` e `docs/operacao-e-homologacao.md`: Mailpit local, variáveis das funções, provedor de e-mail dos convites **[validar]**, configuração do SMTP próprio do Supabase Auth para a recuperação de senha (remetente e domínio da unidade) **[validar]**, confirmação do bloqueio de SMTP nas funções hospedadas; `docs/decisoes-e-pendencias.md` atualizado
 - [ ] T103 E2E de autorização (quickstart cenário 5) em `e2e-supabase/contas.spec.ts`: docente recusado em `criar-conta`, `reenviar-convite` e `importar-alunos`
 - [ ] T104 Verificação final: `npm run verify`, `npm run test:e2e`, `npm run test:db`, `npm run test:e2e:supabase`; tabela de resultados em `specs/002-organizacao-maratona/tasks.md`; marcar T065, T068 e T069
 
