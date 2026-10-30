@@ -96,7 +96,7 @@ export function AppShell({ area }: { area: Area }) {
               rotulo={menuAberto ? 'Fechar menu' : 'Abrir menu'}
             />
           </button>
-          <Brand variante="positivo" className="w-40 lg:hidden" />
+          <Brand variante="positivo" className="w-40 min-w-0 lg:hidden" />
           <p className="hidden text-sm font-semibold text-text-secondary lg:block">
             {ROTULO_AREA[area]}
           </p>
@@ -136,7 +136,7 @@ export function AppShell({ area }: { area: Area }) {
       <main
         id="conteudo"
         tabIndex={-1}
-        className="mx-auto w-full max-w-(--content-max) px-4 py-6 sm:px-6 lg:px-8"
+        className="mx-auto w-full min-w-0 max-w-(--content-max) px-4 py-6 wrap-anywhere sm:px-6 lg:px-8"
       >
         <Outlet />
       </main>

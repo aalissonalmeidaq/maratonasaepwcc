@@ -16,6 +16,28 @@ async function semRolagemHorizontal(page: Page) {
   expect(larguraDoDocumento).toBeLessThanOrEqual(larguraDoDispositivo);
 }
 
+test('painel do aluno mantém atalhos legíveis com texto a 200%', async ({ page }) => {
+  await entrarComo(page, /ana exemplo/i);
+  await expect(page.getByRole('heading', { level: 1, name: /olá, ana/i })).toBeVisible();
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = '200%';
+  });
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => document.fonts.ready);
+    await semRolagemHorizontal(page);
+    const atalhos = page.getByRole('navigation', { name: 'Acesso rápido' }).getByRole('link');
+    for (const atalho of await atalhos.all()) {
+      await expect(atalho).toBeVisible();
+      const tamanho = await atalho.evaluate((el) => ({
+        largura: el.clientWidth,
+        conteudo: el.scrollWidth,
+      }));
+      expect(tamanho.conteudo).toBeLessThanOrEqual(tamanho.largura);
+    }
+  }
+});
+
 async function abrirMenuSeNecessario(page: Page) {
   // Aguarda o layout autenticado antes de decidir (isVisible não espera).
   await expect(page.getByRole('button', { name: 'Sair' })).toBeVisible();

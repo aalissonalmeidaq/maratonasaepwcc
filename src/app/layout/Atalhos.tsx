@@ -12,9 +12,9 @@ export function Atalhos({ area }: { area: Area }) {
   const itens = MENUS[area].filter((i) => i.caminho !== `/${area}`);
   return (
     <nav aria-label="Acesso rápido" className="mb-6">
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      <ul className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-3">
         {itens.map((item, i) => (
-          <li key={item.caminho}>
+          <li key={item.caminho} className="min-w-0">
             <CardDestaque
               titulo={item.rotulo}
               descricao={item.descricao}
