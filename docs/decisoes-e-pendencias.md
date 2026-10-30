@@ -90,8 +90,9 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Dupla = 2 estudantes da **mesma turma**; trios e duplas entre turmas recusados até decisão. **[validar]**
 - Encontros valem para todas as turmas da edição. **[validar]**
 - Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[validar]**
-- Edição de nome de curso/turma pela interface ainda não implementada (remover e recriar, ou
-  ajustar no próximo incremento).
+- Edição de curso e turma pela interface: implementada em 2026-10-30. Mudar o curso de uma turma
+  é permitido; vínculos e duplas da turma são mantidos. **[validar]** se a troca de curso deve
+  ser bloqueada quando a turma já tiver duplas (muda a categoria do ranking).
 - Os testes E2E reais deixam registros fictícios no banco local (rodar `supabase db reset`).
 
 ## 6.1 Spec 005 — busca e paginação

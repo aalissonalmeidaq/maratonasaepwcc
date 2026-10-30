@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ROTULO_PAPEL, type Papel } from '@/modules/acesso';
 import {
   Alert,
@@ -17,39 +17,58 @@ function Rodape({
   enviando,
   rotulo,
   icone,
+  onCancelar,
 }: {
   bloqueio?: string;
   estado: ReturnType<typeof useEnvio>['estado'];
   enviando: boolean;
   rotulo: string;
   icone?: NomeIcone;
+  /** Presente na edição: sai sem gravar ("Cancelar") ou depois de gravar ("Concluir"). */
+  onCancelar?: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 sm:col-span-full">
       {bloqueio && <Alert tom="info" titulo={bloqueio} />}
       <RetornoEnvio estado={estado} />
-      <Button
-        type="submit"
-        icone={icone}
-        carregando={enviando}
-        disabled={Boolean(bloqueio)}
-        className="sm:self-start"
-      >
-        {rotulo}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" icone={icone} carregando={enviando} disabled={Boolean(bloqueio)}>
+          {rotulo}
+        </Button>
+        {onCancelar && (
+          <Button variante="secundario" onClick={onCancelar} disabled={enviando}>
+            {estado.tipo === 'sucesso' ? 'Concluir' : 'Cancelar'}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
 
+/** Na edição, leva o foco ao primeiro campo assim que o formulário aparece. */
+function useFocoNaEdicao<T extends HTMLElement>(editando: boolean) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    if (editando) ref.current?.focus();
+  }, [editando]);
+  return ref;
+}
+
 export function FormCurso({
+  inicial,
   onSalvar,
+  onCancelar,
   bloqueio,
 }: {
-  onSalvar: (d: { nome: string; categoria: string }) => Promise<void>;
+  /** Curso em edição; sem ele, o formulário cadastra um novo. */
+  inicial?: Curso;
+  onSalvar: (d: { id?: string; nome: string; categoria: string }) => Promise<void>;
+  onCancelar?: () => void;
   bloqueio?: string;
 }) {
-  const [nome, setNome] = useState('');
-  const [categoria, setCategoria] = useState('');
+  const [nome, setNome] = useState(inicial?.nome ?? '');
+  const [categoria, setCategoria] = useState(inicial?.categoria ?? '');
+  const primeiro = useFocoNaEdicao<HTMLInputElement>(Boolean(inicial));
   const [erro, setErro] = useState<{ nome?: string; categoria?: string }>({});
   const { estado, enviando, enviar } = useEnvio();
 
@@ -61,12 +80,13 @@ export function FormCurso({
     };
     setErro(e);
     if (Object.keys(e).length) return;
-    if (
-      await enviar(
-        () => onSalvar({ nome: nome.trim(), categoria: categoria.trim() }),
-        'Curso salvo.',
-      )
-    ) {
+    const dados = { nome: nome.trim(), categoria: categoria.trim() };
+    if (inicial) {
+      if (await enviar(() => onSalvar({ id: inicial.id, ...dados }), 'Curso atualizado.'))
+        setNome(dados.nome);
+      return;
+    }
+    if (await enviar(() => onSalvar(dados), 'Curso salvo.')) {
       setNome('');
       setCategoria('');
     }
@@ -75,6 +95,7 @@ export function FormCurso({
   return (
     <form onSubmit={aoEnviar} noValidate className="grid gap-4 sm:grid-cols-2">
       <TextField
+        ref={primeiro}
         rotulo="Nome do curso"
         value={nome}
         onChange={(e) => setNome(e.target.value)}
@@ -91,8 +112,9 @@ export function FormCurso({
         bloqueio={bloqueio}
         estado={estado}
         enviando={enviando}
-        rotulo="Adicionar curso"
-        icone="educacao"
+        rotulo={inicial ? 'Salvar alterações' : 'Adicionar curso'}
+        icone={inicial ? 'correta' : 'educacao'}
+        onCancelar={inicial && onCancelar}
       />
     </form>
   );
@@ -100,16 +122,27 @@ export function FormCurso({
 
 export function FormTurma({
   cursos,
+  inicial,
   onSalvar,
+  onCancelar,
   bloqueio,
 }: {
   cursos: Curso[];
-  onSalvar: (d: { cursoId: string; nome: string; anoLetivo: number | null }) => Promise<void>;
+  /** Turma em edição; sem ela, o formulário cadastra uma nova. */
+  inicial?: Turma;
+  onSalvar: (d: {
+    id?: string;
+    cursoId: string;
+    nome: string;
+    anoLetivo: number | null;
+  }) => Promise<void>;
+  onCancelar?: () => void;
   bloqueio?: string;
 }) {
-  const [cursoId, setCursoId] = useState('');
-  const [nome, setNome] = useState('');
-  const [ano, setAno] = useState('');
+  const [cursoId, setCursoId] = useState(inicial?.cursoId ?? '');
+  const [nome, setNome] = useState(inicial?.nome ?? '');
+  const [ano, setAno] = useState(inicial?.anoLetivo ? String(inicial.anoLetivo) : '');
+  const primeiro = useFocoNaEdicao<HTMLSelectElement>(Boolean(inicial));
   const [erro, setErro] = useState<{ cursoId?: string; nome?: string }>({});
   const { estado, enviando, enviar } = useEnvio();
 
@@ -121,14 +154,19 @@ export function FormTurma({
     };
     setErro(e);
     if (Object.keys(e).length) return;
-    const anoLetivo = ano ? Number(ano) : null;
-    if (await enviar(() => onSalvar({ cursoId, nome: nome.trim(), anoLetivo }), 'Turma salva.'))
-      setNome('');
+    const dados = { cursoId, nome: nome.trim(), anoLetivo: ano ? Number(ano) : null };
+    if (inicial) {
+      if (await enviar(() => onSalvar({ id: inicial.id, ...dados }), 'Turma atualizada.'))
+        setNome(dados.nome);
+      return;
+    }
+    if (await enviar(() => onSalvar(dados), 'Turma salva.')) setNome('');
   }
 
   return (
     <form onSubmit={aoEnviar} noValidate className="grid gap-4 sm:grid-cols-3">
       <SelectField
+        ref={primeiro}
         rotulo="Curso"
         placeholder="Selecione"
         opcoes={cursos.map((c) => ({ valor: c.id, rotulo: c.nome }))}
@@ -154,8 +192,9 @@ export function FormTurma({
         bloqueio={bloqueio}
         estado={estado}
         enviando={enviando}
-        rotulo="Adicionar turma"
-        icone="turma"
+        rotulo={inicial ? 'Salvar alterações' : 'Adicionar turma'}
+        icone={inicial ? 'correta' : 'turma'}
+        onCancelar={inicial && onCancelar}
       />
     </form>
   );

@@ -8,6 +8,7 @@ import {
   FormCurso,
   FormTurma,
   FormVinculo,
+  type Curso,
   type Edicao,
   type Turma,
 } from '@/modules/organizacao';
@@ -103,6 +104,33 @@ function BotaoRemover({
 const nomeTurma = (turmas: Turma[], id: string | null) =>
   turmas.find((t) => t.id === id)?.nome ?? '—';
 
+const idBotaoEditar = (id: string) => `editar-${id}`;
+
+/** Ao sair da edição, o foco volta ao "Editar" da linha (o formulário de edição deixa de existir). */
+function devolverFoco(id: string) {
+  requestAnimationFrame(() => document.getElementById(idBotaoEditar(id))?.focus());
+}
+
+function BotaoEditar({
+  id,
+  rotulo,
+  onEditar,
+}: {
+  id: string;
+  rotulo: string;
+  onEditar: () => void;
+}) {
+  return (
+    <Button id={idBotaoEditar(id)} variante="terciario" icone="editar" onClick={onEditar}>
+      Editar<span className="sr-only"> {rotulo}</span>
+    </Button>
+  );
+}
+
+function TituloDoFormulario({ children }: { children: string }) {
+  return <h3 className="mb-3 font-display text-base font-semibold text-text">{children}</h3>;
+}
+
 // ===========================================================================
 // Coordenação — organização (US1, US2)
 // ===========================================================================
@@ -115,6 +143,8 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
   const turmas = useTurmas(edicao.id);
   const vinculos = useVinculos(edicao.id);
   const pessoas = usePessoas();
+  const [cursoEmEdicao, setCursoEmEdicao] = useState<Curso | null>(null);
+  const [turmaEmEdicao, setTurmaEmEdicao] = useState<Turma | null>(null);
 
   return (
     <>
@@ -143,13 +173,21 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                     id: 'acoes',
                     titulo: 'Ações',
                     buscavel: false,
+                    compacta: true,
                     valor: (c) => (
-                      <BotaoRemover
-                        rotulo={`o curso ${c.nome}`}
-                        descricao="Turmas do curso também serão removidas. A operação fica registrada na auditoria."
-                        bloqueio={bloqueio}
-                        remover={gravar(() => r.organizacao.removerCurso(c.id))}
-                      />
+                      <div className="flex flex-wrap gap-1">
+                        <BotaoEditar
+                          id={c.id}
+                          rotulo={`o curso ${c.nome}`}
+                          onEditar={() => setCursoEmEdicao(c)}
+                        />
+                        <BotaoRemover
+                          rotulo={`o curso ${c.nome}`}
+                          descricao="Turmas do curso também serão removidas. A operação fica registrada na auditoria."
+                          bloqueio={bloqueio}
+                          remover={gravar(() => r.organizacao.removerCurso(c.id))}
+                        />
+                      </div>
                     ),
                   },
                 ]}
@@ -157,11 +195,20 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
             )}
           </Consulta>
           <div className="mt-4 border-t border-border pt-4">
+            <TituloDoFormulario>
+              {cursoEmEdicao ? `Editar curso “${cursoEmEdicao.nome}”` : 'Novo curso'}
+            </TituloDoFormulario>
             <FormCurso
+              key={cursoEmEdicao?.id ?? 'novo'}
+              inicial={cursoEmEdicao ?? undefined}
               bloqueio={bloqueio}
               onSalvar={(d) =>
                 gravar(() => r.organizacao.salvarCurso({ ...d, edicaoId: edicao.id }))()
               }
+              onCancelar={() => {
+                if (cursoEmEdicao) devolverFoco(cursoEmEdicao.id);
+                setCursoEmEdicao(null);
+              }}
             />
           </div>
         </Card>
@@ -186,13 +233,21 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                     id: 'acoes',
                     titulo: 'Ações',
                     buscavel: false,
+                    compacta: true,
                     valor: (t) => (
-                      <BotaoRemover
-                        rotulo={`a turma ${t.nome}`}
-                        descricao="Vínculos da turma também serão removidos. Turmas com duplas não podem ser removidas."
-                        bloqueio={bloqueio}
-                        remover={gravar(() => r.organizacao.removerTurma(t.id))}
-                      />
+                      <div className="flex flex-wrap gap-1">
+                        <BotaoEditar
+                          id={t.id}
+                          rotulo={`a turma ${t.nome}`}
+                          onEditar={() => setTurmaEmEdicao(t)}
+                        />
+                        <BotaoRemover
+                          rotulo={`a turma ${t.nome}`}
+                          descricao="Vínculos da turma também serão removidos. Turmas com duplas não podem ser removidas."
+                          bloqueio={bloqueio}
+                          remover={gravar(() => r.organizacao.removerTurma(t.id))}
+                        />
+                      </div>
                     ),
                   },
                 ]}
@@ -200,10 +255,19 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
             )}
           </Consulta>
           <div className="mt-4 border-t border-border pt-4">
+            <TituloDoFormulario>
+              {turmaEmEdicao ? `Editar turma “${turmaEmEdicao.nome}”` : 'Nova turma'}
+            </TituloDoFormulario>
             <FormTurma
+              key={turmaEmEdicao?.id ?? 'nova'}
+              inicial={turmaEmEdicao ?? undefined}
               cursos={cursos.data ?? []}
               bloqueio={bloqueio}
               onSalvar={(d) => gravar(() => r.organizacao.salvarTurma(d))()}
+              onCancelar={() => {
+                if (turmaEmEdicao) devolverFoco(turmaEmEdicao.id);
+                setTurmaEmEdicao(null);
+              }}
             />
           </div>
         </Card>

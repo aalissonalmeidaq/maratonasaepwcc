@@ -113,5 +113,61 @@ test('coordenação cria conta pela interface e ela aparece nos vínculos (US6)'
   await cartao.getByLabel('Turma', { exact: true }).selectOption({ label: '3º ano A (fictícia)' });
   await cartao.getByRole('button', { name: 'Criar conta' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Conta criada' })).toBeVisible();
+  // A lista de vínculos é paginada: a busca encontra a conta nova em qualquer página.
+  await page.getByRole('searchbox', { name: 'Buscar em Vínculos da edição' }).fill(nome);
   await expect(page.getByRole('cell', { name: nome, exact: true })).toBeVisible();
+});
+
+test('coordenação edita curso e o novo nome vem do servidor após recarregar (FR-001)', async ({
+  page,
+}) => {
+  const sufixo = Date.now() % 100000;
+  const original = `Curso E2E ${sufixo}`;
+  const editado = `Curso E2E editado ${sufixo}`;
+  await entrar(page, 'coordenacao@exemplo.invalid');
+  await page.goto('/coordenacao/organizacao');
+  const cursos = page.locator('#cursos');
+  await cursos.getByLabel('Nome do curso').fill(original);
+  await cursos.getByLabel('Categoria do ranking').fill('Categoria E2E');
+  await cursos.getByRole('button', { name: 'Adicionar curso' }).click();
+  await expect(cursos.getByRole('status').filter({ hasText: 'Curso salvo.' })).toBeVisible();
+
+  await cursos.getByRole('searchbox', { name: 'Buscar em Cursos da edição' }).fill(original);
+  await cursos.getByRole('button', { name: `Editar o curso ${original}` }).click();
+  await expect(cursos.getByRole('heading', { name: `Editar curso “${original}”` })).toBeVisible();
+  await expect(cursos.getByLabel('Nome do curso')).toBeFocused();
+  await cursos.getByLabel('Nome do curso').fill(editado);
+  await cursos.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(cursos.getByRole('status').filter({ hasText: 'Curso atualizado.' })).toBeVisible();
+  await cursos.getByRole('button', { name: 'Concluir' }).click();
+  await expect(cursos.getByRole('heading', { name: 'Novo curso' })).toBeVisible();
+
+  await page.reload();
+  await page
+    .locator('#cursos')
+    .getByRole('searchbox', { name: 'Buscar em Cursos da edição' })
+    .fill(`${sufixo}`);
+  await expect(page.getByRole('cell', { name: editado, exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: original, exact: true })).toHaveCount(0);
+});
+
+test('coordenação edita turma: o nome repetido no curso é recusado pelo servidor', async ({
+  page,
+}) => {
+  await entrar(page, 'coordenacao@exemplo.invalid');
+  await page.goto('/coordenacao/organizacao');
+  const turmas = page.locator('#turmas');
+  await turmas.getByRole('button', { name: 'Editar a turma 3º ano A (fictícia)' }).click();
+  await turmas
+    .getByLabel('Curso', { exact: true })
+    .selectOption({ label: 'Curso Técnico Exemplo B' });
+  await turmas.getByLabel('Nome da turma').fill('3º ano B (fictícia)');
+  await turmas.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(
+    turmas.getByRole('alert').filter({ hasText: 'Já existe uma turma com esse nome neste curso.' }),
+  ).toBeVisible();
+  await turmas.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(
+    turmas.getByRole('button', { name: 'Editar a turma 3º ano A (fictícia)' }),
+  ).toBeFocused();
 });

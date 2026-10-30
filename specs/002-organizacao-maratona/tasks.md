@@ -27,7 +27,7 @@ description: 'Tarefas da spec 002 — Organização da maratona'
 
 ## Phase 4: Telas
 
-- [x] T030 Coordenação: cursos e turmas (criar e remover; edição de nome pela interface pendente — o repositório já suporta) — US1
+- [x] T030 Coordenação: cursos e turmas (criar e remover) — US1
 - [x] T031 Coordenação: vínculos de pessoas — US2
 - [x] T032 Coordenação: duplas (formar, substituir, desfazer, histórico) — US3
 - [x] T033 Coordenação: encontros e ambientes — US4
@@ -43,6 +43,24 @@ description: 'Tarefas da spec 002 — Organização da maratona'
 
 - [x] T050 E2E demo (regressão) e E2E contra Supabase local (formar dupla → aluno vê)
 - [x] T051 `npm run verify`, `test:e2e`, `test:db`; atualizar docs e pendências
+
+## Phase 7: Pendências da spec (2026-10-30)
+
+- [x] T060 RED/GREEN edição de curso e turma nos formulários (preenchidos, foco no primeiro campo, confirmação só após o servidor, Cancelar/Concluir) — FR-001
+- [x] T061 Botão "Editar" nas tabelas de cursos e turmas; foco volta à linha ao sair da edição — FR-001
+- [x] T062 E2E contra Supabase local: editar curso e recarregar; nome de turma repetido recusado — FR-001
+- [ ] T063 Editar e remover ambientes pela interface (repositório já suporta)
+- [ ] T064 Formar dupla em até 4 interações (SC-003; hoje são 5)
+- [ ] T065 Instruções de acesso e troca da senha provisória — depende da unidade (US6)
+
+## Resultado da verificação (2026-10-30, após T060–T062)
+
+| Verificação                        | Resultado                       |
+| ---------------------------------- | ------------------------------- |
+| `npm run typecheck` / `lint`       | sem erros nem avisos            |
+| `npm run test`                     | 30 arquivos, 315 testes         |
+| `npm run test:db` (pgTAP)          | 56/56                           |
+| `npm run test:e2e:supabase` (real) | 15 passando (2 novos de edição) |
 
 ## Resultado da verificação (2026-10-29)
 
