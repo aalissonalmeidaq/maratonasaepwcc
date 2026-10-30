@@ -11,7 +11,7 @@ async function entrar(page: Page, email: string) {
   await page.getByLabel('E-mail').fill(email);
   await page.getByLabel('Senha').fill(SENHA);
   await page.getByRole('button', { name: 'Entrar' }).click();
-  await expect(page.getByRole('button', { name: 'Sair' })).toBeVisible();
+  await expect(page.locator('#conteudo')).toBeVisible();
 }
 
 const indicador = (page: Page, rotulo: string) =>

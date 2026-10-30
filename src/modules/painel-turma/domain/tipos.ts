@@ -65,7 +65,7 @@ export interface PontuacaoDoPainel {
   /** `true` na demonstração: a interface exibe o selo "Dados fictícios". */
   ficticia: boolean;
   estado: EstadoClassificacao;
-  /** `estado` diferente de `parcial`. Na visão do aluno, `equipes` fica vazio se `false`. */
+  /** Publicada pela coordenação (em qualquer estado, PRD RF16/HU05). Na visão do aluno, `equipes` fica vazio se `false`. */
   publicada: boolean;
   /** Ordenadas pela posição na categoria. */
   equipes: PontuacaoDaEquipe[];
