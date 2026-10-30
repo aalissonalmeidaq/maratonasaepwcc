@@ -208,7 +208,7 @@ describe('PainelTurma — pontuação na demonstração (US3, FR-005)', () => {
     expect(await violacoesA11y(container)).toEqual([]);
   });
 
-  it('aluno com classificação não publicada: aviso e nenhum número (cenário 5)', () => {
+  it('aluno com classificação não publicada (dados reais, Incremento 4): aviso e nenhum número', () => {
     renderizar({
       ...base,
       visao: 'aluno',

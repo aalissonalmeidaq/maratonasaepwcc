@@ -134,10 +134,11 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Pontuação (esclarecimento de 2026-10-30, opção B): a RPC devolve `pontuacao: null` e o bloco
   mostra só "Pontuação disponível a partir dos lançamentos de avaliação.". Na demonstração, o bloco
   mostra o total e a posição na categoria das equipes da turma, com o selo "Dados fictícios".
-- Publicação para alunos: só os estados `provisorio` e `definitivo` contam como publicados; com
-  `parcial`, o aluno vê "Classificação ainda não publicada.". **Divergência:** a tela "Ranking"
-  da demonstração (anterior à spec 004) ainda mostra o ranking parcial ao aluno. **[decidir]** se
-  ela passa a seguir a mesma regra.
+- Publicação para alunos (decidido em 2026-10-30, seguindo o PRD RF16/HU05): publicar é um ato
+  da coordenação, independente do estado. Um ranking publicado pode estar parcial, provisório ou
+  definitivo e sempre mostra o estado. Na demonstração o ranking conta como publicado, e o painel
+  da turma e a tela "Ranking" mostram ao aluno a mesma classificação. A regra provisória
+  ("`parcial` não conta como publicado") foi revogada por contrariar o PRD.
 - Listas de equipes e de alunos sem equipe ganham busca e paginação (10 por página) acima de
   10 itens.
 - **Pendente (Incrementos 3/4):** pontuação real por equipe, posição na categoria e publicação do

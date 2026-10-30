@@ -51,11 +51,14 @@ encontrada", pois o painel trabalha sempre com a edição em uso.
   - Na demonstração (esclarecimento B de 2026-10-30), o repositório de demonstração preenche o
     campo com o `rankingPorCategoria()` fictício de `modules/demo`, filtrado às equipes da turma.
     O bloco mostra o estado da classificação e o selo "Dados fictícios".
-- **Publicação**: só os estados `provisorio` e `definitivo` contam como publicados. Na visão do
-  aluno, o repositório devolve `pontuacao.equipes = []` com `publicada = false` enquanto o estado
-  for `parcial`, e a interface mostra "Classificação ainda não publicada". A tela "Ranking" da
-  demonstração ainda mostra o ranking parcial ao aluno; essa divergência é anterior à spec e fica
-  registrada em `docs/decisoes-e-pendencias.md`.
+- **Publicação**: publicar é um ato da coordenação, independente do estado. Pelo PRD (RF16,
+  HU05), um ranking publicado pode estar parcial, provisório ou definitivo, e sempre mostra o
+  estado. Na demonstração, o ranking fictício conta como publicado (`publicada = true`), como na
+  tela "Ranking". Com dados reais, a publicação chega no Incremento 4. Enquanto não houver
+  publicação, a visão do aluno recebe `publicada = false` com `equipes = []` e a interface mostra
+  "Classificação ainda não publicada".
+  - Revisão de 2026-10-30: a regra anterior ("`parcial` não conta como publicado") contrariava o
+    PRD e foi revogada.
 - **Privacidade**: a tabela mostra só o total da equipe e a posição na categoria, sem notas
   individuais nem componentes (Constituição VI).
 - **Alternativas rejeitadas**:

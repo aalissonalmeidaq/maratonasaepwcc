@@ -21,6 +21,9 @@ ranking dependem do Incremento 3/4. Constituição V, VI, VIII.
 - Q: No modo demonstração, o bloco de pontuação mostra números fictícios? → A: Sim: na
   demonstração, pontuação e posição fictícias por equipe com o selo "Dados fictícios"; fora dela,
   só o aviso enquanto não houver lançamentos.
+- Q: Ranking `parcial` conta como publicado para o aluno? → A: Sim, seguindo o PRD (RF16/HU05): o
+  ranking é publicado em qualquer estado e mostra o estado. A regra anterior ("`parcial` não
+  conta") foi revogada por contrariar o PRD.
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -72,8 +75,8 @@ tentar abrir o da turma B (não vinculada) e ser recusado pelo servidor.
 4. **Given** o modo demonstração, **Then** o bloco mostra a pontuação e a posição fictícias de cada
    equipe da turma, identificadas com o selo "Dados fictícios".
 5. **Given** o modo demonstração com o ranking em estado `parcial`, **When** um aluno abre
-   "Minha turma", **Then** vê "Classificação ainda não publicada", sem números; a equipe docente
-   vê a tabela fictícia.
+   "Minha turma", **Then** vê a tabela fictícia só com os totais, o selo "Parcial" e o selo
+   "Dados fictícios" (o ranking é publicado em qualquer estado, PRD RF16/HU05).
 
 ### Edge Cases
 
@@ -99,9 +102,10 @@ tentar abrir o da turma B (não vinculada) e ser recusado pelo servidor.
 - **FR-004**: Indicadores MUST vir de dados do servidor, com estados de carregamento, erro e
   vazio; nenhum número fictício fora do modo demonstração.
 - **FR-005**: Pontuação e ranking MUST aparecer quando existirem; para alunos, só após a
-  publicação do ranking (estado `provisorio` ou `definitivo`; `parcial` não conta como publicado).
-  No modo demonstração, o bloco MUST mostrar pontuação e posição fictícias por equipe com o selo
-  "Dados fictícios", seguindo a mesma regra de publicação para alunos.
+  publicação do ranking. Publicar é um ato da coordenação, independente do estado: um ranking
+  publicado pode estar `parcial`, `provisorio` ou `definitivo` e sempre mostra o estado (PRD
+  RF16/HU05). No modo demonstração, o ranking fictício conta como publicado e o bloco MUST mostrar
+  pontuação e posição por equipe com o selo "Dados fictícios".
 - **FR-006**: Entradas: "Minhas turmas" (docente/mentor) e "Organização → Turmas" (coordenação)
   levam ao painel; o aluno acessa por "Minha turma" no menu.
 - **FR-007**: O painel MUST ser somente leitura; para a equipe docente e a coordenação, o bloco

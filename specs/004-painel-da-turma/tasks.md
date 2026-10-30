@@ -78,6 +78,7 @@ Teste independente: no modo demonstração, a docente vê a tabela "Pontuação 
   - em "Minha turma" da aluna Ana (ranking da demonstração `parcial`), verificar "Classificação ainda não publicada" e a ausência dessa tabela (cenário 5 da US3).
 - [x] T017 Atualizar a documentação: `docs/decisoes-e-pendencias.md` (§6.3), `docs/arquitetura.md` e `docs/requisitos-e-referencias.md`.
 - [x] T028 Revisar `docs/decisoes-e-pendencias.md` §6.3: trocar "sem números, inclusive na demonstração" pela opção B, registrar a regra de publicação (`parcial` não é publicado) e a divergência da tela "Ranking" da demonstração, que ainda mostra o ranking parcial ao aluno.
+- [x] T030 [US3] Resolver a pendência da tela "Ranking" seguindo o PRD (RF16/HU05): publicar independe do estado, e o ranking `parcial` também é visto pelo aluno. RED/GREEN em `src/modules/demo/repositorios.test.ts` e `src/modules/demo/repositorios.ts` (`publicada = true` na demonstração). Ajustar o cenário 5 da US3 no E2E `e2e/jornadas.spec.ts` (a aluna vê a tabela com os selos "Parcial" e "Dados fictícios"). Revogar a regra provisória em `spec.md`, `plan.md`, `research.md`, `data-model.md`, `contracts/telas.md` e `docs/decisoes-e-pendencias.md`. Isso substitui o trecho "parcial não é publicado" das tarefas T021, T023, T025, T026 e T028.
 - [x] T018 Executar os portões: `npm run verify`, `npm run test:db`, `npm run test:e2e` (com o servidor aquecido na porta 4173) e `npx supabase db reset`, seguido do E2E real. Registrar os resultados em `specs/004-painel-da-turma/quickstart.md`.
 
 ## Dependências

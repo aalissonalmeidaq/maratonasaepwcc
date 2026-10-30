@@ -188,9 +188,9 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
       if (!gestao && !aluno) throw new Error('Você não tem acesso a esta turma.');
 
       const daTurma = duplas.filter((d) => d.turmaId === turmaId);
-      // FR-005: ranking fictício da categoria, só com as equipes da turma; o aluno só o recebe
-      // com a classificação publicada (`parcial` não conta).
-      const publicada = edicao.estadoRanking !== 'parcial';
+      // FR-005: ranking fictício da categoria, só com as equipes da turma. Na demonstração o
+      // ranking conta como publicado em qualquer estado, inclusive parcial (PRD RF16/HU05).
+      const publicada = true;
       const ranking = rankingPorCategoria().find((r) => r.categoria === curso.categoria);
       const daTurmaIds = new Set(daTurma.map((d) => d.id));
       const comEquipe = new Set(daTurma.flatMap((d) => d.integrantes));

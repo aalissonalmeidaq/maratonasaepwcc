@@ -33,3 +33,5 @@
 - Portões finais (T018), após a opção B e a paginação: `npm run verify` verde (typecheck, lint,
   447 testes unitários/componentes, build); pgTAP 299; E2E demo 37 passaram (1 ignorado: só
   celular), com o servidor aquecido na porta 4173; E2E real 33 após `supabase db reset`.
+- Após a T030 (ranking publicado em qualquer estado, PRD RF16/HU05): verify 447; pgTAP 299;
+  E2E demo 37 passaram (1 ignorado: só celular); E2E real 33 após `supabase db reset`.

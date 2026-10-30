@@ -42,8 +42,8 @@ pessoais (FR-003).
 - `estado: 'parcial' | 'provisorio' | 'definitivo'`: o estado da classificação da categoria.
 - `equipes: { equipeId, nome, total, posicao, compartilhada, pendente }[]`: as equipes da turma,
   ordenadas pela posição na categoria. Inclui só o total, sem componentes nem notas individuais.
-- `publicada: boolean`: `estado` diferente de `parcial`. Na visão do aluno, `equipes` fica vazio
-  quando `publicada = false`.
+- `publicada: boolean`: o ranking foi publicado pela coordenação, em qualquer estado (PRD RF16). Na
+  demonstração é sempre `true`. Na visão do aluno, `equipes` fica vazio quando `publicada = false`.
 
 ## Derivados no domínio (`domain/painel.ts`)
 

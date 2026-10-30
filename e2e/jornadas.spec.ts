@@ -252,7 +252,7 @@ test.describe('painel da turma (spec 004)', () => {
     ).toBeVisible();
     await expect(page.getByText('Alunos ativos', { exact: true })).toBeVisible();
     await expect(
-      page.getByRole('list', { name: 'Equipes da turma' }).getByRole('heading'),
+      page.getByRole('list', { name: 'Equipes da turma', exact: true }).getByRole('heading'),
     ).toHaveCount(4);
     await expect(page.getByText('Todos os alunos ativos têm equipe.')).toBeVisible();
     const pontuacao = page.getByRole('region', { name: 'Pontuação e classificação' });
@@ -279,15 +279,17 @@ test.describe('painel da turma (spec 004)', () => {
     await expect(
       page.getByRole('heading', { level: 1, name: '3º ano A (fictícia)' }),
     ).toBeVisible();
-    await expect(page.getByRole('list', { name: 'Equipes da turma' })).toBeVisible();
+    await expect(page.getByRole('list', { name: 'Equipes da turma', exact: true })).toBeVisible();
     await expect(page.getByText('Convites pendentes')).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Alterar equipes' })).toHaveCount(0);
-    // Cenário 5 da US3: ranking da demonstração `parcial` não é publicado para o aluno.
+    // Cenário 5 da US3: o ranking publicado (inclusive parcial, PRD RF16/HU05) aparece ao aluno
+    // com o estado e o selo de dados fictícios, só com totais.
     const pontuacao = page.getByRole('region', { name: 'Pontuação e classificação' });
-    await expect(pontuacao.getByText('Classificação ainda não publicada.')).toBeVisible();
+    await expect(pontuacao.getByText('Dados fictícios')).toBeVisible();
+    await expect(pontuacao.getByText('Parcial')).toBeVisible();
     await expect(
       pontuacao.getByText('Pontuação das equipes da turma', { exact: true }),
-    ).toHaveCount(0);
+    ).toHaveCount(1);
     await semRolagemHorizontal(page);
   });
 });

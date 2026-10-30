@@ -39,10 +39,10 @@ implementados. Por isso, a RPC devolve `pontuacao: null`, e o bloco mostra só o
 disponível a partir dos lançamentos de avaliação". Na demonstração (esclarecimento de
 2026-10-30, opção B), o repositório de demonstração preenche `pontuacao` com o ranking fictício
 que já existe em `modules/demo`. O bloco mostra uma tabela com o total e a posição na categoria
-de cada equipe da turma, o estado da classificação e o selo "Dados fictícios". Para o aluno, vale
-a regra de publicação (FR-005): com o ranking `parcial`, o bloco mostra "Classificação ainda não
-publicada", sem números. Com a classificação publicada (`provisorio` ou `definitivo`), o aluno vê a
-tabela só com o total de cada equipe, sem notas individuais.
+de cada equipe da turma, o estado da classificação e o selo "Dados fictícios". O aluno vê a mesma
+tabela, só com os totais, quando o ranking está publicado (FR-005). Na demonstração ele conta
+como publicado em qualquer estado, inclusive `parcial` (PRD RF16/HU05). Com dados reais e o
+ranking ainda não publicado (Incremento 4), o aluno vê "Classificação ainda não publicada".
 
 O painel é somente leitura (FR-007). Para a gestão, o bloco de equipes tem o link "Alterar
 equipes".

@@ -33,7 +33,9 @@ test('docente abre o painel da turma em duas interações; indicadores batem com
     .click();
   await expect(page.getByRole('heading', { level: 1, name: '3º ano A (fictícia)' })).toBeVisible();
 
-  const equipes = page.getByRole('list', { name: 'Equipes da turma' }).locator(':scope > li');
+  const equipes = page
+    .getByRole('list', { name: 'Equipes da turma', exact: true })
+    .locator(':scope > li');
   await expect(indicador(page, 'Equipes')).toHaveText(String(await equipes.count()));
   const semEquipe = page.getByRole('list', { name: 'Alunos sem equipe' }).locator('li');
   await expect(indicador(page, 'Sem equipe')).toHaveText(String(await semEquipe.count()));
@@ -57,7 +59,7 @@ test('docente não vê o painel de turma não vinculada (recusa do servidor)', a
   await entrar(page, 'docente@exemplo.invalid');
   await page.goto(`/docente/turmas/${TURMA_B}`);
   await expect(page.getByText('Você não tem acesso a esta turma.')).toBeVisible();
-  await expect(page.getByRole('list', { name: 'Equipes da turma' })).toHaveCount(0);
+  await expect(page.getByRole('list', { name: 'Equipes da turma', exact: true })).toHaveCount(0);
 });
 
 test('aluna vê "Minha turma" só com dados coletivos', async ({ page }) => {
@@ -67,7 +69,9 @@ test('aluna vê "Minha turma" só com dados coletivos', async ({ page }) => {
     .getByRole('link', { name: 'Minha turma' })
     .click();
   await expect(page.getByRole('heading', { level: 1, name: '3º ano A (fictícia)' })).toBeVisible();
-  await expect(page.getByRole('list', { name: 'Equipes da turma' })).toContainText('Dupla Órbita');
+  await expect(page.getByRole('list', { name: 'Equipes da turma', exact: true })).toContainText(
+    'Dupla Órbita',
+  );
   await expect(page.getByText('Convites pendentes')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Alterar equipes' })).toHaveCount(0);
   await expect(page.getByText('@exemplo.invalid')).toHaveCount(0);
@@ -78,7 +82,9 @@ test('coordenação abre o painel de qualquer turma pela Organização', async (
   await page.goto('/coordenacao/organizacao');
   await page.getByRole('link', { name: 'Painel da turma 3º ano B (fictícia)' }).click();
   await expect(page.getByRole('heading', { level: 1, name: '3º ano B (fictícia)' })).toBeVisible();
-  await expect(page.getByRole('list', { name: 'Equipes da turma' })).toContainText('Dupla Faísca');
+  await expect(page.getByRole('list', { name: 'Equipes da turma', exact: true })).toContainText(
+    'Dupla Faísca',
+  );
   await expect(page.getByLabel('Trocar de turma')).toHaveValue(TURMA_B);
   await expect(page.getByRole('link', { name: 'Alterar equipes' })).toHaveAttribute(
     'href',

@@ -18,7 +18,7 @@
 6. "Pontuação e classificação":
    - Com `pontuacao = null`: aviso "Pontuação disponível a partir dos lançamentos de avaliação.", sem números.
    - Na demonstração: tabela "Pontuação das equipes da turma" (Equipe, Pontos, Posição na categoria), com o selo do estado da classificação e o selo "Dados fictícios". Posição compartilhada aparece como "2º (empate)"; equipe com lançamentos pendentes recebe a nota "lançamentos pendentes". Sem notas individuais.
-   - Aluno com `pontuacao.publicada = false`: "Classificação ainda não publicada.", sem números e sem a tabela. Com `publicada = true`, o aluno vê a mesma tabela, só com os totais.
+   - Aluno com `pontuacao.publicada = true` (na demonstração, sempre, inclusive com o estado Parcial): a mesma tabela, só com os totais, o selo do estado e o selo "Dados fictícios". Com `publicada = false` (dados reais antes da publicação, Incremento 4): "Classificação ainda não publicada.", sem números e sem a tabela.
 
 ## Estados
 

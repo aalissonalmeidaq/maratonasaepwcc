@@ -98,11 +98,11 @@ describe('repositórios de demonstração', () => {
       expect(posicoes).toEqual([...posicoes].sort((a, b) => a - b));
     });
 
-    it('aluno com classificação parcial não recebe pontuação (FR-005)', async () => {
+    it('aluno vê a classificação publicada, inclusive parcial (PRD RF16/HU05)', async () => {
       const p = await como('e01').painelTurma.painel('t-a');
       expect(edicaoDemo.estadoRanking).toBe('parcial');
-      expect(p.pontuacao?.publicada).toBe(false);
-      expect(p.pontuacao?.equipes).toEqual([]);
+      expect(p.pontuacao?.publicada).toBe(true);
+      expect(p.pontuacao?.equipes.map((e) => e.equipeId).sort()).toEqual(['d1', 'd2', 'd3', 'd4']);
     });
 
     it('turma inexistente', async () => {
