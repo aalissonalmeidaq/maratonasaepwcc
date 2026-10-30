@@ -10,6 +10,6 @@
       "node"
     ]
   },
-  "include": ["src"],
+  "include": ["src", "supabase/functions/_shared/**/*.test.ts"],
   "exclude": []
 }

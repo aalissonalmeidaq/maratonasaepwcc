@@ -11,3 +11,4 @@ export { AuthContext, useAuth, type ValorAuth } from './ui/AuthContext';
 export { AuthProvider } from './ui/AuthProvider';
 export { CAMINHO_DO_DESTINO } from './ui/caminhos';
 export { RedirecionarParaPainel, RotaProtegida } from './ui/RotaProtegida';
+export { PaginaDeAcesso, PrimeiroAcessoPage } from './ui/PrimeiroAcessoPage';

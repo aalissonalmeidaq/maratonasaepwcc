@@ -45,6 +45,11 @@ export const useVinculos = (edicaoId?: string) => {
   const r = useRepositorios();
   return useDaEdicao('vinculos', edicaoId, (id) => r.organizacao.vinculos(id));
 };
+/** Só a coordenação consegue ler; para os demais perfis a consulta falha e a coluna fica vazia. */
+export const useSituacaoDeAcesso = (edicaoId?: string) => {
+  const r = useRepositorios();
+  return useDaEdicao('situacao-de-acesso', edicaoId, (id) => r.organizacao.situacaoDeAcesso(id));
+};
 export const useDuplas = (edicaoId?: string) => {
   const r = useRepositorios();
   return useDaEdicao('duplas', edicaoId, (id) => r.duplas.duplas(id));

@@ -34,13 +34,17 @@ pendente ──(primeiro acesso)──▶ usado
 
 ## Funções no banco
 
-| Função                                | Quem executa                                         | Faz                                                                                               |
-| ------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `public.situacao_de_acesso(p_edicao)` | `authenticated` (coordenação da edição; senão 42501) | Lista pessoas da edição com `email`, `acesso_ativo`, `convite_expira_em`                          |
-| `app.registrar_convite(...)`          | somente `service_role`                               | Revoga convite pendente da pessoa e grava o novo (atômico)                                        |
-| `app.consumir_convite(p_token_hash)`  | somente `service_role`                               | Marca `usado_em` se válido e devolve `usuario_id`; nada se inválido/vencido/usado                 |
-| `app.desfazer_consumo(p_convite_id)`  | somente `service_role`                               | Volta `usado_em` para nulo quando o Auth recusa a senha                                           |
-| `app.usuario_por_email(p_email)`      | somente `service_role`                               | Devolve o `id` da conta com esse e-mail (sem diferenciar maiúsculas) ou nulo; usada na importação |
+As funções exclusivas do servidor ficam no schema `public` (o cliente administrativo das Edge
+Functions só chama RPCs expostas), com `execute` revogado de `public`, `anon` e `authenticated`
+e concedido só a `service_role`.
+
+| Função                                  | Quem executa                                         | Faz                                                                                               |
+| --------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `public.situacao_de_acesso(p_edicao)`   | `authenticated` (coordenação da edição; senão 42501) | Lista pessoas da edição com `email`, `acesso_ativo`, `convite_expira_em`                          |
+| `public.registrar_convite(...)`         | somente `service_role`                               | Revoga convite pendente da pessoa e grava o novo (atômico)                                        |
+| `public.consumir_convite(p_token_hash)` | somente `service_role`                               | Marca `usado_em` se válido e devolve `usuario_id`; nada se inválido/vencido/usado                 |
+| `public.desfazer_consumo(p_convite)`    | somente `service_role`                               | Volta `usado_em` para nulo quando o Auth recusa a senha                                           |
+| `public.usuario_por_email(p_email)`     | somente `service_role`                               | Devolve o `id` da conta com esse e-mail (sem diferenciar maiúsculas) ou nulo; usada na importação |
 
 ## Entidades derivadas (sem tabela)
 

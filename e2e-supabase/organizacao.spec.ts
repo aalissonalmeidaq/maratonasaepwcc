@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { ultimoEmailPara } from './mailpit';
 
 // Contas fictícias do supabase/seed.sql (somente ambiente local).
 const SENHA = 'senha-local-123';
@@ -100,19 +101,27 @@ test('curso com nome repetido: servidor recusa com mensagem clara (US1)', async 
   ).toBeVisible();
 });
 
-test('coordenação cria conta pela interface e ela aparece nos vínculos (US6)', async ({ page }) => {
+test('coordenação cria conta pela interface e ela aparece nos vínculos (US6)', async ({
+  page,
+  request,
+}) => {
   const nome = `Estudante UI ${Date.now() % 100000}`;
+  const email = `ui-${Date.now()}@exemplo.invalid`;
+  const inicio = new Date(Date.now() - 1000);
   await entrar(page, 'coordenacao@exemplo.invalid');
   await page.goto('/coordenacao/organizacao');
   const cartao = page
     .locator('section')
     .filter({ has: page.getByRole('heading', { name: 'Criar conta' }) });
   await cartao.getByLabel('Nome completo').fill(nome);
-  await cartao.getByLabel('E-mail').fill(`ui-${Date.now()}@exemplo.invalid`);
-  await cartao.getByLabel('Senha provisória').fill('provisoria-123');
+  await cartao.getByLabel('E-mail').fill(email);
+  await expect(cartao.getByLabel(/senha/i)).toHaveCount(0);
   await cartao.getByLabel('Turma', { exact: true }).selectOption({ label: '3º ano A (fictícia)' });
   await cartao.getByRole('button', { name: 'Criar conta' }).click();
-  await expect(page.getByRole('status').filter({ hasText: 'Conta criada' })).toBeVisible();
+  await expect(
+    page.getByRole('status').filter({ hasText: `Enviamos o convite para ${email}` }),
+  ).toBeVisible();
+  expect(await ultimoEmailPara(request, email, inicio)).toContain('/primeiro-acesso#t=');
   // A lista de vínculos é paginada: a busca encontra a conta nova em qualquer página.
   await page.getByRole('searchbox', { name: 'Buscar em Vínculos da edição' }).fill(nome);
   await expect(page.getByRole('cell', { name: nome, exact: true })).toBeVisible();

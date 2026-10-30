@@ -14,6 +14,9 @@ import {
   FormCurso,
   FormTurma,
   FormVinculo,
+  AcoesDeAcesso,
+  SituacaoDeAcessoBadge,
+  textoDaSituacao,
   type Curso,
   type Edicao,
   type Turma,
@@ -43,6 +46,7 @@ import {
   useEncontros,
   useGravar,
   usePessoas,
+  useSituacaoDeAcesso,
   useTurmas,
   useVinculos,
 } from '../dados/consultas';
@@ -150,6 +154,8 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
   const cursos = useCursos(edicao.id);
   const turmas = useTurmas(edicao.id);
   const vinculos = useVinculos(edicao.id);
+  const acessos = useSituacaoDeAcesso(edicao.id);
+  const situacaoDe = (usuarioId: string) => acessos.data?.find((s) => s.usuarioId === usuarioId);
   const pessoas = usePessoas();
   const duplas = useDuplas(edicao.id);
   const [cursoEmEdicao, setCursoEmEdicao] = useState<Curso | null>(null);
@@ -312,20 +318,42 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                     ),
                   },
                   {
+                    id: 'acesso',
+                    titulo: 'Acesso',
+                    texto: (v) => textoDaSituacao(situacaoDe(v.usuarioId)),
+                    valor: (v) => <SituacaoDeAcessoBadge situacao={situacaoDe(v.usuarioId)} />,
+                  },
+                  {
                     id: 'acoes',
                     titulo: 'Ações',
                     buscavel: false,
                     valor: (v) => (
-                      <Button
-                        variante="terciario"
-                        disabled={Boolean(bloqueio)}
-                        onClick={() =>
-                          void gravar(() => r.organizacao.definirVinculoAtivo(v.id, !v.ativo))()
-                        }
-                      >
-                        {v.ativo ? 'Desativar' : 'Reativar'}
-                        <span className="sr-only"> vínculo de {v.nome}</span>
-                      </Button>
+                      <div className="flex flex-col items-start gap-1">
+                        <Button
+                          variante="terciario"
+                          disabled={Boolean(bloqueio)}
+                          onClick={() =>
+                            void gravar(() => r.organizacao.definirVinculoAtivo(v.id, !v.ativo))()
+                          }
+                        >
+                          {v.ativo ? 'Desativar' : 'Reativar'}
+                          <span className="sr-only"> vínculo de {v.nome}</span>
+                        </Button>
+                        <AcoesDeAcesso
+                          situacao={situacaoDe(v.usuarioId)}
+                          nome={v.nome}
+                          bloqueio={bloqueio}
+                          onReenviar={(novoEmail) =>
+                            gravar(() =>
+                              r.organizacao.reenviarConvite({
+                                edicaoId: edicao.id,
+                                usuarioId: v.usuarioId,
+                                novoEmail,
+                              }),
+                            )()
+                          }
+                        />
+                      </div>
                     ),
                   },
                 ]}

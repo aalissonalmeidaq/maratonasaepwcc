@@ -57,7 +57,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: false,
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    // Código compartilhado das Edge Functions usa só APIs web (crypto, fetch): testável aqui.
+    include: ['src/**/*.test.{ts,tsx}', 'supabase/functions/_shared/**/*.test.ts'],
     css: false,
     restoreMocks: true,
   },

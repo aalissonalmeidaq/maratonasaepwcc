@@ -7,7 +7,10 @@ export {
   type NovaConta,
   type Pessoa,
   type RepositorioOrganizacao,
+  type SituacaoDeAcesso,
   type Turma,
   type Vinculo,
 } from './domain/tipos';
 export { FormConta, FormCurso, FormTurma, FormVinculo } from './ui/Formularios';
+export { AcoesDeAcesso, SituacaoDeAcessoBadge } from './ui/AcessoDaConta';
+export { textoDaSituacao } from './ui/situacaoDeAcesso';

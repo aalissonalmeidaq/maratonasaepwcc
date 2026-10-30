@@ -43,15 +43,16 @@ dias`, uso único e revogação no reenvio. Uma Edge Function pública (`definir
 ## R4. Situação "Aguardando primeiro acesso" / "Acesso ativo"
 
 - **Decision**: função `public.situacao_de_acesso(p_edicao)` (`security definer`, só coordenação
-  da edição) que devolve, por pessoa vinculada à edição, o e-mail (de `auth.users`), se já há
-  senha definida e o vencimento do convite pendente. Nada é copiado para `perfis`.
-- **Rationale**: o e-mail fica restrito à coordenação (dado pessoal de estudante, constituição
-  VI) e não é duplicado; a situação deriva do próprio Auth, inclusive quando a pessoa ativa a
-  conta pela recuperação. **Verificar na implementação**: conta criada sem senha tem
-  `encrypted_password` vazio/nulo; se não for confiável, usar `usado_em` do convite **ou** a
-  existência de login (`last_sign_in_at`).
-- **Alternatives considered**: coluna `perfis.email` (duplicação de dado pessoal, exposta à RLS
-  de leitura de perfis); gatilho em `auth.users` (acoplamento ao esquema do Auth).
+  da edição) que devolve, por pessoa vinculada à edição, o e-mail (de `auth.users`), a situação e
+  o vencimento do convite pendente. **Aguardando primeiro acesso** = o convite mais recente da
+  pessoa não foi usado **e** não houve login (`auth.users.last_sign_in_at`) depois da criação
+  desse convite; senão **Acesso ativo** (inclui contas antigas sem convite e quem ativou a conta
+  pela recuperação de senha).
+- **Verificado em 2026-10-30 (T071)**: conta criada sem senha pelo Auth local recebe senha
+  aleatória — `encrypted_password` não fica vazio nem nulo, então não serve de critério.
+- **Rationale**: o e-mail fica restrito à coordenação (constituição VI) e não é duplicado.
+- **Alternatives considered**: `encrypted_password` vazio (descartado pela verificação);
+  coluna `perfis.email` (duplicação de dado pessoal); gatilho em `auth.users` (acoplamento).
 
 ## R5. Importação CSV
 

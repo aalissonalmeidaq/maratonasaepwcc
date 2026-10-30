@@ -35,9 +35,17 @@ export interface NovaConta {
   edicaoId: string;
   nome: string;
   email: string;
-  senhaProvisoria: string;
   papel: Exclude<Papel, 'coordenacao'>;
   turmaId: string | null;
+}
+
+/** Situação do primeiro acesso de uma conta (visível só para a coordenação). */
+export interface SituacaoDeAcesso {
+  usuarioId: string;
+  email: string;
+  acessoAtivo: boolean;
+  /** Vencimento do convite pendente; nulo quando o acesso já está ativo. */
+  conviteExpiraEm: string | null;
 }
 
 export interface Pessoa {
@@ -64,7 +72,15 @@ export interface RepositorioOrganizacao {
   }): Promise<void>;
   definirVinculoAtivo(id: string, ativo: boolean): Promise<void>;
   /** Cria a conta pela Edge Function `criar-conta` (a chave privada fica só no servidor). */
-  criarConta(dados: NovaConta): Promise<void>;
+  /** Conta sem senha; `conviteEnviado` informa se o e-mail de primeiro acesso saiu. */
+  criarConta(dados: NovaConta): Promise<{ conviteEnviado: boolean }>;
+  situacaoDeAcesso(edicaoId: string): Promise<SituacaoDeAcesso[]>;
+  /** Revoga o convite anterior e envia outro; `novoEmail` corrige o e-mail antes. */
+  reenviarConvite(dados: {
+    edicaoId: string;
+    usuarioId: string;
+    novoEmail?: string;
+  }): Promise<{ conviteEnviado: boolean }>;
 }
 
 /** Escolhe a edição em uso: ativa, depois rascunho, depois a mais recente encerrada. */

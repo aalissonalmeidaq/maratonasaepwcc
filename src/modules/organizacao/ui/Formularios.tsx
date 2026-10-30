@@ -257,20 +257,16 @@ export function FormConta({
   onCriar: (d: {
     nome: string;
     email: string;
-    senhaProvisoria: string;
     papel: PapelDeConta;
     turmaId: string | null;
-  }) => Promise<void>;
+  }) => Promise<{ conviteEnviado: boolean }>;
   bloqueio?: string;
 }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
   const [papel, setPapel] = useState<PapelDeConta>('aluno');
   const [turmaId, setTurmaId] = useState('');
-  const [erros, setErros] = useState<Partial<Record<'nome' | 'email' | 'senha' | 'turma', string>>>(
-    {},
-  );
+  const [erros, setErros] = useState<Partial<Record<'nome' | 'email' | 'turma', string>>>({});
   const { estado, enviando, enviar } = useEnvio();
   const precisaTurma = EXIGE_TURMA.includes(papel);
 
@@ -281,23 +277,27 @@ export function FormConta({
       ...(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && {
         email: 'Informe um e-mail válido.',
       }),
-      ...(senha.length < 10 && { senha: 'A senha provisória deve ter pelo menos 10 caracteres.' }),
       ...(precisaTurma && !turmaId && { turma: 'Selecione a turma.' }),
     };
     setErros(e);
     if (Object.keys(e).length) return;
+    const destino = email.trim().toLowerCase();
     const ok = await enviar(
       () =>
         onCriar({
           nome: nome.trim(),
-          email: email.trim().toLowerCase(),
-          senhaProvisoria: senha,
+          email: destino,
           papel,
           turmaId: precisaTurma ? turmaId : null,
         }),
-      'Conta criada. Entregue a senha provisória à pessoa por um canal definido pela unidade.',
+      ({ conviteEnviado }) =>
+        conviteEnviado
+          ? `Conta criada. Enviamos o convite para ${destino}.`
+          : {
+              alerta:
+                'Conta criada, mas o e-mail do convite não foi enviado. Use “Reenviar convite” em Pessoas e vínculos.',
+            },
     );
-    setSenha('');
     if (ok) {
       setNome('');
       setEmail('');
@@ -319,15 +319,7 @@ export function FormConta({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         erro={erros.email}
-      />
-      <TextField
-        rotulo="Senha provisória"
-        type="password"
-        autoComplete="new-password"
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        erro={erros.senha}
-        dica="Mínimo de 10 caracteres. A política de troca no primeiro acesso será definida pela unidade."
+        dica="A pessoa recebe um convite por e-mail, válido por 7 dias, para criar a própria senha."
       />
       <SelectField
         rotulo="Papel"

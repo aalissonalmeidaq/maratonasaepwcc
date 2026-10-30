@@ -106,14 +106,46 @@ export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): Reposit
     async definirVinculoAtivo(id, ativo) {
       verificarGravacao(await sb.from('atribuicoes').update({ ativo }).eq('id', id));
     },
-    async criarConta(dados) {
-      const { error } = await sb.functions.invoke('criar-conta', { body: dados });
-      if (!error) return;
-      // A função responde { erro } com mensagem em português.
-      const corpo = await (error as { context?: Response }).context?.json?.().catch(() => null);
-      throw new Error(
-        (corpo as { erro?: string } | null)?.erro ?? 'Não foi possível criar a conta.',
+    async situacaoDeAcesso(edicaoId) {
+      const dados = verificar(await sb.rpc('situacao_de_acesso', { p_edicao: edicaoId }));
+      return (
+        dados as {
+          usuario_id: string;
+          email: string;
+          acesso_ativo: boolean;
+          convite_expira_em: string | null;
+        }[]
+      ).map((s) => ({
+        usuarioId: s.usuario_id,
+        email: s.email,
+        acessoAtivo: s.acesso_ativo,
+        conviteExpiraEm: s.convite_expira_em,
+      }));
+    },
+    async reenviarConvite(dados) {
+      return invocarFuncaoDeConta(
+        sb,
+        'reenviar-convite',
+        dados,
+        'Não foi possível reenviar o convite.',
       );
     },
+    async criarConta(dados) {
+      return invocarFuncaoDeConta(sb, 'criar-conta', dados, 'Não foi possível criar a conta.');
+    },
   };
+}
+
+/** Funções de conta respondem `{ conviteEnviado }` ou `{ erro }` com mensagem em português. */
+async function invocarFuncaoDeConta(
+  sb: SupabaseClient,
+  nome: string,
+  corpo: object,
+  padrao: string,
+): Promise<{ conviteEnviado: boolean }> {
+  const { data, error } = await sb.functions.invoke(nome, { body: corpo });
+  if (!error)
+    return { conviteEnviado: Boolean((data as { conviteEnviado?: boolean }).conviteEnviado) };
+  const resposta = await (error as { context?: Response }).context?.json?.().catch(() => null);
+  throw new Error((resposta as { erro?: string } | null)?.erro ?? padrao);
 }

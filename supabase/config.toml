@@ -427,3 +427,22 @@ entrypoint = "./functions/criar-conta/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/criar-conta/*.html" ]
+
+[functions.reenviar-convite]
+enabled = true
+verify_jwt = true
+import_map = "./functions/reenviar-convite/deno.json"
+entrypoint = "./functions/reenviar-convite/index.ts"
+
+[functions.definir-senha-inicial]
+enabled = true
+# Pública: quem abre o link do convite ainda não tem login. A segurança vem do token de uso único.
+verify_jwt = false
+import_map = "./functions/definir-senha-inicial/deno.json"
+entrypoint = "./functions/definir-senha-inicial/index.ts"
+
+[functions.importar-alunos]
+enabled = true
+verify_jwt = true
+import_map = "./functions/importar-alunos/deno.json"
+entrypoint = "./functions/importar-alunos/index.ts"
