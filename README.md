@@ -204,6 +204,7 @@ Lista completa em [docs/decisoes-e-pendencias.md](docs/decisoes-e-pendencias.md)
 - Organização (turmas, vínculos, contas, duplas, encontros) já usa o Supabase; atividades,
   presença, avaliação, pontuação, ocorrências e publicação do ranking ficam para os próximos
   incrementos.
-- Senha provisória de novas contas: entrega e troca no primeiro acesso a definir pela unidade.
+- Primeiro acesso e recuperação de senha por link no e-mail, e importação de alunos por CSV:
+  decididos (spec 002), ainda não implementados.
 - Autenticação de demonstração **não é segura**.
 - Detalhes da premiação, escala e acesso à nota oficial a confirmar.

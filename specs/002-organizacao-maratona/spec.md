@@ -13,8 +13,8 @@ duplas, encontros e ambientes, com dados reais do Supabase, autorização no ser
 ### Session 2026-10-30
 
 - Q: Como a pessoa recebe o acesso pela primeira vez após a coordenação criar a conta? → A:
-  A coordenação entrega a senha provisória pessoalmente e, no primeiro login, o sistema exige
-  criar uma senha nova antes de qualquer outra tela.
+  Superada pelo último esclarecimento desta sessão: link de primeiro acesso por e-mail (sem senha
+  provisória).
 - Q: Quem forma as duplas e trios? → A: Os próprios alunos, por convites entre si (spec 006).
   A coordenação cria turmas, cadastra os alunos e vê e altera equipes, mas não as forma; docente e
   mentor também alteram. Substitui a formação pela coordenação desta spec.
@@ -27,6 +27,16 @@ duplas, encontros e ambientes, com dados reais do Supabase, autorização no ser
   e a mensagem lista os encontros que usam o ambiente; a coordenação troca o ambiente deles antes.
 - Q: Como formar uma dupla em no máximo 4 ações? → A: Pergunta superada: a coordenação não forma
   equipes (spec 006). O nome é escolhido pela própria equipe depois de formada.
+- Q: Se alguém esquecer a senha, como recupera o acesso? → A: Pelo link "Esqueci minha senha" na
+  tela de entrada, enviado ao e-mail da conta, para definir uma senha nova.
+- Q: Como a coordenação faz o cadastro prévio dos alunos de uma turma? → A: Importação de planilha
+  CSV (nome, e-mail) para uma turma, com prévia e relatório de linhas recusadas; o cadastro
+  individual continua para casos avulsos.
+- Q: Na importação por planilha, como cada aluno recebe o primeiro acesso? → A: A conta é criada
+  sem senha conhecida; o aluno recebe por e-mail um link para criar a própria senha.
+- Q: O cadastro individual também usa o link por e-mail? → A: Sim. Todo cadastro (individual ou
+  CSV) cria a conta sem senha conhecida e envia o link de primeiro acesso; não há senha
+  provisória nem troca obrigatória.
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -139,12 +149,21 @@ edição.
 **Acceptance Scenarios**:
 
 1. **Given** a coordenação, **When** cria a conta de um estudante com turma, **Then** a conta,
-   o perfil e a atribuição são criados; a coordenação entrega a senha provisória pessoalmente.
+   o perfil e a atribuição são criados sem senha conhecida, e a pessoa recebe por e-mail um link
+   de primeiro acesso para criar a própria senha.
 2. **Given** uma docente, **When** chama a função, **Then** recebe "não autorizado" e nada é
    criado.
-3. **Given** uma conta com senha provisória, **When** a pessoa entra pela primeira vez, **Then**
-   precisa definir uma senha nova antes de acessar qualquer outra tela; a provisória deixa de
-   valer.
+3. **Given** uma conta recém-criada, **When** a pessoa abre o link de primeiro acesso, **Then**
+   define a própria senha (mínimo de 10 caracteres) e entra; sem usar o link, não há como entrar
+   (nenhuma senha foi definida por outra pessoa). A coordenação pode reenviar o link.
+4. **Given** uma pessoa que esqueceu a senha, **When** informa o e-mail em "Esqueci minha senha",
+   **Then** recebe um link de uso único e prazo limitado para definir uma senha nova; a tela
+   responde da mesma forma exista ou não a conta.
+5. **Given** uma planilha CSV com nome e e-mail de alunos, **When** a coordenação a importa para a
+   turma T, **Then** vê uma prévia com as linhas válidas e as recusadas (e o motivo) antes de
+   confirmar; ao confirmar, o servidor cria as contas como alunos da turma T, sem senha conhecida,
+   envia a cada aluno um link de primeiro acesso para criar a própria senha e informa quantas
+   foram criadas e quais linhas falharam.
 
 ### Edge Cases
 
@@ -158,6 +177,13 @@ edição.
 - Trio: regras e formação por convite na spec 006.
 - Duplas mistas entre turmas: fora do escopo (recusadas).
 - Falha de rede em qualquer gravação: mensagem de erro, sem confirmação de sucesso.
+- "Esqueci minha senha" com e-mail sem conta → mesma resposta neutra (não revela quem tem conta);
+  link vencido ou já usado → mensagem clara e opção de pedir outro.
+- Importação CSV: e-mail repetido no arquivo ou já cadastrado, e-mail inválido, nome vazio,
+  colunas faltando ou arquivo acima de 500 linhas → linha (ou arquivo) recusada com motivo; as
+  demais seguem. Separador "," ou ";" e codificação UTF-8 aceitos.
+- Link de primeiro acesso vencido → o aluno usa "Esqueci minha senha" ou a coordenação reenvia o
+  convite.
 
 ## Requirements _(mandatory)_
 
@@ -182,9 +208,17 @@ edição.
 - **FR-009**: As telas MUST indicar carregamento, erro, vazio e sucesso confirmado.
 - **FR-010**: Criação de contas MUST ocorrer em função do servidor; nenhuma chave privada no
   navegador.
-- **FR-011**: Conta criada com senha provisória MUST exigir a troca da senha no primeiro login,
-  antes de qualquer outra tela; a marcação de troca pendente MUST ser controlada pelo servidor
-  (não apenas pela interface).
+- **FR-011**: Toda conta MUST ser criada sem senha conhecida por terceiros; a pessoa recebe por
+  e-mail um link de primeiro acesso (uso único, prazo limitado) para criar a própria senha. A
+  coordenação MUST poder reenviar o link. Nenhuma senha é digitada pela coordenação.
+- **FR-014**: A tela de entrada MUST oferecer "Esqueci minha senha", que envia ao e-mail da conta
+  um link de uso único e prazo limitado para definir senha nova (mínimo de 10 caracteres); a
+  resposta MUST ser a mesma exista ou não a conta.
+- **FR-015**: A coordenação MUST poder importar alunos de uma turma por arquivo CSV (nome,
+  e-mail), com prévia antes de gravar; a criação ocorre no servidor (mesma verificação do
+  FR-010) sem senha conhecida, cada aluno recebe por e-mail um link de primeiro acesso para criar
+  a própria senha (reenviável pela coordenação), e o resultado lista criadas e recusadas. O
+  cadastro individual permanece.
 
 ### Key Entities
 
@@ -207,6 +241,7 @@ edição.
   por turma). Formação por convite entre alunos (spec 006). Duplas entre turmas não são
   permitidas.
 - Encontros valem para todas as turmas da edição no piloto.
-- Contas são criadas com senha provisória definida pela coordenação e entregue pessoalmente;
-  a troca é obrigatória no primeiro login (FR-011).
+- Contas são criadas sem senha; o primeiro acesso é por link enviado ao e-mail da conta (FR-011).
+- Primeiro acesso e recuperação por e-mail (FR-011, FR-014) exigem e-mails reais nas contas e envio configurado (SMTP) na
+  homologação/produção; no ambiente local, as mensagens ficam na caixa de teste do Supabase.
 - Criação de edições continua restrita à administração do banco nesta spec.

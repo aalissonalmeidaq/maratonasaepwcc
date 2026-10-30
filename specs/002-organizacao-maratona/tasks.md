@@ -51,7 +51,9 @@ description: 'Tarefas da spec 002 — Organização da maratona'
 - [x] T062 E2E contra Supabase local: editar curso e recarregar; nome de turma repetido recusado — FR-001
 - [x] T063 Editar e remover ambientes; migration: remoção de ambiente em uso recusada (hoje `on delete set null`) com mensagem listando encontros — FR-012
 - [-] T064 ~~Nome da dupla sugerido no formulário da coordenação~~ — superada pela spec 006
-- [ ] T065 Troca obrigatória da senha provisória no primeiro login, controlada pelo servidor — FR-011, US6 cenário 3
+- [ ] T065 Primeiro acesso por link de e-mail: `criar-conta` sem senha + envio do convite; remover "Senha provisória" do formulário; reenviar convite — FR-011, US6 cenários 1 e 3
+- [ ] T068 "Esqueci minha senha" na tela de entrada (resposta neutra, link de uso único) — FR-014
+- [ ] T069 Importação de alunos por CSV com prévia, relatório e convite por e-mail — FR-015
 - [-] T066 Trio — movida para a spec 006 (formação por convite; remove "Formar dupla" da coordenação)
 - [x] T067 Bloquear troca de curso de turma com dupla ativa (gatilho + pgTAP + mensagem) — FR-001, US1 cenário 4
 
