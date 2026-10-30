@@ -1,11 +1,13 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { ambiente, type ModoAmbiente } from '@/shared/lib/env';
-import { Alert, Brand, RodapeDoFormulario, TextField, useEnvio } from '@/shared/ui';
+import { Alert, Brand } from '@/shared/ui';
 import { definirSenhaInicial } from '../data/primeiroAcesso';
+import { FormNovaSenha } from './FormNovaSenha';
 
-const MINIMO = 10;
-const estiloLink = 'font-semibold text-link underline-offset-4 hover:underline';
+export const estiloLink = 'font-semibold text-link underline-offset-4 hover:underline';
+export const estiloBotaoLink =
+  'mt-6 inline-flex min-h-(--control-min-height) w-full items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-action-text hover:bg-action-hover focus-visible:shadow-(--focus-ring) focus-visible:outline-none';
 
 /** Lê `#t=` uma única vez e tira o token da barra de endereço (não fica no histórico). */
 function lerTokenDoLink(): string {
@@ -28,6 +30,16 @@ export function PaginaDeAcesso({ titulo, children }: { titulo: string; children:
   );
 }
 
+export function IndisponivelNaDemonstracao({ titulo }: { titulo: string }) {
+  return (
+    <PaginaDeAcesso titulo={titulo}>
+      <Alert tom="info" titulo="Indisponível no modo demonstração.">
+        Na demonstração não há contas reais nem envio de e-mails.
+      </Alert>
+    </PaginaDeAcesso>
+  );
+}
+
 export function PrimeiroAcessoPage({
   modo = ambiente.modo,
   definirSenha = definirSenhaInicial,
@@ -36,21 +48,9 @@ export function PrimeiroAcessoPage({
   definirSenha?: (token: string, senha: string) => Promise<{ email: string }>;
 }) {
   const [token] = useState(lerTokenDoLink);
-  const [senha, setSenha] = useState('');
-  const [confirmacao, setConfirmacao] = useState('');
-  const [erros, setErros] = useState<{ senha?: string; confirmacao?: string }>({});
   const [email, setEmail] = useState<string | null>(null);
-  const { estado, enviando, enviar } = useEnvio();
 
-  if (modo !== 'supabase') {
-    return (
-      <PaginaDeAcesso titulo="Crie sua senha">
-        <Alert tom="info" titulo="Indisponível no modo demonstração.">
-          Na demonstração não há contas reais nem envio de convites.
-        </Alert>
-      </PaginaDeAcesso>
-    );
-  }
+  if (modo !== 'supabase') return <IndisponivelNaDemonstracao titulo="Crie sua senha" />;
 
   if (!token) {
     return (
@@ -73,32 +73,11 @@ export function PrimeiroAcessoPage({
         <Alert tom="sucesso" titulo="Senha criada." anunciar>
           Agora você já pode entrar com o e-mail {email}.
         </Alert>
-        <Link
-          to={`/entrar?email=${encodeURIComponent(email)}`}
-          className="mt-6 inline-flex min-h-(--control-min-height) w-full items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-action-text hover:bg-action-hover focus-visible:shadow-(--focus-ring) focus-visible:outline-none"
-        >
+        <Link to={`/entrar?email=${encodeURIComponent(email)}`} className={estiloBotaoLink}>
           Entrar
         </Link>
       </PaginaDeAcesso>
     );
-  }
-
-  async function aoEnviar(ev: FormEvent) {
-    ev.preventDefault();
-    const e = {
-      ...(senha.length < MINIMO && { senha: `A senha deve ter pelo menos ${MINIMO} caracteres.` }),
-      ...(senha.length >= MINIMO &&
-        confirmacao !== senha && {
-          confirmacao: 'As senhas não são iguais.',
-        }),
-    };
-    setErros(e);
-    if (Object.keys(e).length) return;
-    let resposta: { email: string } | undefined;
-    const ok = await enviar(async () => {
-      resposta = await definirSenha(token, senha);
-    }, 'Senha criada.');
-    if (ok && resposta) setEmail(resposta.email);
   }
 
   return (
@@ -106,38 +85,16 @@ export function PrimeiroAcessoPage({
       <p className="mb-6 text-text-secondary">
         Defina a senha que você vai usar para entrar na Maratona SAEP.
       </p>
-      <form onSubmit={aoEnviar} noValidate className="grid gap-4">
-        <TextField
-          rotulo="Nova senha"
-          type="password"
-          autoComplete="new-password"
-          value={senha}
-          onChange={(ev) => setSenha(ev.target.value)}
-          erro={erros.senha}
-          dica={`Mínimo de ${MINIMO} caracteres.`}
-        />
-        <TextField
-          rotulo="Confirmar senha"
-          type="password"
-          autoComplete="new-password"
-          value={confirmacao}
-          onChange={(ev) => setConfirmacao(ev.target.value)}
-          erro={erros.confirmacao}
-        />
-        <RodapeDoFormulario
-          estado={estado}
-          enviando={enviando}
-          rotulo="Criar senha"
-          icone="seguranca"
-        />
-      </form>
-      {estado.tipo === 'erro' && (
-        <p className="mt-4 text-sm">
-          <Link to="/esqueci-senha" className={estiloLink}>
-            Esqueci minha senha
-          </Link>
-        </p>
-      )}
+      <FormNovaSenha
+        rotuloBotao="Criar senha"
+        onSalvar={async (senha) => setEmail((await definirSenha(token, senha)).email)}
+      />
+      <p className="mt-4 text-sm text-text-secondary">
+        O link venceu?{' '}
+        <Link to="/esqueci-senha" className={estiloLink}>
+          Esqueci minha senha
+        </Link>
+      </p>
     </PaginaDeAcesso>
   );
 }

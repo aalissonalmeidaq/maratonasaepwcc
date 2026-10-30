@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, Navigate } from 'react-router';
+import { Link, Navigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
 import { areaInicial } from '@/modules/acesso';
 import { CAMINHO_DO_DESTINO, useAuth, type Sessao } from '@/modules/auth';
@@ -32,11 +32,16 @@ function FormularioEntrada() {
   const { entrar } = useAuth();
   const [erro, setErro] = useState<string | null>(null);
   const [senhaVisivel, setSenhaVisivel] = useState(false);
+  const [parametros] = useSearchParams();
+  const emailDaUrl = parametros.get('email') ?? '';
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<Entrada>({ resolver: zodResolver(esquemaEntrada) });
+  } = useForm<Entrada>({
+    resolver: zodResolver(esquemaEntrada),
+    defaultValues: { email: emailDaUrl, senha: '' },
+  });
 
   return (
     <form
@@ -82,6 +87,12 @@ function FormularioEntrada() {
         >
           {senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'}
         </Button>
+        <Link
+          to="/esqueci-senha"
+          className="inline-flex min-h-11 items-center self-start font-semibold text-link underline-offset-4 hover:underline"
+        >
+          Esqueci minha senha
+        </Link>
       </div>
       {erro && <Alert tom="erro" titulo={erro} anunciar />}
       <Button type="submit" icone="entrar" carregando={isSubmitting} larguraTotal>
@@ -287,8 +298,10 @@ export function EntradaPage() {
                     <span>Primeiro acesso ou dificuldade para entrar?</span>
                   </summary>
                   <p className="mt-3">
-                    As contas são criadas pela coordenação. Procure a coordenação da Maratona para
-                    confirmar o e-mail cadastrado ou solicitar orientações para recuperar sua senha.
+                    As contas são criadas pela coordenação. Você recebe por e-mail um convite para
+                    criar a sua senha; o link vale por 7 dias. Se ele venceu ou se você esqueceu a
+                    senha, use “Esqueci minha senha”. Se o e-mail não chegar, procure a coordenação
+                    para confirmar o endereço cadastrado.
                   </p>
                   <p className="mt-2">
                     Se você é estudante e não sabe como contatá-la, peça ao docente da sua turma que

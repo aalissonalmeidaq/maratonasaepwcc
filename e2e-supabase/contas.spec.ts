@@ -1,5 +1,5 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
-import { tokenDoConvite, ultimoEmailPara } from './mailpit';
+import { quantosEmailsPara, tokenDoConvite, ultimoEmailPara } from './mailpit';
 
 // Contas sem senha e convite de primeiro acesso contra o Supabase LOCAL (spec 002, US6, FR-011).
 const URL = process.env.E2E_SUPABASE_URL as string;
@@ -207,4 +207,42 @@ test('importar-alunos: docente recusado; acima de 500 linhas recusado', async ({
       )
     ).status(),
   ).toBe(413);
+});
+
+test('esqueci minha senha: resposta neutra e link que redefine a senha (FR-014)', async ({
+  page,
+  request,
+}) => {
+  // Conta nova, já ativada pelo convite.
+  const jwt = await tokenObrigatorio(request, 'coordenacao@exemplo.invalid');
+  const dados = novaConta();
+  const inicio = new Date(Date.now() - 1000);
+  await funcao(request, 'criar-conta', dados, jwt);
+  const convite = tokenDoConvite(await ultimoEmailPara(request, dados.email, inicio));
+  await funcao(request, 'definir-senha-inicial', { token: convite, senha: 'senha-antiga-123' });
+
+  const neutra = 'Se o e-mail estiver cadastrado, enviamos um link válido por 1 hora.';
+  const inexistente = `ninguem-${Date.now()}@exemplo.invalid`;
+  const antesDoPedido = new Date(Date.now() - 1000);
+  for (const email of [inexistente, dados.email]) {
+    await page.goto('/esqueci-senha');
+    await page.getByLabel('E-mail').fill(email);
+    await page.getByRole('button', { name: 'Enviar link' }).click();
+    await expect(page.getByRole('status').filter({ hasText: neutra })).toBeVisible();
+  }
+  expect(await quantosEmailsPara(request, inexistente)).toBe(0);
+
+  const recuperacao = await ultimoEmailPara(request, dados.email, antesDoPedido);
+  const link = /https?:\/\/\S+\/auth\/v1\/verify\?\S+/.exec(recuperacao)?.[0];
+  expect(link, 'o e-mail de recuperação traz o link do Auth').toBeTruthy();
+
+  await page.goto(link!.replace(/&amp;/g, '&'));
+  await expect(page).toHaveURL(/\/redefinir-senha/);
+  await page.getByLabel('Nova senha').fill('senha-recuperada-123');
+  await page.getByLabel('Confirmar senha').fill('senha-recuperada-123');
+  await page.getByRole('button', { name: 'Salvar nova senha' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Senha alterada.' })).toBeVisible();
+
+  expect(await token(request, dados.email, 'senha-recuperada-123')).not.toBeNull();
+  expect(await token(request, dados.email, 'senha-antiga-123')).toBeNull();
 });

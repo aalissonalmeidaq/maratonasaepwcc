@@ -51,8 +51,8 @@ description: 'Tarefas da spec 002 — Organização da maratona'
 - [x] T062 E2E contra Supabase local: editar curso e recarregar; nome de turma repetido recusado — FR-001
 - [x] T063 Editar e remover ambientes; migration: remoção de ambiente em uso recusada (hoje `on delete set null`) com mensagem listando encontros — FR-012
 - [-] T064 ~~Nome da dupla sugerido no formulário da coordenação~~ — superada pela spec 006
-- [ ] T065 (detalhada em T070–T090) Primeiro acesso por link de e-mail (token próprio, 7 dias, uso único): `criar-conta` sem senha + envio do convite; remover "Senha provisória"; situação "Aguardando primeiro acesso"/"Acesso ativo", corrigir e-mail e reenviar — FR-011, US6 cenários 1, 3 e 6
-- [ ] T068 (detalhada em T091–T094) "Esqueci minha senha" na tela de entrada (resposta neutra, link de uso único) — FR-014
+- [x] T065 (detalhada em T070–T090) Primeiro acesso por link de e-mail (token próprio, 7 dias, uso único): `criar-conta` sem senha + envio do convite; remover "Senha provisória"; situação "Aguardando primeiro acesso"/"Acesso ativo", corrigir e-mail e reenviar — FR-011, US6 cenários 1, 3 e 6
+- [x] T068 (detalhada em T091–T094) "Esqueci minha senha" na tela de entrada (resposta neutra, link de uso único) — FR-014
 - [x] T069 (detalhada em T095–T100) Importação de alunos por CSV com prévia, relatório (criadas, vinculadas, recusadas) e convite por e-mail — FR-015
 - [-] T066 Trio — movida para a spec 006 (formação por convite; remove "Formar dupla" da coordenação)
 - [x] T067 Bloquear troca de curso de turma com dupla ativa (gatilho + pgTAP + mensagem) — FR-001, US1 cenário 4
@@ -95,7 +95,7 @@ coordenação vê quem está pendente e reenvia.
 - [x] T084 [US6] GREEN `src/modules/organizacao/ui/Formularios.tsx` (`FormConta`), `src/modules/organizacao/domain/tipos.ts` e `src/modules/organizacao/data/repositorioSupabase.ts` (`criarConta` devolve `{ conviteEnviado }`); demonstração continua recusando escrita; atualizar o E2E "coordenação cria conta pela interface" em `e2e-supabase/organizacao.spec.ts` (sem "Senha provisória"; confere "Enviamos o convite para …" e o e-mail no Mailpit)
 - [x] T085 [P] [US6] RED `src/modules/auth/ui/PrimeiroAcessoPage.test.tsx`: lê o token de `#t=`; "Nova senha" e "Confirmar senha" (≥ 10 e iguais); sucesso só após o servidor, com "Entrar" e e-mail preenchido; erro do servidor exibido; sem token → orientação; link "Esqueci minha senha"; axe sem violações; no modo demonstração, a página informa "Indisponível no modo demonstração" e não chama nem simula o servidor
 - [x] T086 [US6] GREEN `src/modules/auth/ui/PrimeiroAcessoPage.tsx` e chamada à função em `src/modules/auth/data/` (exportados por `src/modules/auth/index.ts`)
-- [ ] T087 [US6] (pendente: `rotas.tsx` tem alterações sem commit de outra sessão; a página já existe e está exportada por `@/modules/auth`) Rota pública `/primeiro-acesso` em `src/app/rotas.tsx` — **combinar com a outra sessão** que edita esse arquivo
+- [x] T087 [US6] Rota pública `/primeiro-acesso` em `src/app/rotas.tsx` — **combinar com a outra sessão** que edita esse arquivo
 - [x] T088 [P] [US6] RED testes da coluna "Acesso" em `src/app/paginas/organizacao.test.tsx` (ou componente extraído): `StatusBadge` "Aguardando primeiro acesso"/"Acesso ativo"; "Reenviar convite" e "Corrigir e-mail" só nas pendentes; busca encontra pela situação; no modo demonstração, situações fictícias identificadas como tais e ações bloqueadas com o aviso existente
 - [x] T089 [US6] GREEN `situacaoDeAcesso(edicaoId)` e `reenviarConvite(...)` em `src/modules/organizacao/data/repositorioSupabase.ts` (+ demonstração com situações fictícias e escrita bloqueada), hook em `src/app/dados/consultas.ts`, coluna e ações em `src/app/paginas/organizacao.tsx`
 - [x] T090 [US6] E2E em `e2e-supabase/contas.spec.ts`: corrigir e-mail e reenviar invalida o link anterior; após o primeiro acesso a situação vira "Acesso ativo"
@@ -105,10 +105,10 @@ coordenação vê quem está pendente e reenvia.
 **Goal**: "Esqueci minha senha" com resposta neutra e link de 1 hora.
 **Independent Test**: [quickstart.md](./quickstart.md) cenário 3.
 
-- [ ] T091 (pendente: depende de `rotas.tsx`/`comum.tsx`/adaptador em edição por outra sessão) [P] [US6] RED `src/modules/auth/ui/EsqueciSenhaPage.test.tsx` e `src/modules/auth/ui/RedefinirSenhaPage.test.tsx`: mesma mensagem para qualquer e-mail ("Se o e-mail estiver cadastrado, enviamos um link válido por 1 hora."); redefinição com senha ≥ 10 e confirmação; link vencido orienta a pedir outro; no modo demonstração, as duas páginas informam "Indisponível no modo demonstração" sem simular envio
-- [ ] T092 (pendente: depende de `rotas.tsx`/`comum.tsx`/adaptador em edição por outra sessão) [US6] GREEN páginas em `src/modules/auth/ui/` e métodos `pedirRecuperacao(email)` (`resetPasswordForEmail` com `redirectTo` `/redefinir-senha`) e `redefinirSenha(senha)` em `src/modules/auth/data/adaptadorSupabase.ts` — **arquivo alterado pela outra sessão; combinar**
-- [ ] T093 (pendente: depende de `rotas.tsx`/`comum.tsx`/adaptador em edição por outra sessão) [US6] Rotas `/esqueci-senha` e `/redefinir-senha` em `src/app/rotas.tsx` e link "Esqueci minha senha" na entrada (`src/app/paginas/comum.tsx`) — **combinar com a outra sessão**
-- [ ] T094 (pendente: depende de `rotas.tsx`/`comum.tsx`/adaptador em edição por outra sessão) [US6] E2E em `e2e-supabase/contas.spec.ts`: e-mail cadastrado e inexistente recebem a mesma resposta; só o cadastrado recebe mensagem no Mailpit; o link redefine a senha
+- [x] T091 [P] [US6] RED `src/modules/auth/ui/EsqueciSenhaPage.test.tsx` e `src/modules/auth/ui/RedefinirSenhaPage.test.tsx`: mesma mensagem para qualquer e-mail ("Se o e-mail estiver cadastrado, enviamos um link válido por 1 hora."); redefinição com senha ≥ 10 e confirmação; link vencido orienta a pedir outro; no modo demonstração, as duas páginas informam "Indisponível no modo demonstração" sem simular envio
+- [x] T092 [US6] GREEN páginas em `src/modules/auth/ui/` e métodos `pedirRecuperacao(email)` (`resetPasswordForEmail` com `redirectTo` `/redefinir-senha`) e `redefinirSenha(senha)` em `src/modules/auth/data/adaptadorSupabase.ts` — **arquivo alterado pela outra sessão; combinar**
+- [x] T093 [US6] Rotas `/esqueci-senha` e `/redefinir-senha` em `src/app/rotas.tsx` e link "Esqueci minha senha" na entrada (`src/app/paginas/comum.tsx`) — **combinar com a outra sessão**
+- [x] T094 [US6] E2E em `e2e-supabase/contas.spec.ts`: e-mail cadastrado e inexistente recebem a mesma resposta; só o cadastrado recebe mensagem no Mailpit; o link redefine a senha
 
 ### 8.5 US6 — Importação de alunos por CSV (cenário 5)
 
@@ -150,6 +150,22 @@ coordenação vê quem está pendente e reenvia.
 2. Incremento 2 = 8.4 (recuperação), assim que as rotas forem combinadas.
 3. Incremento 3 = 8.5 (importação CSV).
 4. 8.6 fecha documentação e verificação.
+
+## Resultado da verificação (2026-10-30, fase 8 completa)
+
+| Verificação                        | Resultado                                            |
+| ---------------------------------- | ---------------------------------------------------- |
+| `npm run verify`                   | sem erros nem avisos; 40 arquivos, 379 testes; build |
+| `npm run test:e2e` (demonstração)  | 27 passando                                          |
+| `npm run test:db` (pgTAP)          | 95/95                                                |
+| `npm run test:e2e:supabase` (real) | 22 passando                                          |
+
+Ao assumir a sessão interrompida: o trabalho sem commit dela (rotas sob demanda, entrada, painel
+do aluno) foi incorporado em commit próprio, e o branch `codex/pr5-fixes` (foco na edição com
+botão visível, atualização confirmada por `select().single()`, rota `/primeiro-acesso`) foi
+mesclado. Recuperação de senha: páginas e testes de interface vistos em RED antes do código; o
+E2E (T094) foi escrito depois. As URLs de redirecionamento do Auth local passaram a aceitar
+caminhos (`/**`) e a porta 4174 da suíte E2E.
 
 ## Resultado da verificação (2026-10-30, 8.5 e 8.6)
 

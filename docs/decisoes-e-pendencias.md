@@ -78,9 +78,9 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Contas criadas pela coordenação via Edge Function `criar-conta` (ADR 0008). Decidido em 2026-10-30
   (spec 002): sem senha provisória — primeiro acesso e recuperação por link no e-mail; importação
   por CSV com prévia. **Implementados em 2026-10-30:** convite de 7 dias, situação de acesso com
-  reenvio e importação CSV (ADR 0009). **Pendentes:** rotas `/primeiro-acesso`,
-  `/esqueci-senha` e `/redefinir-senha` (arquivos em edição por outra sessão) e o provedor de
-  e-mail da produção **[validar]**.
+  reenvio e importação CSV (ADR 0009). Rotas `/primeiro-acesso`, `/esqueci-senha` e
+  `/redefinir-senha` e o link "Esqueci minha senha" na entrada também concluídos. **Pendente:**
+  provedor de e-mail da produção e SMTP do Auth **[validar]**.
 - Criação de edições: sem política de INSERT para `authenticated` (somente administração do
   banco) até a spec de organização definir o papel administrador.
 - Ícones PWA gerados a partir de `maratona-simbolo.svg` com fundo branco no maskable. **[validar]**
