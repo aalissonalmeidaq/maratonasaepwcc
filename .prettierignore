@@ -12,3 +12,6 @@ supabase/.temp
 package-lock.json
 public/brand
 docs/icones
+docs/padroes
+.agents
+.impeccable

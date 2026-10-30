@@ -16,3 +16,7 @@ export { TextField } from './TextField';
 export { RetornoEnvio } from './envio';
 export { useEnvio, type EstadoEnvio } from './useEnvio';
 export { TextAreaField } from './TextAreaField';
+export { BannerDestaque } from './BannerDestaque';
+export { CardDestaque } from './CardDestaque';
+export { PadraoGrafico } from './PadraoGrafico';
+export { ProgressoCircular } from './ProgressoCircular';

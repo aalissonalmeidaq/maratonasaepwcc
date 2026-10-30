@@ -10,6 +10,7 @@ import {
   ResponsiveTable,
   StatCard,
   StatusBadge,
+  BannerDestaque,
 } from '@/shared/ui';
 import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
@@ -22,8 +23,7 @@ export function DocenteInicioPage() {
     <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="docente" />}>
       {(p: Painel) => (
         <>
-          <PageHeader
-            icone="inicio"
+          <BannerDestaque
             titulo={`Olá, ${p.docente?.nome ?? 'docente'}`}
             descricao="Turmas autorizadas, presenças e avaliações pendentes."
           />
