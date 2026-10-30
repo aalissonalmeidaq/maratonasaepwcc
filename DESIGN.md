@@ -268,6 +268,9 @@ foco retorna ao elemento de origem.
 ### Marca e ícones
 
 Usar os SVGs existentes em public/brand e os ícones de src/shared/ui/icones/dados.ts.
+SENAI Ceará: em fundo claro usar `public/brand/senai-ceara-colorido.svg`, cópia integral de
+`logo-senai.svg` fornecido pelo usuário em 30/10/2026. Em fundo escuro usar
+`public/brand/senai-ceara-branco.svg`. Preservar cores e proporções dos arquivos originais.
 Ícones podem herdar a cor do texto ou usar a combinação de marca já implementada.
 Não redesenhar marcas oficiais nem interpretar pranchas ilustrativas como dados reais.
 

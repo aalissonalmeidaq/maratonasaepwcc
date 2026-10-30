@@ -312,9 +312,7 @@ export function EntradaPage() {
               </div>
             )}
             <div className="mt-8 flex justify-center lg:hidden">
-              <span className="rounded-lg bg-navy-900 px-4 py-3">
-                <MarcaSenai fundo="escuro" className="w-28" />
-              </span>
+              <MarcaSenai fundo="claro" className="w-28" />
             </div>
           </div>
         </main>
