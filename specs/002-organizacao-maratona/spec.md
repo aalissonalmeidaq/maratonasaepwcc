@@ -2,7 +2,8 @@
 
 **Feature Branch**: `002-organizacao-maratona`
 **Created**: 2026-10-29
-**Status**: Draft (aguardando validação da coordenação)
+**Status**: Implementada em 2026-10-30 (regras marcadas **[validar]** em
+`docs/decisoes-e-pendencias.md` aguardam a coordenação)
 **Input**: User description: "Incremento 2 — edições, cursos, turmas, vínculos, estudantes,
 duplas, encontros e ambientes, com dados reais do Supabase, autorização no servidor e auditoria."
 
@@ -148,7 +149,7 @@ demonstração continuam com dados fictícios e as ações de escrita ficam indi
 
 ---
 
-### User Story 6 - Criação de contas pela coordenação (Priority: P3) — RF03
+### User Story 6 - Contas e acesso (Priority: P3) — RF03
 
 A coordenação cria contas (nome, e-mail, papel e turma) sem acesso a chaves privadas no
 navegador; a criação ocorre em função no servidor, que verifica se quem chama é coordenação da
@@ -162,8 +163,8 @@ edição.
 2. **Given** uma docente, **When** chama a função, **Then** recebe "não autorizado" e nada é
    criado.
 3. **Given** uma conta recém-criada, **When** a pessoa abre o link de primeiro acesso, **Then**
-   define a própria senha (mínimo de 10 caracteres) e entra; sem usar o link, não há como entrar
-   (nenhuma senha foi definida por outra pessoa).
+   define a própria senha (mínimo de 10 caracteres) e entra; sem o link de convite ou de
+   recuperação não há como entrar (nenhuma senha foi definida por outra pessoa).
 4. **Given** uma pessoa que esqueceu a senha, **When** informa o e-mail em "Esqueci minha senha",
    **Then** recebe um link de uso único, válido por 1 hora, para definir uma senha nova; a tela
    responde da mesma forma exista ou não a conta.
@@ -216,9 +217,7 @@ edição.
 - **FR-006**: Escrita em duplas e integrantes MUST ocorrer apenas por funções do servidor que
   verificam a autorização; a API não aceita escrita direta nessas tabelas.
 - **FR-007**: Encontros MUST validar horário, número único e limite configurado na edição.
-- **FR-012**: Coordenação MUST editar e remover ambientes; remover ambiente usado por encontro
-  MUST ser recusado pelo servidor, informando os encontros afetados.
-- **FR-008**: Aluno MUST ver apenas a própria dupla, o colega e os encontros da edição; docente
+- **FR-008**: Aluno MUST ver apenas a própria dupla, os colegas e os encontros da edição; docente
   MUST ver duplas das turmas vinculadas.
 - **FR-009**: As telas MUST indicar carregamento, erro, vazio e sucesso confirmado.
 - **FR-010**: Criação de contas MUST ocorrer em função do servidor; nenhuma chave privada no
@@ -228,13 +227,16 @@ edição.
   coordenação MUST ver a situação do primeiro acesso de cada conta ("Aguardando primeiro acesso" /
   "Acesso ativo"), corrigir o e-mail das pendentes e reenviar o link (o anterior deixa de valer).
   Nenhuma senha é digitada pela coordenação.
+- **FR-012**: Coordenação MUST editar e remover ambientes; remover ambiente usado por encontro
+  MUST ser recusado pelo servidor, informando os encontros afetados.
+- **FR-013**: Removido (sugestão de nome no formulário da coordenação; a formação passou para
+  a spec 006).
 - **FR-014**: A tela de entrada MUST oferecer "Esqueci minha senha", que envia ao e-mail da conta
   um link de uso único, válido por 1 hora, para definir senha nova (mínimo de 10 caracteres); a
   resposta MUST ser a mesma exista ou não a conta.
 - **FR-015**: A coordenação MUST poder importar alunos de uma turma por arquivo CSV (nome,
   e-mail), com prévia antes de gravar; a criação ocorre no servidor (mesma verificação do
-  FR-010) sem senha conhecida, cada aluno recebe por e-mail um link de primeiro acesso para criar
-  a própria senha (reenviável pela coordenação), e o resultado lista criadas, vinculadas (conta já
+  FR-010), com contas e convites como no FR-011, e o resultado lista criadas, vinculadas (conta já
   existente) e recusadas. O cadastro individual permanece.
 
 ### Key Entities

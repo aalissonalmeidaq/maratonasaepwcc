@@ -14,8 +14,8 @@ TanStack Query. Telas de coordenação passam a gravar no servidor; docente e al
 Edge Function `criar-conta` para RF03 (P3).
 
 **Revisão 2026-10-30 (esclarecimentos)**: já entregues a edição de curso/turma, o bloqueio de
-troca de curso com dupla ativa e a edição/remoção de ambientes (T060–T063, T067). Falta o novo
-ciclo de contas: toda conta nasce **sem senha** e recebe por e-mail um **convite próprio de 7
+troca de curso com dupla ativa e a edição/remoção de ambientes (T060–T063, T067). Depois, o novo
+ciclo de contas (entregue em 2026-10-30, T070–T104): toda conta nasce **sem senha** e recebe por e-mail um **convite próprio de 7
 dias** (token com hash em `convites_acesso`, consumido por uma função pública); recuperação de
 senha pelo fluxo padrão do Auth (1 hora); situação "Aguardando primeiro acesso" / "Acesso ativo"
 com reenvio e correção de e-mail; importação de alunos por CSV com prévia no navegador e
@@ -58,7 +58,7 @@ Resultado (pré e pós-design): aprovado.
 ```text
 supabase/migrations/20261029130000_organizacao_duplas_encontros.sql
 supabase/migrations/20261030120000_regras_turma_ambiente.sql          # T063, T067 (entregue)
-supabase/migrations/2026103013xxxx_convites_acesso.sql                # T065: tabela, funções, RLS
+supabase/migrations/20261030130000_convites_acesso.sql                # T065: tabela, funções, RLS
 supabase/tests/002_organizacao.test.sql
 supabase/tests/003_regras_organizacao.test.sql
 supabase/tests/004_convites_acesso.test.sql                           # T065
@@ -80,8 +80,9 @@ Artefatos de design: [data-model.md](./data-model.md), [contracts/](./contracts/
 
 ## Riscos e dependências
 
-- `src/app/rotas.tsx` e `src/app/paginas/comum.tsx` estão sendo alterados por outra sessão; as
-  três rotas públicas e o link "Esqueci minha senha" precisam ser combinados com ela.
+- Resolvido: as rotas públicas e o link "Esqueci minha senha" entraram depois de incorporar o
+  trabalho da sessão que editava `rotas.tsx` e `comum.tsx`.
+- Produção depende do provedor de e-mail dos convites e do SMTP do Auth **[validar]**.
 - Contas existentes (seed e já criadas com senha) aparecem como "Acesso ativo" sem migração.
 - A formação de equipes passou para a spec 006; o formulário "Formar dupla" da coordenação será
   removido lá, não aqui.
