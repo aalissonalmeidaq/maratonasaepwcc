@@ -5,6 +5,8 @@
 import type { Dupla, RepositorioDuplas } from '@/modules/duplas';
 import type { Encontro, RepositorioEncontros } from '@/modules/encontros';
 import type { RepositorioOrganizacao } from '@/modules/organizacao';
+import type { RepositorioPainelTurma } from '@/modules/painel-turma';
+import { rankingPorCategoria } from './consultas';
 import { cursos, duplas, edicao, encontros, pessoas, turmas } from './dados';
 
 const recusar = async (): Promise<never> => {
@@ -170,10 +172,90 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     removerEncontro: recusar,
   };
 
+  const repositorioPainelTurma: RepositorioPainelTurma = {
+    async painel(turmaId) {
+      const turma = turmas.find((t) => t.id === turmaId);
+      const curso = cursos.find((c) => c.id === turma?.cursoId);
+      if (!turma || !curso) throw new Error('Turma não encontrada.');
+      const pessoa = eu();
+      const gestao =
+        coordena() ||
+        Boolean(
+          pessoa?.turmas.includes(turmaId) &&
+          pessoa.papeis.some((p) => p === 'docente' || p === 'mentor'),
+        );
+      const aluno = Boolean(pessoa?.papeis.includes('aluno') && pessoa.turmas.includes(turmaId));
+      if (!gestao && !aluno) throw new Error('Você não tem acesso a esta turma.');
+
+      const daTurma = duplas.filter((d) => d.turmaId === turmaId);
+      // FR-005: ranking fictício da categoria, só com as equipes da turma; o aluno só o recebe
+      // com a classificação publicada (`parcial` não conta).
+      const publicada = edicao.estadoRanking !== 'parcial';
+      const ranking = rankingPorCategoria().find((r) => r.categoria === curso.categoria);
+      const daTurmaIds = new Set(daTurma.map((d) => d.id));
+      const comEquipe = new Set(daTurma.flatMap((d) => d.integrantes));
+      return {
+        visao: gestao ? 'gestao' : 'aluno',
+        turma: {
+          id: turma.id,
+          nome: turma.nome,
+          anoLetivo: null,
+          cursoNome: curso.nome,
+          categoria: curso.categoria,
+          edicaoId: edicao.id,
+        },
+        alunos: pessoas
+          .filter((p) => p.papeis.includes('aluno') && p.turmas.includes(turmaId))
+          .map((p) => ({ id: p.id, nome: p.nome, temEquipe: comEquipe.has(p.id) }))
+          .sort((a, b) => a.nome.localeCompare(b.nome)),
+        equipes: daTurma.map((d) => ({
+          id: d.id,
+          nome: d.nome,
+          integrantes: d.integrantes.map((id) => ({
+            estudanteId: id,
+            nome: nomeDe(id),
+            integranteInativo: false,
+          })),
+        })),
+        convitesPendentes: gestao ? 0 : null,
+        pontuacao: {
+          ficticia: true,
+          estado: edicao.estadoRanking,
+          publicada,
+          equipes:
+            gestao || publicada
+              ? (ranking?.posicoes ?? [])
+                  .filter((p) => daTurmaIds.has(p.duplaId))
+                  .sort((a, b) => a.posicao - b.posicao)
+                  .map((p) => ({
+                    equipeId: p.duplaId,
+                    nome: p.nome,
+                    total: p.totais.total,
+                    posicao: p.posicao,
+                    compartilhada: p.compartilhada,
+                    pendente: p.totais.pendente,
+                  }))
+              : [],
+        },
+        encontros: (await repositorioEncontros.encontros(edicao.id)).map((e) => ({
+          id: e.id,
+          numero: e.numero,
+          titulo: e.titulo,
+          data: e.data,
+          inicio: e.inicio,
+          fim: e.fim,
+          estado: e.estado,
+          ambienteNome: e.ambienteNome,
+        })),
+      };
+    },
+  };
+
   return {
     somenteLeitura: true,
     organizacao,
     duplas: repositorioDuplas,
     encontros: repositorioEncontros,
+    painelTurma: repositorioPainelTurma,
   };
 }

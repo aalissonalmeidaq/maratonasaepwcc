@@ -120,6 +120,29 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - **[validar]** Nomes de equipe não passam por moderação; o docente/mentor pode renomear com
   justificativa.
 
+## 6.3 Spec 004 — painel da turma (implementada em 2026-10-30)
+
+- Antes numerada 007; renumerada para 004 a pedido do usuário em 2026-10-30.
+- Uma RPC de leitura (`painel_da_turma`) decide o acesso no servidor: coordenação da edição,
+  docente/mentor da turma e aluno ativo da turma. O aluno recebe só nome e "tem equipe" dos
+  colegas, as equipes da turma e os encontros; nada de convites, contatos ou situação individual.
+  Nenhuma tabela nova (sem RLS nova); a RPC tem teste pgTAP de todos os cenários de acesso.
+- Indicadores são derivados das listas exibidas (SC-003); só o total de convites pendentes vem
+  pronto do servidor, e só para a gestão.
+- O painel é somente leitura; o link "Alterar equipes" leva às telas da spec 003.
+- O componente `Card` passou a nomear a própria seção pelo título (`aria-labelledby`).
+- Pontuação (esclarecimento de 2026-10-30, opção B): a RPC devolve `pontuacao: null` e o bloco
+  mostra só "Pontuação disponível a partir dos lançamentos de avaliação.". Na demonstração, o bloco
+  mostra o total e a posição na categoria das equipes da turma, com o selo "Dados fictícios".
+- Publicação para alunos: só os estados `provisorio` e `definitivo` contam como publicados; com
+  `parcial`, o aluno vê "Classificação ainda não publicada.". **Divergência:** a tela "Ranking"
+  da demonstração (anterior à spec 004) ainda mostra o ranking parcial ao aluno. **[decidir]** se
+  ela passa a seguir a mesma regra.
+- Listas de equipes e de alunos sem equipe ganham busca e paginação (10 por página) acima de
+  10 itens.
+- **Pendente (Incrementos 3/4):** pontuação real por equipe, posição na categoria e publicação do
+  ranking para alunos (US3, cenários 1 e 2), com a regra de publicação aplicada no servidor.
+
 ## 6.1 Spec 005 — busca e paginação
 
 - Busca e paginação são feitas no navegador sobre os registros que a RLS já entregou (volume

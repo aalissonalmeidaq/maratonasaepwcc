@@ -18,7 +18,7 @@ Fonte: PRD v1.0, Documento de Visão v1.0, Design System v1.0 e instruções do 
 | RF14        | Cálculo, descontos, desempate                | Núcleo TS pronto e testado; versão SQL no Inc. 4                                   | `modules/pontuacao`                             |
 | RF15        | Ocorrências e recurso                        | Deduplicação/teto prontos; fluxo no Inc. 4                                         | —                                               |
 | RF16        | Ranking por estado sem notas individuais     | Cálculo e exibição (demo); publicação no Inc. 4                                    | `classificar`, telas de ranking                 |
-| RF17        | Painéis e CSV                                | Painéis demo; CSV no Inc. 5                                                        | —                                               |
+| RF17        | Painéis e CSV                                | Painel por turma real (spec 004); demais painéis demo; CSV no Inc. 5               | `modules/painel-turma`, migration 004           |
 | RF18        | PWA instalável, offline, atualização         | **Base pronta**                                                                    | `vite.config.ts`, `shared/pwa`                  |
 | RF19–RF20   | Certificados, push                           | Fora do escopo (Could)                                                             | —                                               |
 | RNF01       | Responsivo                                   | Verificado por E2E em 412 px (Pixel 7) e desktop                                   | `e2e/`                                          |

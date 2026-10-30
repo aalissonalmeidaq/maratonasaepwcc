@@ -66,6 +66,17 @@ const AlunoDuplaPage = lazy(() =>
 const EncontrosLeituraPage = lazy(() =>
   import('./paginas/organizacao').then((modulo) => ({ default: modulo.EncontrosLeituraPage })),
 );
+const AlunoTurmaPage = lazy(() =>
+  import('./paginas/painelTurma').then((modulo) => ({ default: modulo.AlunoTurmaPage })),
+);
+const DocentePainelTurmaPage = lazy(() =>
+  import('./paginas/painelTurma').then((modulo) => ({ default: modulo.DocentePainelTurmaPage })),
+);
+const CoordenacaoPainelTurmaPage = lazy(() =>
+  import('./paginas/painelTurma').then((modulo) => ({
+    default: modulo.CoordenacaoPainelTurmaPage,
+  })),
+);
 const DocenteTurmasPage = lazy(() =>
   import('./paginas/organizacao').then((modulo) => ({ default: modulo.DocenteTurmasPage })),
 );
@@ -103,6 +114,7 @@ export function AppRotas() {
             <Route path="/aluno" element={<AppShell area="aluno" />}>
               <Route index element={<AlunoInicioPage />} />
               <Route path="dupla" element={<AlunoDuplaPage />} />
+              <Route path="turma" element={<AlunoTurmaPage />} />
               <Route path="encontros" element={<EncontrosLeituraPage />} />
               <Route path="desafios" element={<AlunoDesafiosPage />} />
               <Route path="pontuacao" element={<AlunoPontuacaoPage />} />
@@ -115,6 +127,7 @@ export function AppRotas() {
             <Route path="/docente" element={<AppShell area="docente" />}>
               <Route index element={<DocenteInicioPage />} />
               <Route path="turmas" element={<DocenteTurmasPage />} />
+              <Route path="turmas/:turmaId" element={<DocentePainelTurmaPage />} />
               <Route path="encontros" element={<EncontrosLeituraPage />} />
               <Route path="presenca" element={<DocentePresencaPage />} />
               <Route path="avaliacoes" element={<DocenteAvaliacoesPage />} />
@@ -126,6 +139,7 @@ export function AppRotas() {
             <Route path="/coordenacao" element={<AppShell area="coordenacao" />}>
               <Route index element={<CoordenacaoInicioPage />} />
               <Route path="organizacao" element={<CoordenacaoOrganizacaoPage />} />
+              <Route path="turmas/:turmaId" element={<CoordenacaoPainelTurmaPage />} />
               <Route path="duplas" element={<CoordenacaoDuplasPage />} />
               <Route path="encontros" element={<CoordenacaoEncontrosPage />} />
               <Route path="ranking" element={<CoordenacaoRankingPage />} />

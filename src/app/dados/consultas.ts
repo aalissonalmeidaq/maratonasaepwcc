@@ -94,6 +94,18 @@ export function useConvitesPendentes(ativo: boolean): number {
   const convites = useConvites(ativo ? edicao.data?.id : undefined);
   return convitesRecebidosPendentes(convites.data ?? [], sessao?.usuarioId ?? '').length;
 }
+/** Painel da turma (spec 004): o servidor decide o acesso e o que cada perfil recebe. */
+export function usePainelTurma(turmaId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('painel-turma', turmaId),
+    queryFn: () => r.painelTurma.painel(turmaId as string),
+    enabled: Boolean(turmaId),
+    // Acesso negado ou turma inexistente não mudam numa nova tentativa.
+    retry: false,
+  });
+}
 export const useEncontros = (edicaoId?: string) => {
   const r = useRepositorios();
   return useDaEdicao('encontros', edicaoId, (id) => r.encontros.encontros(id));

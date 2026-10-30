@@ -5,6 +5,7 @@ import { criarRepositoriosDemo } from '@/modules/demo';
 import { criarRepositorioDuplasSupabase } from '@/modules/duplas';
 import { criarRepositorioEncontrosSupabase } from '@/modules/encontros';
 import { criarRepositorioOrganizacaoSupabase } from '@/modules/organizacao';
+import { criarRepositorioPainelTurmaSupabase } from '@/modules/painel-turma';
 import { obterSupabase } from '@/shared/lib/supabase';
 import { ContextoRepositorios, type Repositorios } from './useRepositorios';
 
@@ -15,6 +16,7 @@ function criarRepositoriosSupabase(): Repositorios {
     organizacao: criarRepositorioOrganizacaoSupabase(sb),
     duplas: criarRepositorioDuplasSupabase(sb),
     encontros: criarRepositorioEncontrosSupabase(sb),
+    painelTurma: criarRepositorioPainelTurmaSupabase(sb),
   };
 }
 

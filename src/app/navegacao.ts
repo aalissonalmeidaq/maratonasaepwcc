@@ -20,6 +20,12 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       descricao: 'Equipe, convites e turma',
     },
     {
+      rotulo: 'Minha turma',
+      caminho: '/aluno/turma',
+      icone: 'turma',
+      descricao: 'Equipes, colegas e encontros',
+    },
+    {
       rotulo: 'Encontros',
       caminho: '/aluno/encontros',
       icone: 'calendario',

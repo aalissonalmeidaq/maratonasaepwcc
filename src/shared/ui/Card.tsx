@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { cx } from './cx';
 import { Icon, type NomeIcone } from './Icon';
 
@@ -17,9 +17,11 @@ interface CardProps {
 
 export function Card({ titulo, nivel = 2, acao, icone, id, className, children }: CardProps) {
   const Titulo = `h${nivel}` as const;
+  const idTitulo = useId();
   return (
     <section
       id={id}
+      aria-labelledby={titulo ? idTitulo : undefined}
       className={cx(
         'min-w-0 scroll-mt-24 rounded-lg border border-border bg-surface p-4 shadow-sm sm:p-5',
         className,
@@ -28,7 +30,10 @@ export function Card({ titulo, nivel = 2, acao, icone, id, className, children }
       {(titulo || acao) && (
         <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
           {titulo && (
-            <Titulo className="flex min-w-0 items-center gap-2 font-display text-lg font-semibold text-text">
+            <Titulo
+              id={idTitulo}
+              className="flex min-w-0 items-center gap-2 font-display text-lg font-semibold text-text"
+            >
               {icone && <Icon nome={icone} tamanho="lg" cor="marca" />}
               {titulo}
             </Titulo>
