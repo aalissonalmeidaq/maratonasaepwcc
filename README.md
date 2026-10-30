@@ -210,7 +210,8 @@ Ver [docs/operacao-e-homologacao.md](docs/operacao-e-homologacao.md) (projeto Su
 Lista completa em [docs/decisoes-e-pendencias.md](docs/decisoes-e-pendencias.md). Principais:
 
 - Regulamento/projeto pedagógico **não fornecido**: regras em `piloto-2026.0-a-confirmar`.
-- Marca SENAI Ceará **ausente** (área provisória). Ícones vetorizados aguardam validação da unidade.
+- Marca SENAI Ceará: arquivos colorido (fundo claro) e branco (fundo escuro) em `public/brand/`.
+  Ícones vetorizados aguardam validação da unidade.
 - Organização (turmas, vínculos, contas, duplas, encontros) já usa o Supabase; atividades,
   presença, avaliação, pontuação, ocorrências e publicação do ranking ficam para os próximos
   incrementos.
