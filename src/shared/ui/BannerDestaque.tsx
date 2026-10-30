@@ -21,12 +21,14 @@ export function BannerDestaque({ titulo, descricao, lateral }: BannerDestaquePro
       />
       <PadraoGrafico nome="textura" className="absolute inset-0 -z-20 h-full w-full opacity-40" />
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="max-w-xl">
+        <div className="min-w-0 max-w-xl wrap-anywhere">
           <h1 className="font-display text-2xl font-bold sm:text-3xl">{titulo}</h1>
           {descricao && <p className="mt-2 text-white/85">{descricao}</p>}
         </div>
         {lateral && (
-          <div className="shrink-0 rounded-xl bg-navy-950/70 p-4 backdrop-blur-sm">{lateral}</div>
+          <div className="w-full min-w-0 rounded-xl bg-navy-950/70 p-4 backdrop-blur-sm sm:w-auto sm:max-w-sm">
+            {lateral}
+          </div>
         )}
       </div>
     </header>

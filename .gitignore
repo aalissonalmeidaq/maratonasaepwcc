@@ -26,3 +26,9 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 node_modules
+
+# Impeccable: espaços de revisão locais (worktrees, capturas, zips) e cópias da skill.
+# A skill é restaurada pela versão travada em skills-lock.json (npx skills experimental_install).
+.impeccable/
+.agents/
+.claude/skills/impeccable/

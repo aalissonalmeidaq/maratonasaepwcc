@@ -82,7 +82,10 @@ export function painelAluno(usuarioId: string) {
     turma,
     curso,
     proximoEncontro: proximo,
-    proximoDesafio: desafios.find((d) => d.encontroId === proximo?.id) ?? null,
+    proximoDesafio:
+      [...desafios]
+        .filter((d) => new Date(d.prazo).getTime() >= Date.now())
+        .sort((a, b) => new Date(a.prazo).getTime() - new Date(b.prazo).getTime())[0] ?? null,
     desafios,
     porEncontro,
     totais,

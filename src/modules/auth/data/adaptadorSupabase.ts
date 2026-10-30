@@ -30,8 +30,37 @@ export function criarAdaptadorSupabase(supabase: SupabaseClient): AdaptadorAuth 
       return data.session ? montarSessao(data.session.user.id) : null;
     },
     async entrar({ email, senha }) {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if (error || !data.user) throw new ErroDeAutenticacao('E-mail ou senha incorretos.');
+      let resultado;
+      try {
+        resultado = await supabase.auth.signInWithPassword({ email, password: senha });
+      } catch {
+        throw new ErroDeAutenticacao(
+          'Não foi possível conectar. Verifique sua conexão e tente novamente.',
+        );
+      }
+      const { data, error } = resultado;
+      if (error) {
+        if (error.name === 'AuthRetryableFetchError' || error.status === 0) {
+          throw new ErroDeAutenticacao(
+            'Não foi possível conectar. Verifique sua conexão e tente novamente.',
+          );
+        }
+        if (error.code === 'invalid_credentials') {
+          throw new ErroDeAutenticacao(
+            'E-mail ou senha incorretos. Confira os dados e tente novamente.',
+          );
+        }
+        if (error.status === 429 || error.code === 'over_request_rate_limit') {
+          throw new ErroDeAutenticacao(
+            'Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.',
+          );
+        }
+        throw new ErroDeAutenticacao(
+          'O acesso está indisponível no momento. Tente novamente em alguns instantes.',
+        );
+      }
+      if (!data.user)
+        throw new ErroDeAutenticacao('Não foi possível concluir o acesso. Tente novamente.');
       return montarSessao(data.user.id);
     },
     async sair() {

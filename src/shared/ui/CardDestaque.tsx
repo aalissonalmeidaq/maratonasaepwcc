@@ -40,7 +40,7 @@ export function CardDestaque({
     <Link
       to={para}
       className={cx(
-        'group relative isolate flex h-full min-h-36 flex-col overflow-hidden rounded-2xl border p-4 shadow-sm transition-[box-shadow,transform,border-color] duration-(--duration-normal) ease-out',
+        'group relative isolate flex h-full min-h-36 min-w-0 flex-col overflow-hidden rounded-2xl border p-4 shadow-sm wrap-anywhere transition-[box-shadow,transform,border-color] duration-(--duration-normal) ease-out',
         'hover:-translate-y-0.5 hover:shadow-md focus-visible:shadow-(--focus-ring) focus-visible:outline-none motion-reduce:hover:translate-y-0',
         escuro
           ? 'border-navy-950 bg-[linear-gradient(135deg,#0B2D6B,#062457_55%,#04193F)] text-white'

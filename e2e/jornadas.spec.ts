@@ -36,7 +36,7 @@ test.describe('jornadas por perfil (modo demonstração)', () => {
     await entrarComo(page, /ana exemplo/i);
     await expect(page).toHaveURL(/\/aluno$/);
     await expect(page.getByRole('heading', { level: 1, name: /olá, ana/i })).toBeVisible();
-    await expect(page.getByText('até 400 pontos')).toBeVisible();
+    await expect(page.getByText('de 400 pontos possíveis na edição')).toBeVisible();
     await semRolagemHorizontal(page);
 
     await navegarPeloMenu(page, 'Ranking');
