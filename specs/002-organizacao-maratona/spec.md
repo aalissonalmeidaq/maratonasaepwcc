@@ -15,16 +15,18 @@ duplas, encontros e ambientes, com dados reais do Supabase, autorização no ser
 - Q: Como a pessoa recebe o acesso pela primeira vez após a coordenação criar a conta? → A:
   A coordenação entrega a senha provisória pessoalmente e, no primeiro login, o sistema exige
   criar uma senha nova antes de qualquer outra tela.
+- Q: Quem forma as duplas e trios? → A: Os próprios alunos, por convites entre si (spec 006).
+  A coordenação cria turmas, cadastra os alunos e vê e altera equipes, mas não as forma; docente e
+  mentor também alteram. Substitui a formação pela coordenação desta spec.
 - Q: O que acontece com o estudante sem par quando a turma tem número ímpar de estudantes? → A:
-  Permite-se um trio: no máximo um por turma, somente quando o número de alunos ativos da turma
-  for ímpar no momento da formação.
+  Um trio por turma, só com número ímpar de alunos ativos, formado por convite a dois colegas
+  (regras na spec 006).
 - Q: Uma turma que já tem duplas pode ser movida para outro curso? → A: Não. Com dupla ativa na
   turma, o curso fica bloqueado (o servidor recusa); nome e ano letivo continuam editáveis.
 - Q: O que acontece ao remover um ambiente já marcado em algum encontro? → A: O servidor recusa
   e a mensagem lista os encontros que usam o ambiente; a coordenação troca o ambiente deles antes.
-- Q: Como formar uma dupla em no máximo 4 ações? → A: Ao escolher os integrantes, o nome é
-  sugerido a partir dos primeiros nomes (ex.: "Ana e Bruno"); a coordenação pode trocá-lo, e ele
-  continua obrigatório e único na turma.
+- Q: Como formar uma dupla em no máximo 4 ações? → A: Pergunta superada: a coordenação não forma
+  equipes (spec 006). O nome é escolhido pela própria equipe depois de formada.
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -72,31 +74,31 @@ a ver essa turma; desativar e verificar que deixa de ver.
 
 ---
 
-### User Story 3 - Coordenação forma e altera duplas com histórico (Priority: P1) — HU01
+### User Story 3 - Alteração de duplas com histórico (Priority: P1) — HU01
 
-A coordenação forma duplas com dois estudantes ativos da mesma turma (ou um trio, quando a
-turma tem número ímpar de alunos ativos — ver FR-004). Substituições e
-desfazimento exigem justificativa e geram histórico com responsável.
+**Formação substituída pela spec 006**: duplas e trios são formados pelos alunos por convite.
+Esta história mantém as regras de integridade da equipe e as alterações (substituir, desfazer)
+com justificativa e histórico, feitas pela coordenação e — conforme a spec 006 — por docente e
+mentor da turma. Os cenários 1–3 continuam valendo como regras do servidor para qualquer
+formação.
 
-**Independent Test**: formar uma dupla, tentar formar outra com um dos mesmos estudantes
+**Independent Test**: com uma equipe formada, tentar incluir um dos mesmos estudantes em outra
 (recusado), substituir um integrante com justificativa e consultar o histórico.
 
 **Acceptance Scenarios**:
 
-1. **Given** dois estudantes ativos da turma T sem dupla ativa, **When** a coordenação forma a
-   dupla, **Then** a dupla é criada de forma atômica (dupla e integrantes juntos).
-2. **Given** um estudante já em dupla ativa na edição, **When** a coordenação tenta incluí-lo
-   em outra dupla, **Then** o servidor recusa e nada é gravado.
-3. **Given** estudantes de turmas diferentes, **When** a coordenação tenta formar a dupla,
-   **Then** o servidor recusa.
+1. **Given** dois estudantes ativos da turma T sem dupla ativa, **When** a dupla é formada,
+   **Then** é criada de forma atômica (dupla e integrantes juntos).
+2. **Given** um estudante já em dupla ativa na edição, **When** se tenta incluí-lo em outra
+   dupla, **Then** o servidor recusa e nada é gravado.
+3. **Given** estudantes de turmas diferentes, **When** se tenta formar a dupla, **Then** o
+   servidor recusa.
 4. **Given** uma dupla ativa, **When** a coordenação substitui um integrante sem justificativa
    (mínimo de 10 caracteres), **Then** a operação é recusada; com justificativa, o histórico
    registra saída, entrada, responsável, horário e motivo.
 5. **Given** um aluno, **When** consulta a própria dupla, **Then** vê o nome da dupla e dos
    colegas, e não vê duplas de outras turmas.
-6. **Given** uma turma com número ímpar de alunos ativos e nenhum trio ativo, **When** a
-   coordenação forma uma equipe com três estudantes, **Then** o trio é criado; **Given** uma
-   turma com número par de alunos ativos ou que já tem um trio ativo, **Then** o servidor recusa.
+6. Trio (um por turma, só em turma com número ímpar de alunos ativos): ver spec 006.
 
 ---
 
@@ -153,8 +155,7 @@ edição.
 - Encontro sem ambiente definido é permitido (ambiente "a confirmar").
 - Remover ambiente em uso por encontro → recusado; nenhum encontro perde o ambiente sem ação
   explícita da coordenação.
-- Trio: no máximo um ativo por turma e só com número ímpar de alunos ativos na formação; um trio
-  já formado continua válido se o número de alunos mudar depois.
+- Trio: regras e formação por convite na spec 006.
 - Duplas mistas entre turmas: fora do escopo (recusadas).
 - Falha de rede em qualquer gravação: mensagem de erro, sem confirmação de sucesso.
 
@@ -167,12 +168,8 @@ edição.
   curso define a categoria do ranking.
 - **FR-002**: Coordenação MUST atribuir e desativar papéis de outras pessoas; nunca os próprios.
 - **FR-003**: Um estudante MUST estar ativo em no máximo uma turma por edição.
-- **FR-004**: Formar dupla MUST ser atômico e exigir dois alunos ativos distintos da mesma
-  turma, sem dupla ativa na edição. Excepcionalmente, MUST aceitar três integrantes (trio) quando
-  a turma tiver número ímpar de alunos ativos e ainda não tiver trio ativo.
-- **FR-013**: Ao escolher os integrantes, o formulário MUST sugerir o nome da equipe com os
-  primeiros nomes ("Ana e Bruno"; trio: "Ana, Bruno e Carla"), sem sobrescrever um nome digitado
-  pela coordenação.
+- **FR-004**: Formar dupla MUST ser atômico e exigir alunos ativos distintos da mesma turma,
+  sem equipe ativa na edição. Quem forma e o trio: spec 006 (a coordenação não forma equipes).
 - **FR-005**: Substituir integrante e desfazer dupla MUST exigir justificativa (≥ 10
   caracteres) e registrar histórico com responsável e horário do servidor.
 - **FR-006**: Escrita em duplas e integrantes MUST ocorrer apenas por funções do servidor que
@@ -201,14 +198,14 @@ edição.
 
 - **SC-001**: 100% dos cenários de autorização desta spec têm teste pgTAP passando.
 - **SC-002**: Nenhuma combinação inválida de dupla (Edge Cases) é gravada pelo servidor.
-- **SC-003**: A coordenação forma uma dupla em até 4 interações a partir da lista de duplas
-  (turma, integrante 1, integrante 2, "Formar dupla"), aceitando o nome sugerido.
+- **SC-003**: Superado pela spec 006 (SC-001: aluno envia convite em até 3 interações).
 - **SC-004**: Com o Supabase local, as jornadas "formar dupla" e "aluno vê dupla" passam em E2E.
 
 ## Assumptions
 
-- Dupla = 2 estudantes da mesma turma; trio permitido só para turma com número ímpar de alunos
-  ativos (um por turma). Duplas entre turmas não são permitidas.
+- Dupla = 2 estudantes da mesma turma; trio só em turma com número ímpar de alunos ativos (um
+  por turma). Formação por convite entre alunos (spec 006). Duplas entre turmas não são
+  permitidas.
 - Encontros valem para todas as turmas da edição no piloto.
 - Contas são criadas com senha provisória definida pela coordenação e entregue pessoalmente;
   a troca é obrigatória no primeiro login (FR-011).

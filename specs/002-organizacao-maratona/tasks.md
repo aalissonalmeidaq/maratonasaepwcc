@@ -50,9 +50,9 @@ description: 'Tarefas da spec 002 — Organização da maratona'
 - [x] T061 Botão "Editar" nas tabelas de cursos e turmas; foco volta à linha ao sair da edição — FR-001
 - [x] T062 E2E contra Supabase local: editar curso e recarregar; nome de turma repetido recusado — FR-001
 - [ ] T063 Editar e remover ambientes; migration: remoção de ambiente em uso recusada (hoje `on delete set null`) com mensagem listando encontros — FR-012
-- [ ] T064 Nome da dupla sugerido a partir dos integrantes — FR-013, SC-003
+- [-] T064 ~~Nome da dupla sugerido no formulário da coordenação~~ — superada pela spec 006
 - [ ] T065 Troca obrigatória da senha provisória no primeiro login, controlada pelo servidor — FR-011, US6 cenário 3
-- [ ] T066 Trio: um por turma com número ímpar de alunos ativos (RPC `formar_dupla`, pgTAP, formulário) — FR-004, US3 cenário 6
+- [-] T066 Trio — movida para a spec 006 (formação por convite; remove "Formar dupla" da coordenação)
 - [ ] T067 Bloquear troca de curso de turma com dupla ativa (gatilho + pgTAP + mensagem) — FR-001, US1 cenário 4
 
 ## Resultado da verificação (2026-10-30, após T060–T062)

@@ -87,9 +87,11 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 
 ## 6. Decisões da spec 002 a validar
 
-- Dupla = 2 estudantes da **mesma turma**. Trio: decidido em 2026-10-30 (spec 002, Clarifications) —
-  um por turma, só com número ímpar de alunos ativos; **ainda não implementado**. Duplas entre
-  turmas continuam recusadas.
+- Equipes formadas pelos próprios alunos por convite (decidido em 2026-10-30, spec 006): dupla,
+  ou um trio por turma em turma com número ímpar de alunos ativos. A coordenação não forma
+  equipes; coordenação, docente e mentor alteram com justificativa. **Ainda não implementado** —
+  hoje a tela da coordenação ainda tem "Formar dupla". Duplas entre turmas continuam recusadas.
+  **[validar]** se docente/mentor podem formar equipe nova com alunos que sobraram.
 - Encontros valem para todas as turmas da edição. **[validar]**
 - Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[validar]**
 - Edição de curso e turma pela interface: implementada em 2026-10-30. Decidido na mesma data
