@@ -90,14 +90,14 @@ export function AlunoInicioPage() {
             titulo={`Olá, ${p.estudante.nome.split(' ')[0]}!`}
             descricao="Cada desafio é uma oportunidade de evoluir."
             lateral={
-              <div className="flex items-center gap-4">
+              <div className="flex min-w-0 flex-wrap items-center gap-4 wrap-anywhere">
                 <ProgressoCircular
                   valor={p.totais.total}
                   maximo={p.maximo}
                   rotulo="Progresso da pontuação da dupla"
                   inverso
                 />
-                <div>
+                <div className="min-w-0 flex-1 basis-36">
                   <p className="text-sm text-white/80">Pontuação da dupla</p>
                   <p className="font-display text-2xl font-bold tabular-nums">
                     {formatarPontos(p.totais.total)}
