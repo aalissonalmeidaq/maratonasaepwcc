@@ -9,16 +9,19 @@ interface CardProps {
   acao?: ReactNode;
   /** Ícone ao lado do título, nas cores da marca (decorativo). */
   icone?: NomeIcone;
+  /** Âncora para navegação dentro da página. */
+  id?: string;
   className?: string;
   children: ReactNode;
 }
 
-export function Card({ titulo, nivel = 2, acao, icone, className, children }: CardProps) {
+export function Card({ titulo, nivel = 2, acao, icone, id, className, children }: CardProps) {
   const Titulo = `h${nivel}` as const;
   return (
     <section
+      id={id}
       className={cx(
-        'min-w-0 rounded-lg border border-border bg-surface p-4 shadow-sm sm:p-5',
+        'min-w-0 scroll-mt-24 rounded-lg border border-border bg-surface p-4 shadow-sm sm:p-5',
         className,
       )}
     >

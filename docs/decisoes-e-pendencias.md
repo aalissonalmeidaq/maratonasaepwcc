@@ -65,9 +65,10 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 
 ## 5. Pendências técnicas
 
-- Impeccable e UI/UX Pro Max **não estão instalados** neste ambiente. Não instalamos
-  automaticamente por serem código de terceiros; para instalar, confirme a fonte oficial e
-  siga as instruções do autor. Seguimos o Design System e boas práticas de acessibilidade.
+- Impeccable 4.8.0 (`pbakaus/impeccable`, via `npx skills add`) instalado a pedido do usuário
+  em 2026-10-30, em `.agents/skills/impeccable` e `.claude/skills/impeccable` (cópia idêntica;
+  versão travada em `skills-lock.json`). É código de terceiros com permissões do agente:
+  revisar ao atualizar. UI/UX Pro Max **não está instalado**.
 - `npm audit`: 4 vulnerabilidades **baixas** em `deepmerge` via `workbox-build` (ferramenta de
   build do PWA; não vai ao navegador). A correção sugerida rebaixa o plugin e quebra o build.
   Acompanhar nova versão de `workbox-build`.
@@ -92,6 +93,14 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Edição de nome de curso/turma pela interface ainda não implementada (remover e recriar, ou
   ajustar no próximo incremento).
 - Os testes E2E reais deixam registros fictícios no banco local (rodar `supabase db reset`).
+
+## 6.1 Spec 005 — busca e paginação
+
+- Busca e paginação são feitas no navegador sobre os registros que a RLS já entregou (volume
+  pequeno por edição). Se as listagens crescerem (ex.: centenas de estudantes por edição), migrar
+  para paginação e busca no servidor (`range` + filtro no PostgREST).
+- Tamanho de página: 10. **[validar]** com a coordenação.
+- Resumos dos painéis iniciais não são listagens e não têm busca.
 
 ## 7. Questões em aberto (PRD §19)
 
