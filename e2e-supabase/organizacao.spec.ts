@@ -216,3 +216,61 @@ test('ambientes: edita; em uso não é removido e lista os encontros (FR-012)', 
   await page.getByRole('dialog').getByRole('button', { name: 'Remover' }).click();
   await expect(ambientes.getByRole('cell', { name: nome, exact: true })).toHaveCount(0);
 });
+
+test('importação CSV: prévia, relatório do servidor e convites (FR-015)', async ({
+  page,
+  request,
+}) => {
+  const n = Date.now() % 1_000_000;
+  const novo1 = `csv-a-${n}@exemplo.invalid`;
+  const novo2 = `csv-b-${n}@exemplo.invalid`;
+  const existente = `csv-existente-${n}@exemplo.invalid`;
+  const inicio = new Date(Date.now() - 1000);
+
+  await entrar(page, 'coordenacao@exemplo.invalid');
+  await page.goto('/coordenacao/organizacao');
+
+  // Conta que já existe na edição, sem turma (papel de apoio).
+  const conta = page.locator('#criar-conta');
+  await conta.getByLabel('Nome completo').fill('Pessoa Existente CSV');
+  await conta.getByLabel('E-mail').fill(existente);
+  await conta.getByLabel('Papel').selectOption({ label: 'Apoio técnico-administrativo' });
+  await conta.getByRole('button', { name: 'Criar conta' }).click();
+  await expect(conta.getByRole('status').filter({ hasText: 'Conta criada' })).toBeVisible();
+
+  const csv = [
+    'nome;email',
+    `Aluno Novo Um;${novo1}`,
+    `Aluno Novo Dois;${novo2}`,
+    `Pessoa Existente CSV;${existente}`,
+    'Íris Exemplo;iris@exemplo.invalid',
+    'Sem E-mail;nao-e-email',
+    `Repetido;${novo1}`,
+  ].join('\n');
+
+  const importar = page.locator('#importar-alunos');
+  await importar
+    .getByLabel('Turma', { exact: true })
+    .selectOption({ label: '3º ano A (fictícia)' });
+  await importar.getByLabel('Arquivo CSV').setInputFiles({
+    name: 'alunos.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(csv, 'utf8'),
+  });
+  await expect(
+    importar.getByText('4 alunos prontos para importar · 2 linhas recusadas'),
+  ).toBeVisible();
+
+  await importar.getByRole('button', { name: 'Importar 4 alunos' }).click();
+  await expect(
+    importar.getByText('Importação concluída: 2 contas criadas, 1 vinculada, 1 recusada.'),
+  ).toBeVisible();
+  await expect(
+    importar
+      .getByRole('table', { name: 'Linhas recusadas pelo servidor' })
+      .getByRole('cell', { name: 'Já ativo em outra turma desta edição.' }),
+  ).toBeVisible();
+
+  expect(await ultimoEmailPara(request, novo1, inicio)).toContain('/primeiro-acesso#t=');
+  expect(await ultimoEmailPara(request, novo2, inicio)).toContain('/primeiro-acesso#t=');
+});

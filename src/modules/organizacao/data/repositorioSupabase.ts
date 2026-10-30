@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Papel } from '@/modules/acesso';
 import { verificar, verificarGravacao } from '@/shared/dados/erros';
-import type { RepositorioOrganizacao } from '../domain/tipos';
+import type { RepositorioOrganizacao, ResultadoDaImportacao } from '../domain/tipos';
 
 export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): RepositorioOrganizacao {
   return {
@@ -121,6 +121,14 @@ export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): Reposit
         acessoAtivo: s.acesso_ativo,
         conviteExpiraEm: s.convite_expira_em,
       }));
+    },
+    async importarAlunos(dados) {
+      const { data, error } = await sb.functions.invoke('importar-alunos', { body: dados });
+      if (!error) return data as ResultadoDaImportacao;
+      const resposta = await (error as { context?: Response }).context?.json?.().catch(() => null);
+      throw new Error(
+        (resposta as { erro?: string } | null)?.erro ?? 'Não foi possível importar os alunos.',
+      );
     },
     async reenviarConvite(dados) {
       return invocarFuncaoDeConta(

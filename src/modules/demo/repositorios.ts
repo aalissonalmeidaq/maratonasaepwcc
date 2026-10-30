@@ -83,6 +83,7 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
       }));
     },
     reenviarConvite: recusar,
+    importarAlunos: recusar,
   };
 
   const repositorioDuplas: RepositorioDuplas = {

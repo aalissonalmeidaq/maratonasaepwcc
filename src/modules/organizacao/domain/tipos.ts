@@ -48,6 +48,13 @@ export interface SituacaoDeAcesso {
   conviteExpiraEm: string | null;
 }
 
+/** Relatório da importação por CSV devolvido pelo servidor (FR-015). */
+export interface ResultadoDaImportacao {
+  criadas: { linha: number; email: string; conviteEnviado: boolean }[];
+  vinculadas: { linha: number; email: string }[];
+  recusadas: { linha: number; email: string; motivo: string }[];
+}
+
 export interface Pessoa {
   id: string;
   nome: string;
@@ -75,6 +82,11 @@ export interface RepositorioOrganizacao {
   /** Conta sem senha; `conviteEnviado` informa se o e-mail de primeiro acesso saiu. */
   criarConta(dados: NovaConta): Promise<{ conviteEnviado: boolean }>;
   situacaoDeAcesso(edicaoId: string): Promise<SituacaoDeAcesso[]>;
+  importarAlunos(dados: {
+    edicaoId: string;
+    turmaId: string;
+    linhas: { linha: number; nome: string; email: string }[];
+  }): Promise<ResultadoDaImportacao>;
   /** Revoga o convite anterior e envia outro; `novoEmail` corrige o e-mail antes. */
   reenviarConvite(dados: {
     edicaoId: string;
