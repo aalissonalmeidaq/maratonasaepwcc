@@ -6,7 +6,7 @@ import { AuthContext, type ValorAuth } from '@/modules/auth';
 import { violacoesA11y } from '@/test/a11y';
 import { EntradaPage } from './comum';
 
-function renderizar(modo: ValorAuth['modo']) {
+function renderizar(modo: ValorAuth['modo'], ajustes: Partial<ValorAuth> = {}) {
   const valor: ValorAuth = {
     modo,
     carregando: false,
@@ -14,6 +14,7 @@ function renderizar(modo: ValorAuth['modo']) {
     entrar: vi.fn(),
     entrarDemo: modo === 'demo' ? vi.fn() : null,
     sair: vi.fn(),
+    ...ajustes,
   };
   return render(
     <AuthContext.Provider value={valor}>
@@ -61,5 +62,36 @@ describe('Tela de entrada', () => {
   it('oferece ajuda para quem não consegue entrar', () => {
     renderizar('supabase');
     expect(screen.getByText(/procure a coordenação/i)).toBeInTheDocument();
+  });
+
+  it('libera nova tentativa quando um perfil de demonstração falha', async () => {
+    const user = userEvent.setup();
+    const entrarDemo = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Falha'))
+      .mockResolvedValueOnce(undefined);
+    renderizar('demo', { entrarDemo });
+    const perfil = screen.getByRole('button', { name: /aluno.*ana exemplo/i });
+    await user.click(perfil);
+    expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível abrir a demonstração');
+    expect(perfil).toBeEnabled();
+    await user.click(perfil);
+    expect(entrarDemo).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('normaliza o e-mail e preserva as credenciais após falha', async () => {
+    const user = userEvent.setup();
+    const entrar = vi.fn().mockRejectedValue(new Error('Acesso indisponível. Tente novamente.'));
+    renderizar('supabase', { entrar });
+    await user.type(screen.getByLabelText('E-mail'), ' pessoa@exemplo.invalid ');
+    await user.type(screen.getByLabelText('Senha'), 'senha-de-teste');
+    await user.click(screen.getByRole('button', { name: /^entrar$/i }));
+    expect(entrar).toHaveBeenCalledWith({
+      email: 'pessoa@exemplo.invalid',
+      senha: 'senha-de-teste',
+    });
+    expect(screen.getByRole('alert')).toHaveTextContent('Acesso indisponível');
+    expect(screen.getByLabelText('Senha')).toHaveValue('senha-de-teste');
   });
 });

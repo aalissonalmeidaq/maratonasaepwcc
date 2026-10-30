@@ -86,7 +86,7 @@ test.describe('jornadas por perfil (modo demonstração)', () => {
     await entrarComo(page, /ana exemplo/i);
     await expect(page).toHaveURL(/\/aluno$/);
     await expect(page.getByRole('heading', { level: 1, name: /olá, ana/i })).toBeVisible();
-    await expect(page.getByText('até 400 pontos')).toBeVisible();
+    await expect(page.getByText('de 400 pontos possíveis na edição')).toBeVisible();
     await semRolagemHorizontal(page);
 
     await navegarPeloMenu(page, 'Ranking');
@@ -184,4 +184,21 @@ test('atalhos do painel levam às seções do perfil', async ({ page }) => {
   await atalhos.getByRole('link', { name: 'Ranking' }).click();
   await expect(page).toHaveURL(/\/aluno\/ranking$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Ranking' })).toBeVisible();
+});
+
+test('convite abre a rota pública de primeiro acesso', async ({ page }) => {
+  await page.goto('/primeiro-acesso#t=token-do-convite');
+  await expect(page.getByRole('heading', { name: 'Crie sua senha' })).toBeVisible();
+  await expect(page).toHaveURL(/\/primeiro-acesso$/);
+});
+
+test('edição devolve foco ao botão visível', async ({ page }) => {
+  await entrarComo(page, /coordenação/i);
+  await page.goto('/coordenacao/organizacao');
+  const editar = page.getByRole('button', { name: /Editar o curso/ }).first();
+  await editar.click();
+  const campo = page.getByLabel('Nome do curso', { exact: true });
+  await expect(campo).toBeFocused();
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(editar).toBeFocused();
 });

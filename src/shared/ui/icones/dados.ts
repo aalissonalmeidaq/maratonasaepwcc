@@ -360,6 +360,11 @@ export const ICONES = {
     acento: 'coral',
     svg: `<path d="M4 6.5h16M9.5 6.5V4h5v2.5"/><path d="M6 6.5l1 14h10l1-14"/><path d="M10 10.5v6M14 10.5v6" ${a}/>`,
   },
+  salvar: {
+    rotulo: 'Salvar',
+    acento: 'azul',
+    svg: `<path d="M5.5 3.5h10.7l4.3 4.3v10.7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/><path d="M8 3.5V8h7V3.5"/><path d="M7.5 20.5v-6h9v6" ${a}/>`,
+  },
 
   // --- Avaliação e resultados -----------------------------------------------------------
   avaliacao: {

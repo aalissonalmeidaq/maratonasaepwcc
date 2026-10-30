@@ -7,15 +7,13 @@ import {
   Alert,
   Card,
   EmptyState,
-  Icon,
   PageHeader,
-  ProgressBar,
+  ProgressoCircular,
   ResponsiveTable,
-  ListaPaginada,
   StatCard,
   StatusBadge,
   BannerDestaque,
-  ProgressoCircular,
+  ListaPaginada,
 } from '@/shared/ui';
 import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
@@ -84,101 +82,119 @@ export function TabelaRanking({
 
 export function AlunoInicioPage() {
   return (
-    <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="aluno" />}>
+    <ComDadosDemo
+      carregar={carregar}
+      foraDaDemo={
+        <>
+          <PageHeader titulo="Início" descricao="Acompanhe as atividades da sua dupla." />
+          <Atalhos area="aluno" />
+        </>
+      }
+    >
       {(p: Painel) => (
         <>
           <BannerDestaque
             titulo={`Olá, ${p.estudante.nome.split(' ')[0]}!`}
             descricao="Cada desafio é uma oportunidade de evoluir."
             lateral={
-              <div className="flex min-w-0 flex-wrap items-center gap-4 wrap-anywhere">
-                <ProgressoCircular
-                  valor={p.totais.total}
-                  maximo={p.maximo}
-                  rotulo="Progresso da pontuação da dupla"
-                  inverso
-                />
-                <div className="min-w-0 flex-1 basis-36">
-                  <p className="text-sm text-white/80">Pontuação da dupla</p>
-                  <p className="font-display text-2xl font-bold tabular-nums">
-                    {formatarPontos(p.totais.total)}
-                  </p>
-                  <p className="text-xs text-white/70">de {p.maximo} pontos</p>
+              <section aria-label="Pontuação acumulada" className="min-w-0 wrap-anywhere">
+                <div className="flex flex-wrap items-center gap-3">
+                  <ProgressoCircular
+                    valor={p.totais.total}
+                    maximo={p.maximo}
+                    rotulo="Pontuação acumulada da dupla"
+                    inverso
+                  />
+                  <div className="min-w-0 flex-1 basis-36">
+                    <h2 className="text-sm font-semibold text-white">Pontuação acumulada</h2>
+                    <p className="mt-1 text-3xl font-bold tabular-nums">
+                      {formatarPontos(p.totais.total)}
+                    </p>
+                    <p className="text-sm text-white/85">
+                      de {p.maximo} pontos possíveis na edição
+                    </p>
+                  </div>
                 </div>
-              </div>
+                {p.totais.pendente && (
+                  <p className="mt-2 text-sm text-white/85">
+                    Há lançamentos pendentes: a pontuação pode mudar.
+                  </p>
+                )}
+                <Link
+                  to="/aluno/pontuacao"
+                  className="mt-2 inline-flex min-h-11 items-center rounded-md text-sm font-semibold text-white underline underline-offset-4 hover:text-cyan-500"
+                >
+                  Ver detalhes por encontro
+                </Link>
+              </section>
             }
           />
-          <Atalhos area="aluno" />
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard
-              icone="pontuacao"
-              acento="roxo"
-              rotulo="Pontuação da dupla"
-              valor={formatarPontos(p.totais.total)}
-              complemento={`até ${p.maximo} pontos`}
-            />
-            <StatCard
-              icone="ranking"
-              acento="amarelo"
-              rotulo="Posição na categoria"
-              valor={p.minhaPosicao ? `${p.minhaPosicao.posicao}º` : '—'}
-              complemento={p.ranking && <StatusBadge estado={p.ranking.estado} />}
-            />
-            <StatCard
-              icone="calendario"
-              acento="ciano"
-              rotulo="Próximo encontro"
-              valor={p.proximoEncontro ? formatarData(p.proximoEncontro.data) : '—'}
-              complemento={p.proximoEncontro?.horario}
-            />
-            <StatCard
-              icone="dupla"
-              rotulo="Minha dupla"
-              valor={p.dupla.nome}
-              complemento={p.colega ? `com ${p.colega.nome}` : undefined}
-            />
-          </div>
-
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <Card icone="progresso" titulo="Progresso da dupla" className="lg:col-span-2">
-              <ProgressBar
-                valor={p.totais.total}
-                maximo={p.maximo}
-                rotulo="Pontuação acumulada da dupla"
-              />
-              <p className="mt-2 text-sm text-text-secondary">
-                {formatarPontos(p.totais.total)} de {p.maximo} pontos possíveis na edição.
-                {p.totais.pendente && ' Há lançamentos pendentes: a pontuação pode mudar.'}
-              </p>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Card icone="calendario" titulo="Próximo encontro">
+              {p.proximoEncontro ? (
+                <>
+                  <p className="text-lg font-semibold">{p.proximoEncontro.titulo}</p>
+                  <p className="mt-2 text-text-secondary">
+                    {formatarData(p.proximoEncontro.data)} · {p.proximoEncontro.horario}
+                  </p>
+                  <p className="mt-1 text-sm text-text-secondary">{p.proximoEncontro.ambiente}</p>
+                </>
+              ) : (
+                <p>Nenhum encontro futuro cadastrado.</p>
+              )}
               <Link
-                to="/aluno/pontuacao"
-                className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-link underline-offset-4 hover:underline"
+                to="/aluno/encontros"
+                className="mt-3 inline-flex min-h-11 items-center rounded-md font-semibold text-link underline-offset-4 hover:underline"
               >
-                Ver detalhes por encontro
+                Ver encontros
               </Link>
             </Card>
             <Card icone="tarefa" titulo="Próxima tarefa">
               {p.proximoDesafio ? (
                 <>
-                  <p className="font-semibold">{p.proximoDesafio.titulo}</p>
-                  <p className="mt-1 flex items-center gap-1 text-sm text-text-secondary">
-                    <Icon nome="horario" tamanho="sm" /> Prazo:{' '}
-                    {formatarDataHora(p.proximoDesafio.prazo)}
+                  <p className="text-lg font-semibold">{p.proximoDesafio.titulo}</p>
+                  <p className="mt-2 text-sm text-text-secondary">
+                    Prazo: {formatarDataHora(p.proximoDesafio.prazo)}
                   </p>
-                  <Link
-                    to="/aluno/desafios"
-                    className="mt-3 inline-block text-sm font-semibold text-link underline-offset-4 hover:underline"
-                  >
-                    Ver desafio
-                  </Link>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    {
+                      p.porEncontro.find((e) => e.encontro.id === p.proximoDesafio?.encontroId)
+                        ?.encontro.titulo
+                    }
+                  </p>
                 </>
               ) : (
-                <EmptyState titulo="Nenhuma tarefa no próximo encontro." />
+                <p>Nenhuma tarefa com prazo futuro cadastrada.</p>
               )}
+              <Link
+                to="/aluno/desafios"
+                className="mt-3 inline-flex min-h-11 items-center rounded-md font-semibold text-link underline-offset-4 hover:underline"
+              >
+                {p.proximoDesafio ? 'Ver desafio' : 'Ver desafios'}
+              </Link>
             </Card>
           </div>
-
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <>
+              <StatCard
+                icone="ranking"
+                acento="amarelo"
+                rotulo="Posição na categoria"
+                valor={p.minhaPosicao ? `${p.minhaPosicao.posicao}º` : '—'}
+                complemento={p.ranking && <StatusBadge estado={p.ranking.estado} />}
+              />
+              <StatCard
+                icone="dupla"
+                rotulo="Minha dupla"
+                valor={p.dupla.nome}
+                complemento={p.colega ? `com ${p.colega.nome}` : undefined}
+              />
+            </>
+          </div>
+          <section aria-label="Acessos do aluno" className="mt-6">
+            <Atalhos area="aluno" compacto />
+          </section>
+          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card icone="calendario" titulo="Encontros">
               <ul className="flex flex-col divide-y divide-border">
                 {p.porEncontro.map(({ encontro, pontuacao }) => (
@@ -356,7 +372,7 @@ export function AlunoPontuacaoPage() {
             titulo="Pontuação da dupla"
             descricao={`${formatarPontos(p.totais.total)} de ${p.maximo} pontos · regras ${REGRAS_PILOTO.versao}`}
           />
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {p.porEncontro.map(({ encontro, pontuacao }) => (
               <Card icone="calendario" key={encontro.id} titulo={encontro.titulo}>
                 {pontuacao ? (
@@ -423,7 +439,7 @@ export function AlunoRegulamentoPage() {
         Este é um resumo das regras do piloto. O regulamento oficial aprovado prevalece e será
         publicado aqui pela coordenação.
       </Alert>
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card icone="pontuacao" titulo="Pontuação por encontro">
           <ul className="list-disc space-y-1 pl-5 text-sm">
             <li>

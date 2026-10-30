@@ -72,6 +72,18 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     vincular: recusar,
     definirVinculoAtivo: recusar,
     criarConta: recusar,
+    // Situações fictícias: a 3ª pessoa de cada lista aparece como pendente, para demonstrar a tela.
+    async situacaoDeAcesso() {
+      if (!coordena()) return [];
+      return pessoas.map((p, i) => ({
+        usuarioId: p.id,
+        email: `${p.id}@exemplo.invalid`,
+        acessoAtivo: i % 3 !== 2,
+        conviteExpiraEm: i % 3 === 2 ? new Date(Date.now() + 5 * 86_400_000).toISOString() : null,
+      }));
+    },
+    reenviarConvite: recusar,
+    importarAlunos: recusar,
   };
 
   const repositorioDuplas: RepositorioDuplas = {

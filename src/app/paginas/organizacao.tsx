@@ -2,12 +2,23 @@ import { useState, type ReactNode } from 'react';
 import { ROTULO_PAPEL } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
 import { AcoesDupla, FormDupla, type Dupla, type RegistroHistorico } from '@/modules/duplas';
-import { FormAmbiente, FormEncontro, situacaoEncontro, type Encontro } from '@/modules/encontros';
+import {
+  FormAmbiente,
+  FormEncontro,
+  situacaoEncontro,
+  type Ambiente,
+  type Encontro,
+} from '@/modules/encontros';
 import {
   FormConta,
   FormCurso,
   FormTurma,
   FormVinculo,
+  ImportarAlunos,
+  AcoesDeAcesso,
+  SituacaoDeAcessoBadge,
+  textoDaSituacao,
+  type Curso,
   type Edicao,
   type Turma,
 } from '@/modules/organizacao';
@@ -21,7 +32,6 @@ import {
   NavegacaoSecoes,
   PageHeader,
   ResponsiveTable,
-  RetornoEnvio,
   StatusBadge,
   useEnvio,
   type EstadoVisual,
@@ -37,6 +47,7 @@ import {
   useEncontros,
   useGravar,
   usePessoas,
+  useSituacaoDeAcesso,
   useTurmas,
   useVinculos,
 } from '../dados/consultas';
@@ -72,14 +83,17 @@ function BotaoRemover({
   bloqueio?: string;
 }) {
   const [aberto, setAberto] = useState(false);
-  const { estado, enviando, enviar } = useEnvio();
+  const { estado, enviando, enviar, limpar } = useEnvio();
   return (
     <>
       <Button
         variante="terciario"
         icone="excluir"
         disabled={Boolean(bloqueio)}
-        onClick={() => setAberto(true)}
+        onClick={() => {
+          limpar();
+          setAberto(true);
+        }}
       >
         Remover<span className="sr-only"> {rotulo}</span>
       </Button>
@@ -90,18 +104,48 @@ function BotaoRemover({
         descricao={descricao}
         rotuloConfirmar="Remover"
         carregando={enviando}
+        erro={estado.tipo === 'erro' ? estado.mensagem : undefined}
         onCancelar={() => setAberto(false)}
         onConfirmar={async () => {
           if (await enviar(remover, 'Removido.')) setAberto(false);
         }}
       />
-      {estado.tipo === 'erro' && <RetornoEnvio estado={estado} />}
     </>
   );
 }
 
 const nomeTurma = (turmas: Turma[], id: string | null) =>
   turmas.find((t) => t.id === id)?.nome ?? '—';
+
+/** Ao sair da edição, o foco volta ao "Editar" da linha (o formulário de edição deixa de existir). */
+function devolverFoco(id: string) {
+  requestAnimationFrame(() => {
+    const botoes = document.querySelectorAll<HTMLButtonElement>('[data-editar]');
+    [...botoes]
+      .find((botao) => botao.dataset.editar === id && botao.getClientRects().length > 0)
+      ?.focus();
+  });
+}
+
+function BotaoEditar({
+  id,
+  rotulo,
+  onEditar,
+}: {
+  id: string;
+  rotulo: string;
+  onEditar: () => void;
+}) {
+  return (
+    <Button data-editar={id} variante="terciario" icone="editar" onClick={onEditar}>
+      Editar<span className="sr-only"> {rotulo}</span>
+    </Button>
+  );
+}
+
+function TituloDoFormulario({ children }: { children: string }) {
+  return <h3 className="mb-3 font-display text-base font-semibold text-text">{children}</h3>;
+}
 
 // ===========================================================================
 // Coordenação — organização (US1, US2)
@@ -114,7 +158,12 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
   const cursos = useCursos(edicao.id);
   const turmas = useTurmas(edicao.id);
   const vinculos = useVinculos(edicao.id);
+  const acessos = useSituacaoDeAcesso(edicao.id);
+  const situacaoDe = (usuarioId: string) => acessos.data?.find((s) => s.usuarioId === usuarioId);
   const pessoas = usePessoas();
+  const duplas = useDuplas(edicao.id);
+  const [cursoEmEdicao, setCursoEmEdicao] = useState<Curso | null>(null);
+  const [turmaEmEdicao, setTurmaEmEdicao] = useState<Turma | null>(null);
 
   return (
     <>
@@ -125,6 +174,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
           { id: 'turmas', rotulo: 'Turmas', icone: 'turma' },
           { id: 'vinculos', rotulo: 'Pessoas e vínculos', icone: 'usuarios' },
           { id: 'criar-conta', rotulo: 'Criar conta', icone: 'editarUsuario' },
+          { id: 'importar-alunos', rotulo: 'Importar alunos', icone: 'importar' },
         ]}
       />
       <div className="grid gap-6">
@@ -143,13 +193,21 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                     id: 'acoes',
                     titulo: 'Ações',
                     buscavel: false,
+                    compacta: true,
                     valor: (c) => (
-                      <BotaoRemover
-                        rotulo={`o curso ${c.nome}`}
-                        descricao="Turmas do curso também serão removidas. A operação fica registrada na auditoria."
-                        bloqueio={bloqueio}
-                        remover={gravar(() => r.organizacao.removerCurso(c.id))}
-                      />
+                      <div className="flex flex-wrap gap-1">
+                        <BotaoEditar
+                          id={c.id}
+                          rotulo={`o curso ${c.nome}`}
+                          onEditar={() => setCursoEmEdicao(c)}
+                        />
+                        <BotaoRemover
+                          rotulo={`o curso ${c.nome}`}
+                          descricao="Turmas do curso também serão removidas. A operação fica registrada na auditoria."
+                          bloqueio={bloqueio}
+                          remover={gravar(() => r.organizacao.removerCurso(c.id))}
+                        />
+                      </div>
                     ),
                   },
                 ]}
@@ -157,11 +215,20 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
             )}
           </Consulta>
           <div className="mt-4 border-t border-border pt-4">
+            <TituloDoFormulario>
+              {cursoEmEdicao ? `Editar curso “${cursoEmEdicao.nome}”` : 'Novo curso'}
+            </TituloDoFormulario>
             <FormCurso
+              key={cursoEmEdicao?.id ?? 'novo'}
+              inicial={cursoEmEdicao ?? undefined}
               bloqueio={bloqueio}
               onSalvar={(d) =>
                 gravar(() => r.organizacao.salvarCurso({ ...d, edicaoId: edicao.id }))()
               }
+              onCancelar={() => {
+                if (cursoEmEdicao) devolverFoco(cursoEmEdicao.id);
+                setCursoEmEdicao(null);
+              }}
             />
           </div>
         </Card>
@@ -186,13 +253,21 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                     id: 'acoes',
                     titulo: 'Ações',
                     buscavel: false,
+                    compacta: true,
                     valor: (t) => (
-                      <BotaoRemover
-                        rotulo={`a turma ${t.nome}`}
-                        descricao="Vínculos da turma também serão removidos. Turmas com duplas não podem ser removidas."
-                        bloqueio={bloqueio}
-                        remover={gravar(() => r.organizacao.removerTurma(t.id))}
-                      />
+                      <div className="flex flex-wrap gap-1">
+                        <BotaoEditar
+                          id={t.id}
+                          rotulo={`a turma ${t.nome}`}
+                          onEditar={() => setTurmaEmEdicao(t)}
+                        />
+                        <BotaoRemover
+                          rotulo={`a turma ${t.nome}`}
+                          descricao="Vínculos da turma também serão removidos. Turmas com duplas não podem ser removidas."
+                          bloqueio={bloqueio}
+                          remover={gravar(() => r.organizacao.removerTurma(t.id))}
+                        />
+                      </div>
                     ),
                   },
                 ]}
@@ -200,10 +275,23 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
             )}
           </Consulta>
           <div className="mt-4 border-t border-border pt-4">
+            <TituloDoFormulario>
+              {turmaEmEdicao ? `Editar turma “${turmaEmEdicao.nome}”` : 'Nova turma'}
+            </TituloDoFormulario>
             <FormTurma
+              key={turmaEmEdicao?.id ?? 'nova'}
+              inicial={turmaEmEdicao ?? undefined}
+              cursoBloqueado={
+                turmaEmEdicao !== null &&
+                (duplas.data ?? []).some((d) => d.turmaId === turmaEmEdicao.id && d.ativa)
+              }
               cursos={cursos.data ?? []}
               bloqueio={bloqueio}
               onSalvar={(d) => gravar(() => r.organizacao.salvarTurma(d))()}
+              onCancelar={() => {
+                if (turmaEmEdicao) devolverFoco(turmaEmEdicao.id);
+                setTurmaEmEdicao(null);
+              }}
             />
           </div>
         </Card>
@@ -235,20 +323,42 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
                     ),
                   },
                   {
+                    id: 'acesso',
+                    titulo: 'Acesso',
+                    texto: (v) => textoDaSituacao(situacaoDe(v.usuarioId)),
+                    valor: (v) => <SituacaoDeAcessoBadge situacao={situacaoDe(v.usuarioId)} />,
+                  },
+                  {
                     id: 'acoes',
                     titulo: 'Ações',
                     buscavel: false,
                     valor: (v) => (
-                      <Button
-                        variante="terciario"
-                        disabled={Boolean(bloqueio)}
-                        onClick={() =>
-                          void gravar(() => r.organizacao.definirVinculoAtivo(v.id, !v.ativo))()
-                        }
-                      >
-                        {v.ativo ? 'Desativar' : 'Reativar'}
-                        <span className="sr-only"> vínculo de {v.nome}</span>
-                      </Button>
+                      <div className="flex flex-col items-start gap-1">
+                        <Button
+                          variante="terciario"
+                          disabled={Boolean(bloqueio)}
+                          onClick={() =>
+                            void gravar(() => r.organizacao.definirVinculoAtivo(v.id, !v.ativo))()
+                          }
+                        >
+                          {v.ativo ? 'Desativar' : 'Reativar'}
+                          <span className="sr-only"> vínculo de {v.nome}</span>
+                        </Button>
+                        <AcoesDeAcesso
+                          situacao={situacaoDe(v.usuarioId)}
+                          nome={v.nome}
+                          bloqueio={bloqueio}
+                          onReenviar={(novoEmail) =>
+                            gravar(() =>
+                              r.organizacao.reenviarConvite({
+                                edicaoId: edicao.id,
+                                usuarioId: v.usuarioId,
+                                novoEmail,
+                              }),
+                            )()
+                          }
+                        />
+                      </div>
                     ),
                   },
                 ]}
@@ -272,6 +382,16 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
             turmas={turmas.data ?? []}
             bloqueio={bloqueio}
             onCriar={(d) => gravar(() => r.organizacao.criarConta({ ...d, edicaoId: edicao.id }))()}
+          />
+        </Card>
+
+        <Card id="importar-alunos" icone="importar" titulo="Importar alunos (CSV)">
+          <ImportarAlunos
+            turmas={turmas.data ?? []}
+            bloqueio={bloqueio}
+            onImportar={(turmaId, linhas) =>
+              gravar(() => r.organizacao.importarAlunos({ edicaoId: edicao.id, turmaId, linhas }))()
+            }
           />
         </Card>
       </div>
@@ -498,6 +618,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
   const encontros = useEncontros(edicao.id);
   const ambientes = useAmbientes(edicao.id);
   const [editando, setEditando] = useState<Encontro | null>(null);
+  const [ambienteEmEdicao, setAmbienteEmEdicao] = useState<Ambiente | null>(null);
   const salvar = (d: Parameters<typeof r.encontros.salvarEncontro>[1]) =>
     gravar(() => r.encontros.salvarEncontro(edicao.id, d))();
 
@@ -557,7 +678,7 @@ function Encontros({ edicao }: { edicao: Edicao }) {
           />
         )}
       </Card>
-      <Card icone="notebook" titulo="Ambientes">
+      <Card id="ambientes" icone="notebook" titulo="Ambientes">
         <Consulta consulta={ambientes}>
           {(lista) => (
             <ResponsiveTable
@@ -568,14 +689,44 @@ function Encontros({ edicao }: { edicao: Edicao }) {
               colunas={[
                 { id: 'n', titulo: 'Ambiente', valor: (a) => a.nome },
                 { id: 'o', titulo: 'Observações', valor: (a) => a.observacoes ?? '—' },
+                {
+                  id: 'acoes',
+                  titulo: 'Ações',
+                  buscavel: false,
+                  compacta: true,
+                  valor: (a) => (
+                    <div className="flex flex-wrap gap-1">
+                      <BotaoEditar
+                        id={a.id}
+                        rotulo={`o ambiente ${a.nome}`}
+                        onEditar={() => setAmbienteEmEdicao(a)}
+                      />
+                      <BotaoRemover
+                        rotulo={`o ambiente ${a.nome}`}
+                        descricao="Ambientes usados em encontros não podem ser removidos: troque o ambiente desses encontros antes. A operação fica registrada na auditoria."
+                        bloqueio={bloqueio}
+                        remover={gravar(() => r.encontros.removerAmbiente(a.id))}
+                      />
+                    </div>
+                  ),
+                },
               ]}
             />
           )}
         </Consulta>
         <div className="mt-4 border-t border-border pt-4">
+          <TituloDoFormulario>
+            {ambienteEmEdicao ? `Editar ambiente “${ambienteEmEdicao.nome}”` : 'Novo ambiente'}
+          </TituloDoFormulario>
           <FormAmbiente
+            key={ambienteEmEdicao?.id ?? 'novo'}
+            inicial={ambienteEmEdicao ?? undefined}
             bloqueio={bloqueio}
             onSalvar={(d) => gravar(() => r.encontros.salvarAmbiente(edicao.id, d))()}
+            onCancelar={() => {
+              if (ambienteEmEdicao) devolverFoco(ambienteEmEdicao.id);
+              setAmbienteEmEdicao(null);
+            }}
           />
         </div>
       </Card>

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Papel } from '@/modules/acesso';
 import { verificar, verificarGravacao } from '@/shared/dados/erros';
-import type { RepositorioOrganizacao } from '../domain/tipos';
+import type { RepositorioOrganizacao, ResultadoDaImportacao } from '../domain/tipos';
 
 export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): RepositorioOrganizacao {
   return {
@@ -54,22 +54,22 @@ export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): Reposit
     },
     async salvarCurso({ id, edicaoId, nome, categoria }) {
       const linha = { edicao_id: edicaoId, nome: nome.trim(), categoria: categoria.trim() };
-      verificarGravacao(
-        id
-          ? await sb.from('cursos').update(linha).eq('id', id)
-          : await sb.from('cursos').insert(linha),
-      );
+      if (id) {
+        verificar(await sb.from('cursos').update(linha).eq('id', id).select('id').single());
+      } else {
+        verificarGravacao(await sb.from('cursos').insert(linha));
+      }
     },
     async removerCurso(id) {
       verificarGravacao(await sb.from('cursos').delete().eq('id', id));
     },
     async salvarTurma({ id, cursoId, nome, anoLetivo }) {
       const linha = { curso_id: cursoId, nome: nome.trim(), ano_letivo: anoLetivo };
-      verificarGravacao(
-        id
-          ? await sb.from('turmas').update(linha).eq('id', id)
-          : await sb.from('turmas').insert(linha),
-      );
+      if (id) {
+        verificar(await sb.from('turmas').update(linha).eq('id', id).select('id').single());
+      } else {
+        verificarGravacao(await sb.from('turmas').insert(linha));
+      }
     },
     async removerTurma(id) {
       verificarGravacao(await sb.from('turmas').delete().eq('id', id));
@@ -106,14 +106,54 @@ export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): Reposit
     async definirVinculoAtivo(id, ativo) {
       verificarGravacao(await sb.from('atribuicoes').update({ ativo }).eq('id', id));
     },
-    async criarConta(dados) {
-      const { error } = await sb.functions.invoke('criar-conta', { body: dados });
-      if (!error) return;
-      // A função responde { erro } com mensagem em português.
-      const corpo = await (error as { context?: Response }).context?.json?.().catch(() => null);
+    async situacaoDeAcesso(edicaoId) {
+      const dados = verificar(await sb.rpc('situacao_de_acesso', { p_edicao: edicaoId }));
+      return (
+        dados as {
+          usuario_id: string;
+          email: string;
+          acesso_ativo: boolean;
+          convite_expira_em: string | null;
+        }[]
+      ).map((s) => ({
+        usuarioId: s.usuario_id,
+        email: s.email,
+        acessoAtivo: s.acesso_ativo,
+        conviteExpiraEm: s.convite_expira_em,
+      }));
+    },
+    async importarAlunos(dados) {
+      const { data, error } = await sb.functions.invoke('importar-alunos', { body: dados });
+      if (!error) return data as ResultadoDaImportacao;
+      const resposta = await (error as { context?: Response }).context?.json?.().catch(() => null);
       throw new Error(
-        (corpo as { erro?: string } | null)?.erro ?? 'Não foi possível criar a conta.',
+        (resposta as { erro?: string } | null)?.erro ?? 'Não foi possível importar os alunos.',
       );
     },
+    async reenviarConvite(dados) {
+      return invocarFuncaoDeConta(
+        sb,
+        'reenviar-convite',
+        dados,
+        'Não foi possível reenviar o convite.',
+      );
+    },
+    async criarConta(dados) {
+      return invocarFuncaoDeConta(sb, 'criar-conta', dados, 'Não foi possível criar a conta.');
+    },
   };
+}
+
+/** Funções de conta respondem `{ conviteEnviado }` ou `{ erro }` com mensagem em português. */
+async function invocarFuncaoDeConta(
+  sb: SupabaseClient,
+  nome: string,
+  corpo: object,
+  padrao: string,
+): Promise<{ conviteEnviado: boolean }> {
+  const { data, error } = await sb.functions.invoke(nome, { body: corpo });
+  if (!error)
+    return { conviteEnviado: Boolean((data as { conviteEnviado?: boolean }).conviteEnviado) };
+  const resposta = await (error as { context?: Response }).context?.json?.().catch(() => null);
+  throw new Error((resposta as { erro?: string } | null)?.erro ?? padrao);
 }

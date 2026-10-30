@@ -1,57 +1,31 @@
 import { useState, type FormEvent } from 'react';
 import { ROTULO_PAPEL, type Papel } from '@/modules/acesso';
 import {
-  Alert,
-  Button,
-  RetornoEnvio,
+  RodapeDoFormulario as Rodape,
   SelectField,
   TextField,
   useEnvio,
-  type NomeIcone,
+  useFocoNaEdicao,
 } from '@/shared/ui';
 import type { Curso, Pessoa, Turma } from '../domain/tipos';
 
-function Rodape({
-  bloqueio,
-  estado,
-  enviando,
-  rotulo,
-  icone,
-}: {
-  bloqueio?: string;
-  estado: ReturnType<typeof useEnvio>['estado'];
-  enviando: boolean;
-  rotulo: string;
-  icone?: NomeIcone;
-}) {
-  return (
-    <div className="flex flex-col gap-3 sm:col-span-full">
-      {bloqueio && <Alert tom="info" titulo={bloqueio} />}
-      <RetornoEnvio estado={estado} />
-      <Button
-        type="submit"
-        icone={icone}
-        carregando={enviando}
-        disabled={Boolean(bloqueio)}
-        className="sm:self-start"
-      >
-        {rotulo}
-      </Button>
-    </div>
-  );
-}
-
 export function FormCurso({
+  inicial,
   onSalvar,
+  onCancelar,
   bloqueio,
 }: {
-  onSalvar: (d: { nome: string; categoria: string }) => Promise<void>;
+  /** Curso em edição; sem ele, o formulário cadastra um novo. */
+  inicial?: Curso;
+  onSalvar: (d: { id?: string; nome: string; categoria: string }) => Promise<void>;
+  onCancelar?: () => void;
   bloqueio?: string;
 }) {
-  const [nome, setNome] = useState('');
-  const [categoria, setCategoria] = useState('');
+  const [nome, setNome] = useState(inicial?.nome ?? '');
+  const [categoria, setCategoria] = useState(inicial?.categoria ?? '');
+  const primeiro = useFocoNaEdicao<HTMLInputElement>(Boolean(inicial));
   const [erro, setErro] = useState<{ nome?: string; categoria?: string }>({});
-  const { estado, enviando, enviar } = useEnvio();
+  const { estado, enviando, enviar, limpar } = useEnvio();
 
   async function aoEnviar(ev: FormEvent) {
     ev.preventDefault();
@@ -61,20 +35,27 @@ export function FormCurso({
     };
     setErro(e);
     if (Object.keys(e).length) return;
-    if (
-      await enviar(
-        () => onSalvar({ nome: nome.trim(), categoria: categoria.trim() }),
-        'Curso salvo.',
-      )
-    ) {
+    const dados = { nome: nome.trim(), categoria: categoria.trim() };
+    if (inicial) {
+      if (await enviar(() => onSalvar({ id: inicial.id, ...dados }), 'Curso atualizado.'))
+        setNome(dados.nome);
+      return;
+    }
+    if (await enviar(() => onSalvar(dados), 'Curso salvo.')) {
       setNome('');
       setCategoria('');
     }
   }
 
   return (
-    <form onSubmit={aoEnviar} noValidate className="grid gap-4 sm:grid-cols-2">
+    <form
+      onChange={enviando ? undefined : limpar}
+      onSubmit={aoEnviar}
+      noValidate
+      className="grid gap-4 sm:grid-cols-2"
+    >
       <TextField
+        ref={primeiro}
         rotulo="Nome do curso"
         value={nome}
         onChange={(e) => setNome(e.target.value)}
@@ -91,8 +72,9 @@ export function FormCurso({
         bloqueio={bloqueio}
         estado={estado}
         enviando={enviando}
-        rotulo="Adicionar curso"
-        icone="educacao"
+        rotulo={inicial ? 'Salvar alterações' : 'Adicionar curso'}
+        icone={inicial ? 'salvar' : 'educacao'}
+        onCancelar={inicial && onCancelar}
       />
     </form>
   );
@@ -100,18 +82,33 @@ export function FormCurso({
 
 export function FormTurma({
   cursos,
+  inicial,
   onSalvar,
+  onCancelar,
   bloqueio,
+  cursoBloqueado = false,
 }: {
   cursos: Curso[];
-  onSalvar: (d: { cursoId: string; nome: string; anoLetivo: number | null }) => Promise<void>;
+  /** Turma em edição; sem ela, o formulário cadastra uma nova. */
+  inicial?: Turma;
+  /** A turma tem dupla ativa: o servidor recusa a troca de curso (spec 002, FR-001). */
+  cursoBloqueado?: boolean;
+  onSalvar: (d: {
+    id?: string;
+    cursoId: string;
+    nome: string;
+    anoLetivo: number | null;
+  }) => Promise<void>;
+  onCancelar?: () => void;
   bloqueio?: string;
 }) {
-  const [cursoId, setCursoId] = useState('');
-  const [nome, setNome] = useState('');
-  const [ano, setAno] = useState('');
+  const [cursoId, setCursoId] = useState(inicial?.cursoId ?? '');
+  const [nome, setNome] = useState(inicial?.nome ?? '');
+  const [ano, setAno] = useState(inicial?.anoLetivo ? String(inicial.anoLetivo) : '');
+  const campoCurso = useFocoNaEdicao<HTMLSelectElement>(Boolean(inicial) && !cursoBloqueado);
+  const campoNome = useFocoNaEdicao<HTMLInputElement>(Boolean(inicial) && cursoBloqueado);
   const [erro, setErro] = useState<{ cursoId?: string; nome?: string }>({});
-  const { estado, enviando, enviar } = useEnvio();
+  const { estado, enviando, enviar, limpar } = useEnvio();
 
   async function aoEnviar(ev: FormEvent) {
     ev.preventDefault();
@@ -121,22 +118,37 @@ export function FormTurma({
     };
     setErro(e);
     if (Object.keys(e).length) return;
-    const anoLetivo = ano ? Number(ano) : null;
-    if (await enviar(() => onSalvar({ cursoId, nome: nome.trim(), anoLetivo }), 'Turma salva.'))
-      setNome('');
+    const dados = { cursoId, nome: nome.trim(), anoLetivo: ano ? Number(ano) : null };
+    if (inicial) {
+      if (await enviar(() => onSalvar({ id: inicial.id, ...dados }), 'Turma atualizada.'))
+        setNome(dados.nome);
+      return;
+    }
+    if (await enviar(() => onSalvar(dados), 'Turma salva.')) setNome('');
   }
 
   return (
-    <form onSubmit={aoEnviar} noValidate className="grid gap-4 sm:grid-cols-3">
+    <form
+      onChange={enviando ? undefined : limpar}
+      onSubmit={aoEnviar}
+      noValidate
+      className="grid gap-4 sm:grid-cols-3"
+    >
       <SelectField
+        ref={campoCurso}
         rotulo="Curso"
         placeholder="Selecione"
         opcoes={cursos.map((c) => ({ valor: c.id, rotulo: c.nome }))}
         value={cursoId}
         onChange={(e) => setCursoId(e.target.value)}
         erro={erro.cursoId}
+        disabled={cursoBloqueado}
+        dica={
+          cursoBloqueado ? 'Esta turma já tem duplas; o curso não pode ser alterado.' : undefined
+        }
       />
       <TextField
+        ref={campoNome}
         rotulo="Nome da turma"
         value={nome}
         onChange={(e) => setNome(e.target.value)}
@@ -154,8 +166,9 @@ export function FormTurma({
         bloqueio={bloqueio}
         estado={estado}
         enviando={enviando}
-        rotulo="Adicionar turma"
-        icone="turma"
+        rotulo={inicial ? 'Salvar alterações' : 'Adicionar turma'}
+        icone={inicial ? 'salvar' : 'turma'}
+        onCancelar={inicial && onCancelar}
       />
     </form>
   );
@@ -254,20 +267,16 @@ export function FormConta({
   onCriar: (d: {
     nome: string;
     email: string;
-    senhaProvisoria: string;
     papel: PapelDeConta;
     turmaId: string | null;
-  }) => Promise<void>;
+  }) => Promise<{ conviteEnviado: boolean }>;
   bloqueio?: string;
 }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
   const [papel, setPapel] = useState<PapelDeConta>('aluno');
   const [turmaId, setTurmaId] = useState('');
-  const [erros, setErros] = useState<Partial<Record<'nome' | 'email' | 'senha' | 'turma', string>>>(
-    {},
-  );
+  const [erros, setErros] = useState<Partial<Record<'nome' | 'email' | 'turma', string>>>({});
   const { estado, enviando, enviar } = useEnvio();
   const precisaTurma = EXIGE_TURMA.includes(papel);
 
@@ -278,23 +287,27 @@ export function FormConta({
       ...(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && {
         email: 'Informe um e-mail válido.',
       }),
-      ...(senha.length < 10 && { senha: 'A senha provisória deve ter pelo menos 10 caracteres.' }),
       ...(precisaTurma && !turmaId && { turma: 'Selecione a turma.' }),
     };
     setErros(e);
     if (Object.keys(e).length) return;
+    const destino = email.trim().toLowerCase();
     const ok = await enviar(
       () =>
         onCriar({
           nome: nome.trim(),
-          email: email.trim().toLowerCase(),
-          senhaProvisoria: senha,
+          email: destino,
           papel,
           turmaId: precisaTurma ? turmaId : null,
         }),
-      'Conta criada. Entregue a senha provisória à pessoa por um canal definido pela unidade.',
+      ({ conviteEnviado }) =>
+        conviteEnviado
+          ? `Conta criada. Enviamos o convite para ${destino}.`
+          : {
+              alerta:
+                'Conta criada, mas o e-mail do convite não foi enviado. Use “Reenviar convite” em Pessoas e vínculos.',
+            },
     );
-    setSenha('');
     if (ok) {
       setNome('');
       setEmail('');
@@ -316,15 +329,7 @@ export function FormConta({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         erro={erros.email}
-      />
-      <TextField
-        rotulo="Senha provisória"
-        type="password"
-        autoComplete="new-password"
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        erro={erros.senha}
-        dica="Mínimo de 10 caracteres. A política de troca no primeiro acesso será definida pela unidade."
+        dica="A pessoa recebe um convite por e-mail, válido por 7 dias, para criar a própria senha."
       />
       <SelectField
         rotulo="Papel"

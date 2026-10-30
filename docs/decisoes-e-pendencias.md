@@ -34,7 +34,8 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   arquivos em `docs/padroes/svg` e galeria em `docs/padroes/galeria.html` (`npm run padroes`).
   **[validar]**
 - **13 ícones** das pranchas "Navegação e conta", "Maratona e aprendizagem" e "Avaliação e
-  administração" acrescentados (116 no total). **[validar]**
+  administração" acrescentados, mais o ícone "Salvar" criado no mesmo estilo em 2026-10-30
+  (117 no total). **[validar]**
 - **Paleta da prancha × tokens em uso:** azul-marinho `#0B2D6B` × `#062457`; amarelo `#FFC02E` ×
   `#FFB820`; borda sutil `#E6EBF2` × `#DCE5EF`. Os padrões gráficos usam a paleta da prancha; os
   tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[decidir]**
@@ -74,8 +75,12 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   Acompanhar nova versão de `workbox-build`.
 - Bundle JS principal ~670 kB (197 kB gzip). Sem meta de desempenho definida (PRD RNF08);
   dividir por área com `import()` quando as metas forem acordadas.
-- Contas criadas pela coordenação via Edge Function `criar-conta` (ADR 0008). **[validar]** entrega da
-  senha provisória, troca no primeiro acesso e importação em lote (CSV).
+- Contas criadas pela coordenação via Edge Function `criar-conta` (ADR 0008). Decidido em 2026-10-30
+  (spec 002): sem senha provisória — primeiro acesso e recuperação por link no e-mail; importação
+  por CSV com prévia. **Implementados em 2026-10-30:** convite de 7 dias, situação de acesso com
+  reenvio e importação CSV (ADR 0009). Rotas `/primeiro-acesso`, `/esqueci-senha` e
+  `/redefinir-senha` e o link "Esqueci minha senha" na entrada também concluídos. **Pendente:**
+  provedor de e-mail da produção e SMTP do Auth **[validar]**.
 - Criação de edições: sem política de INSERT para `authenticated` (somente administração do
   banco) até a spec de organização definir o papel administrador.
 - Ícones PWA gerados a partir de `maratona-simbolo.svg` com fundo branco no maskable. **[validar]**
@@ -87,11 +92,16 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 
 ## 6. Decisões da spec 002 a validar
 
-- Dupla = 2 estudantes da **mesma turma**; trios e duplas entre turmas recusados até decisão. **[validar]**
+- Equipes formadas pelos próprios alunos por convite (decidido em 2026-10-30, spec 006): dupla,
+  ou um trio por turma em turma com número ímpar de alunos ativos. A coordenação não forma
+  equipes; coordenação, docente e mentor alteram com justificativa. **Ainda não implementado** —
+  hoje a tela da coordenação ainda tem "Formar dupla". Duplas entre turmas continuam recusadas.
+  **[validar]** se docente/mentor podem formar equipe nova com alunos que sobraram.
 - Encontros valem para todas as turmas da edição. **[validar]**
 - Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[validar]**
-- Edição de nome de curso/turma pela interface ainda não implementada (remover e recriar, ou
-  ajustar no próximo incremento).
+- Edição de curso e turma pela interface: implementada em 2026-10-30. Decidido na mesma data
+  (spec 002, Clarifications): com dupla ativa, o curso da turma não pode mudar — regra no servidor
+  implementada (gatilho `turmas_validar_troca_de_curso`); a tela mostra o curso bloqueado.
 - Os testes E2E reais deixam registros fictícios no banco local (rodar `supabase db reset`).
 
 ## 6.1 Spec 005 — busca e paginação

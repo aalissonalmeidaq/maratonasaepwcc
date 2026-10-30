@@ -1,9 +1,25 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { calcularEncontro, REGRAS_PILOTO } from '@/modules/pontuacao';
-import { lancamentos } from './dados';
+import { desafios, lancamentos } from './dados';
 import { painelAluno, painelCoordenacao, painelDocente, rankingPorCategoria } from './consultas';
 
 describe('consultas do modo demonstração', () => {
+  it('antecipa a tarefa futura mesmo quando o próximo encontro não tem desafio', () => {
+    const p = painelAluno('e01');
+    expect(p?.proximoDesafio?.id).toBe('ds4');
+    expect(p?.proximoDesafio?.encontroId).not.toBe(p?.proximoEncontro?.id);
+  });
+
+  it('não apresenta uma tarefa expirada como próxima', () => {
+    vi.useFakeTimers();
+    try {
+      const ultimoPrazo = Math.max(...desafios.map((d) => new Date(d.prazo).getTime()));
+      vi.setSystemTime(ultimoPrazo + 1);
+      expect(painelAluno('e01')?.proximoDesafio).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it('a pontuação exibida ao aluno é a calculada pelo núcleo de regras', () => {
     const p = painelAluno('e01');
     const esperado = Object.values(lancamentos.d1!).reduce(

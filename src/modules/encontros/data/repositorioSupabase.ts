@@ -22,11 +22,11 @@ export function criarRepositorioEncontrosSupabase(sb: SupabaseClient): Repositor
         nome: nome.trim(),
         observacoes: observacoes?.trim() || null,
       };
-      verificarGravacao(
-        id
-          ? await sb.from('ambientes').update(linha).eq('id', id)
-          : await sb.from('ambientes').insert(linha),
-      );
+      if (id) {
+        verificar(await sb.from('ambientes').update(linha).eq('id', id).select('id').single());
+      } else {
+        verificarGravacao(await sb.from('ambientes').insert(linha));
+      }
     },
     async removerAmbiente(id) {
       verificarGravacao(await sb.from('ambientes').delete().eq('id', id));

@@ -9,5 +9,7 @@
   2. criação do usuário com o cliente administrativo, somente no servidor;
   3. atribuição gravada como a própria coordenação (RLS e auditoria valem); em falha, a conta
      é removida (compensação).
-- **Pendente [validar]:** entrega da senha provisória e troca obrigatória no primeiro acesso;
-  importação em lote (CSV) de estudantes.
+- **Atualização (2026-10-30):** a conta passa a nascer **sem senha**; a pessoa recebe um
+  convite por e-mail para criar a própria senha (ver ADR 0009). A senha provisória foi
+  removida. Funções novas no mesmo padrão: `reenviar-convite` (com correção de e-mail),
+  `definir-senha-inicial` (pública) e `importar-alunos` (CSV, linha a linha, até 500).

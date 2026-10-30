@@ -115,8 +115,18 @@ da coordenação; **Minhas turmas** e **Encontros** da docente; **Minha dupla** 
 aluno. Painéis com pontuação, ranking e premiação ainda usam somente a demonstração
 (Incrementos 3 e 4).
 
-A criação de contas usa a Edge Function `supabase/functions/criar-conta`, servida
-automaticamente pelo `supabase start` (ver [ADR 0008](docs/adr/0008-criacao-de-contas.md)).
+Contas (ver [ADR 0008](docs/adr/0008-criacao-de-contas.md) e
+[ADR 0009](docs/adr/0009-convites-de-acesso.md)): a coordenação cria a conta **sem senha** ou
+importa alunos por CSV; cada pessoa recebe por e-mail um convite de 7 dias para criar a própria
+senha. As Edge Functions (`criar-conta`, `reenviar-convite`, `definir-senha-inicial`,
+`importar-alunos`) sobem com o `supabase start` e leem `supabase/functions/.env`:
+
+```bash
+cp supabase/functions/.env.example supabase/functions/.env   # valores locais, sem segredos
+```
+
+No ambiente local os e-mails não saem da máquina: veja-os no **Mailpit**
+(http://127.0.0.1:54424). Os testes E2E reais leem os convites por ali.
 
 O projeto **não** se conecta a bancos remotos. Nunca rode `seed.sql` fora do ambiente local.
 
@@ -165,7 +175,7 @@ Toda nova tabela vem com políticas RLS **e** testes pgTAP na mesma mudança.
 
 ## Ícones
 
-103 ícones próprios em SVG, vetorizados a partir da prancha "100 ícones da Maratona SAEP"
+117 ícones próprios em SVG, vetorizados a partir da prancha "100 ícones da Maratona SAEP"
 (fonte única em `src/shared/ui/icones/dados.ts`). Use `<Icon nome="dupla" />` (monocromático,
 herda a cor do texto) ou `cor="marca"` (contorno azul-marinho + cor de apoio da prancha).
 Arquivos avulsos e galeria para revisão: `npm run icones` → `docs/icones/` (não edite à mão;
@@ -204,6 +214,7 @@ Lista completa em [docs/decisoes-e-pendencias.md](docs/decisoes-e-pendencias.md)
 - Organização (turmas, vínculos, contas, duplas, encontros) já usa o Supabase; atividades,
   presença, avaliação, pontuação, ocorrências e publicação do ranking ficam para os próximos
   incrementos.
-- Senha provisória de novas contas: entrega e troca no primeiro acesso a definir pela unidade.
+- Primeiro acesso e recuperação de senha por link no e-mail, e importação de alunos por CSV:
+  decididos (spec 002), ainda não implementados.
 - Autenticação de demonstração **não é segura**.
 - Detalhes da premiação, escala e acesso à nota oficial a confirmar.

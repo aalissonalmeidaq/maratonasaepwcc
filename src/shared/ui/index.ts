@@ -18,6 +18,8 @@ export { StatusBadge, type EstadoVisual } from './StatusBadge';
 export { TextField } from './TextField';
 export { RetornoEnvio } from './envio';
 export { useEnvio, type EstadoEnvio } from './useEnvio';
+export { RodapeDoFormulario } from './RodapeDoFormulario';
+export { useFocoNaEdicao } from './useFocoNaEdicao';
 export { TextAreaField } from './TextAreaField';
 export { BannerDestaque } from './BannerDestaque';
 export { CardDestaque } from './CardDestaque';
