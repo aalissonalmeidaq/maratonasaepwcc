@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router';
-import { RedirecionarParaPainel, RotaProtegida } from '@/modules/auth';
+import { PrimeiroAcessoPage, RedirecionarParaPainel, RotaProtegida } from '@/modules/auth';
 import { AppShell } from './layout/AppShell';
 import * as Aluno from './paginas/aluno';
 import { AguardandoPermissaoPage, EntradaPage, NaoEncontradaPage } from './paginas/comum';
@@ -11,6 +11,7 @@ export function AppRotas() {
   return (
     <Routes>
       <Route path="/" element={<RedirecionarParaPainel />} />
+      <Route path="/primeiro-acesso" element={<PrimeiroAcessoPage />} />
       <Route path="/entrar" element={<EntradaPage />} />
       <Route path="/aguardando-permissao" element={<AguardandoPermissaoPage />} />
 

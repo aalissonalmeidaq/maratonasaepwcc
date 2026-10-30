@@ -185,3 +185,20 @@ test('atalhos do painel levam às seções do perfil', async ({ page }) => {
   await expect(page).toHaveURL(/\/aluno\/ranking$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Ranking' })).toBeVisible();
 });
+
+test('convite abre a rota pública de primeiro acesso', async ({ page }) => {
+  await page.goto('/primeiro-acesso#t=token-do-convite');
+  await expect(page.getByRole('heading', { name: 'Crie sua senha' })).toBeVisible();
+  await expect(page).toHaveURL(/\/primeiro-acesso$/);
+});
+
+test('edição devolve foco ao botão visível', async ({ page }) => {
+  await entrarComo(page, /coordenação/i);
+  await page.goto('/coordenacao/organizacao');
+  const editar = page.getByRole('button', { name: /Editar o curso/ }).first();
+  await editar.click();
+  const campo = page.getByLabel('Nome do curso', { exact: true });
+  await expect(campo).toBeFocused();
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(editar).toBeFocused();
+});

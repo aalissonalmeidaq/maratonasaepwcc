@@ -17,7 +17,7 @@ export function FormAmbiente({
   const [nome, setNome] = useState(inicial?.nome ?? '');
   const [observacoes, setObservacoes] = useState(inicial?.observacoes ?? '');
   const [erro, setErro] = useState<string | undefined>();
-  const { estado, enviando, enviar } = useEnvio();
+  const { estado, enviando, enviar, limpar } = useEnvio();
   const primeiro = useFocoNaEdicao<HTMLInputElement>(Boolean(inicial));
 
   async function aoEnviar(ev: FormEvent) {
@@ -36,7 +36,12 @@ export function FormAmbiente({
   }
 
   return (
-    <form onSubmit={aoEnviar} noValidate className="grid gap-4 sm:grid-cols-2">
+    <form
+      onChange={enviando ? undefined : limpar}
+      onSubmit={aoEnviar}
+      noValidate
+      className="grid gap-4 sm:grid-cols-2"
+    >
       <TextField
         ref={primeiro}
         rotulo="Nome do ambiente"
