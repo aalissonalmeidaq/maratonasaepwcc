@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padrões gráficos da Maratona SAEP</title>
+<style>
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #0B2D6B; font-family: Montserrat, Arial, sans-serif; }
+  h1 { margin: 0 0 4px; } p { margin: 0 0 24px; color: #33465F; }
+  main { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  figure { margin: 0; background: #fff; border: 1px solid #E6EBF2; border-radius: 16px; overflow: hidden; }
+  .amostra { position: relative; height: 160px; overflow: hidden; background: #fff; }
+  .amostra img { position: absolute; inset: 12px; width: calc(100% - 24px); height: calc(100% - 24px); object-fit: contain; }
+  figcaption { display: grid; gap: 4px; padding: 12px 16px; font-size: 13px; }
+  figcaption span { color: #33465F; } code { font-size: 11px; color: #66768A; }
+</style>
+</head>
+<body>
+<h1>Padrões gráficos da Maratona SAEP</h1>
+<p>Recriação vetorial da prancha 08 — versão para validação pela unidade. Gerado por <code>npm run padroes</code>; não edite à mão.</p>
+<main>
+<figure><div class="amostra"><img src="svg/faixas.svg" alt=""></div><figcaption><strong>Elementos base</strong><span>As faixas diagonais da marca nas seis cores principais.</span><code>faixas.svg</code></figcaption></figure>
+<figure><div class="amostra"><img src="svg/volumes.svg" alt=""></div><figcaption><strong>Faixas em diferentes volumes</strong><span>Variação de largura para ritmo e hierarquia.</span><code>volumes.svg</code></figcaption></figure>
+<figure><div class="amostra"><img src="svg/recortes.svg" alt=""></div><figcaption><strong>Recortes e terminações</strong><span>Terminações retas, chanfradas e em seta.</span><code>recortes.svg</code></figcaption></figure>
+<figure><div class="amostra"><img src="svg/diagonal.svg" alt=""></div><figcaption><strong>Padrão diagonal</strong><span>Faixas cruzadas em módulo quadrado.</span><code>diagonal.svg</code></figcaption></figure>
+<figure><div class="amostra"><img src="svg/setas.svg" alt=""></div><figcaption><strong>Padrão de setas</strong><span>Sequência de setas indicando avanço.</span><code>setas.svg</code></figcaption></figure>
+<figure><div class="amostra"><img src="svg/entrelacado.svg" alt=""></div><figcaption><strong>Padrão entrelaçado</strong><span>Faixas sobrepostas em transparência, formando cruzamentos.</span><code>entrelacado.svg</code></figcaption></figure>
+<figure><div class="amostra"><img src="svg/canto.svg" alt=""></div><figcaption><strong>Composição de canto</strong><span>Recorte diagonal para cantos de cabeçalhos, banners e cartões.</span><code>canto.svg</code></figcaption></figure>
+<figure><div class="amostra"><img src="svg/textura.svg" alt=""></div><figcaption><strong>Textura institucional</strong><span>Repetição das faixas em baixa opacidade para fundos.</span><code>textura.svg</code></figcaption></figure>
+<figure><div class="amostra" style="background:linear-gradient(45deg, #1676FF, #22D3EE 30%, #FFC02E 55%, #FF5866 78%, #8B6DFF)"></div><figcaption><strong>Gradiente marca</strong><code>linear-gradient(45deg, #1676FF, #22D3EE 30%, #FFC02E 55%, #FF5866 78%, #8B6DFF)</code></figcaption></figure>
+<figure><div class="amostra" style="background:linear-gradient(45deg, #EAF2FF, #FFFFFF 60%)"></div><figcaption><strong>Gradiente suave</strong><code>linear-gradient(45deg, #EAF2FF, #FFFFFF 60%)</code></figcaption></figure>
+<figure><div class="amostra" style="background:linear-gradient(135deg, #0B2D6B, #062457 55%, #04193F)"></div><figcaption><strong>Gradiente escuro</strong><code>linear-gradient(135deg, #0B2D6B, #062457 55%, #04193F)</code></figcaption></figure>
+</main>
+</body>
+</html>

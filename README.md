@@ -171,6 +171,14 @@ herda a cor do texto) ou `cor="marca"` (contorno azul-marinho + cor de apoio da 
 Arquivos avulsos e galeria para revisão: `npm run icones` → `docs/icones/` (não edite à mão;
 um teste garante que estão em sincronia com a fonte).
 
+## Padrões gráficos
+
+Faixas, recortes, padrões modulares (diagonal, setas, entrelaçado), composição de canto,
+textura e gradientes da prancha 08, em `src/shared/ui/padroes/dados.ts`. Use
+`<PadraoGrafico nome="canto" posicao="inferior-direito" />` (sempre decorativo) ou os
+componentes `BannerDestaque`, `CardDestaque` e `ProgressoCircular`. Arquivos avulsos e galeria:
+`npm run padroes` → `docs/padroes/`.
+
 ## PWA e offline
 
 - Instalável quando o navegador oferece (botão "Instalar aplicativo"); no iOS use "Adicionar à

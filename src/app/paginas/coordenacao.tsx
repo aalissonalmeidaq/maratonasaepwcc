@@ -10,6 +10,7 @@ import {
   PageHeader,
   StatCard,
   StatusBadge,
+  BannerDestaque,
 } from '@/shared/ui';
 import { TabelaRanking } from './aluno';
 import { Atalhos } from '../layout/Atalhos';
@@ -23,7 +24,7 @@ export function CoordenacaoInicioPage() {
     <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="coordenacao" />}>
       {(p: Painel) => (
         <>
-          <PageHeader icone="painel" titulo="Visão geral" descricao={p.edicao.nome} />
+          <BannerDestaque titulo="Visão geral" descricao={p.edicao.nome} />
           <Atalhos area="coordenacao" />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard

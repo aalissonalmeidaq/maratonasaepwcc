@@ -343,7 +343,7 @@ export const ICONES = {
   enviar: {
     rotulo: 'Enviar',
     acento: 'coral',
-    svg: `<path d="M21 3 3 10.5l7 2.5 2.5 7z"/><path d="M21 3 10 13" ${a}/>`,
+    svg: `<path d="M21 3 3 10.5l7 2.5 2.5 7z"/><path d="M21 3 10 13" ${a}/><path d="M2 15.5h3M3 19h3" ${a}/>`,
   },
   documento: {
     rotulo: 'Documento',
@@ -564,6 +564,73 @@ export const ICONES = {
     svg: `${bandeja}<path d="M12 14.5v-11M8 7.5l4-4 4 4" ${a}/>`,
   },
   sincronizar: { rotulo: 'Sincronizar', acento: 'azul', svg: setasCirculares },
+
+  // --- Pranchas "Navegação e conta", "Maratona e aprendizagem", "Avaliação e administração" ---
+  voltar: {
+    rotulo: 'Voltar',
+    acento: 'azul',
+    svg: `<circle cx="12" cy="12" r="9"/><path d="m13.5 8-4 4 4 4" ${a}/>`,
+  },
+  avancar: {
+    rotulo: 'Avançar',
+    acento: 'ciano',
+    svg: `<circle cx="12" cy="12" r="9"/><path d="m10.5 8 4 4-4 4" ${a}/>`,
+  },
+  fecharCirculo: {
+    rotulo: 'Fechar',
+    acento: 'coral',
+    svg: `<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6" ${a}/>`,
+  },
+  adicionar: {
+    rotulo: 'Adicionar',
+    acento: 'ciano',
+    svg: `<circle cx="12" cy="12" r="9" ${a}/><path d="M12 7.5v9M7.5 12h9" ${a}/>`,
+  },
+  correcao: {
+    rotulo: 'Correção',
+    acento: 'coral',
+    svg: `<path d="M13 20.5H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V11"/><path d="M7.5 8h9M7.5 11.5h6M7.5 15h3"/><path d="m14 17.5 2.5 2.5 5-6" ${a}/>`,
+  },
+  advertencia: {
+    rotulo: 'Advertência',
+    acento: 'coral',
+    svg: `<path d="M10.3 5.2 3.6 17.5a2 2 0 0 0 1.7 3h13.4a2 2 0 0 0 1.7-3L13.7 5.2a2 2 0 0 0-3.4 0z" ${a}/><path d="M12 10v4M12 17.3h.01"/><path d="M4 7.5 2.5 6M20 7.5 21.5 6M1 12h1.5M21.5 12H23" ${a}/>`,
+  },
+  participacao: {
+    rotulo: 'Participação',
+    acento: 'amarelo',
+    svg: `${pessoaCentral}${pessoasLaterais}<path d="M12 1.5v1.2M7.8 2.5l.8 1M16.2 2.5l-.8 1" ${a}/>`,
+  },
+  relogio: {
+    rotulo: 'Relógio',
+    acento: 'coral',
+    svg: `<circle cx="14" cy="12" r="8"/><path d="M14 8v4.5l3 1.8" ${a}/><path d="M1.5 9h3M1 12.5h3.5M2 16h2.5" ${a}/>`,
+  },
+  apresentacao: {
+    rotulo: 'Apresentação',
+    acento: 'amarelo',
+    svg: `<circle cx="6.5" cy="10" r="2.8"/><path d="M1.5 20c.5-3 2.4-5 5-5s4.5 2 5 5"/><path d="M9 3.5h12.5V14H12"/><path d="M15.5 14v3.5l-2 2M15.5 17.5l2 2"/><path d="M14.5 11V9.5M17 11V7.5M19.5 11V6" ${a}/>`,
+  },
+  computador: {
+    rotulo: 'Computador',
+    acento: 'azul',
+    svg: `<rect x="4" y="4.5" width="16" height="11" rx="1.5"/><path d="M2 18.5h20l-1.5 1.5h-17z"/><path d="M6.5 13h11" ${a}/>`,
+  },
+  laboratorio: {
+    rotulo: 'Laboratório',
+    acento: 'ciano',
+    svg: `<path d="M9.5 3h5M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15.5h10" ${a}/><circle cx="11" cy="12.3" r=".8" ${af}/><circle cx="13.4" cy="11" r=".6" ${af}/>`,
+  },
+  colaboracao: {
+    rotulo: 'Colaboração',
+    acento: 'amarelo',
+    svg: `<circle cx="12" cy="5.5" r="2"/><path d="M9 10c.6-1.2 1.7-2 3-2s2.4.8 3 2"/><circle cx="6" cy="14.5" r="2" ${a}/><path d="M3 19c.6-1.2 1.7-2 3-2s2.4.8 3 2" ${a}/><circle cx="18" cy="14.5" r="2" ${a}/><path d="M15 19c.6-1.2 1.7-2 3-2s2.4.8 3 2" ${a}/><path d="M5 9.5a8 8 0 0 1 2.5-3.5M19 9.5a8 8 0 0 0-2.5-3.5M10 21.5h4"/>`,
+  },
+  ideia: {
+    rotulo: 'Ideia',
+    acento: 'amarelo',
+    svg: `<path d="M9 17.5h6M10 21h4"/><path d="M8.6 14.5A6 6 0 1 1 15.4 14.5c-.8.7-1 1.6-1 2.5h-4.8c0-.9-.2-1.8-1-2.5z" ${a}/><path d="M12 .8v1.2M4 4.3l.9.9M20 4.3l-.9.9M1.5 10.5H3M21 10.5h1.5" ${a}/>`,
+  },
 
   // --- Utilitários de interface (não constam da prancha; mesmo estilo) ---------------------------
   fechar: { rotulo: 'Fechar', acento: 'coral', svg: '<path d="M6 6l12 12M18 6 6 18"/>' },

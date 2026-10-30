@@ -3,7 +3,7 @@ import { NavLink, Outlet } from 'react-router';
 import { ROTULO_PAPEL, type Area } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
 import { BotaoInstalar } from '@/shared/pwa';
-import { Brand, Button, Icon, MarcaSenai, cx } from '@/shared/ui';
+import { Brand, Button, Icon, MarcaSenai, PadraoGrafico, cx } from '@/shared/ui';
 import { MENUS, ROTULO_AREA } from '../navegacao';
 
 function Menu({ area, aoNavegar }: { area: Area; aoNavegar?: () => void }) {
@@ -31,21 +31,6 @@ function Menu({ area, aoNavegar }: { area: Area; aoNavegar?: () => void }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-/** Faixas diagonais da marca, usadas com moderação como grafismo (Design System §2). */
-function Faixas() {
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute -right-6 -bottom-4 flex gap-2 opacity-90"
-    >
-      <span className="h-24 w-4 rotate-35 rounded-sm bg-cyan-500" />
-      <span className="h-24 w-4 rotate-35 rounded-sm bg-yellow-500" />
-      <span className="h-24 w-4 rotate-35 rounded-sm bg-coral-500" />
-      <span className="h-24 w-4 rotate-35 rounded-sm bg-purple-500" />
-    </div>
   );
 }
 
@@ -88,7 +73,11 @@ export function AppShell({ area }: { area: Area }) {
         <div className="relative z-10 mt-6">
           <MarcaSenai fundo="escuro" className="w-28" />
         </div>
-        <Faixas />
+        <PadraoGrafico
+          nome="canto"
+          posicao="inferior-direito"
+          className="absolute right-0 bottom-0 h-40 w-full opacity-90"
+        />
       </aside>
 
       {/* Barra superior */}
@@ -107,7 +96,7 @@ export function AppShell({ area }: { area: Area }) {
               rotulo={menuAberto ? 'Fechar menu' : 'Abrir menu'}
             />
           </button>
-          <Brand variante="positivo" className="w-40 lg:hidden" />
+          <Brand variante="positivo" className="w-40 min-w-0 lg:hidden" />
           <p className="hidden text-sm font-semibold text-text-secondary lg:block">
             {ROTULO_AREA[area]}
           </p>
@@ -147,7 +136,7 @@ export function AppShell({ area }: { area: Area }) {
       <main
         id="conteudo"
         tabIndex={-1}
-        className="mx-auto w-full max-w-(--content-max) px-4 py-6 sm:px-6 lg:px-8"
+        className="mx-auto w-full min-w-0 max-w-(--content-max) px-4 py-6 wrap-anywhere sm:px-6 lg:px-8"
       >
         <Outlet />
       </main>

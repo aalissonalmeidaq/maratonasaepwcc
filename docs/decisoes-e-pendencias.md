@@ -25,6 +25,23 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   arquivos como estão (não alteramos a marca). **[validar]**
 - Tokens têm `--color-coral-500 #FF5866` e os SVGs `#FC4B55` (diferença pequena). Sem ação.
 
+## 2.1 Identidade visual — pranchas recebidas em 2026-10-29
+
+- O usuário indicou as pranchas (variações da marca, paleta, tipografia, universo fotográfico,
+  aplicações, elementos de interface, iconografia, padrões gráficos e acabamentos) como a
+  identidade visual da aplicação.
+- **Padrões gráficos** (prancha 08) recriados em SVG em `src/shared/ui/padroes/dados.ts`;
+  arquivos em `docs/padroes/svg` e galeria em `docs/padroes/galeria.html` (`npm run padroes`).
+  **[validar]**
+- **13 ícones** das pranchas "Navegação e conta", "Maratona e aprendizagem" e "Avaliação e
+  administração" acrescentados (116 no total). **[validar]**
+- **Paleta da prancha × tokens em uso:** azul-marinho `#0B2D6B` × `#062457`; amarelo `#FFC02E` ×
+  `#FFB820`; borda sutil `#E6EBF2` × `#DCE5EF`. Os padrões gráficos usam a paleta da prancha; os
+  tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[decidir]**
+  se os tokens devem migrar para a paleta da prancha.
+- Ilustrações de pessoas enviadas como modelo não chegaram como arquivos; aguardam
+  `docs/referencias/ilustracoes/`.
+
 ## 3. Premissas de regra (configuração `REGRAS_PILOTO`)
 
 | Premissa                             | Escolha provisória                                                                                       |

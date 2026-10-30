@@ -13,6 +13,8 @@ import {
   ResponsiveTable,
   StatCard,
   StatusBadge,
+  BannerDestaque,
+  ProgressoCircular,
 } from '@/shared/ui';
 import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
@@ -84,10 +86,26 @@ export function AlunoInicioPage() {
     <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="aluno" />}>
       {(p: Painel) => (
         <>
-          <PageHeader
-            icone="inicio"
+          <BannerDestaque
             titulo={`Olá, ${p.estudante.nome.split(' ')[0]}!`}
             descricao="Cada desafio é uma oportunidade de evoluir."
+            lateral={
+              <div className="flex min-w-0 flex-wrap items-center gap-4 wrap-anywhere">
+                <ProgressoCircular
+                  valor={p.totais.total}
+                  maximo={p.maximo}
+                  rotulo="Progresso da pontuação da dupla"
+                  inverso
+                />
+                <div className="min-w-0 flex-1 basis-36">
+                  <p className="text-sm text-white/80">Pontuação da dupla</p>
+                  <p className="font-display text-2xl font-bold tabular-nums">
+                    {formatarPontos(p.totais.total)}
+                  </p>
+                  <p className="text-xs text-white/70">de {p.maximo} pontos</p>
+                </div>
+              </div>
+            }
           />
           <Atalhos area="aluno" />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
