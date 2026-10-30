@@ -11,9 +11,11 @@ describe('MarcaSenai', () => {
     );
   });
 
-  it('em fundo claro mantém a área provisória (versão colorida ainda não fornecida)', () => {
+  it('em fundo claro usa o arquivo colorido fornecido', () => {
     render(<MarcaSenai fundo="claro" />);
-    expect(screen.queryByRole('img')).not.toBeInTheDocument();
-    expect(screen.getByText(/arquivo oficial pendente/i)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'SENAI Ceará' })).toHaveAttribute(
+      'src',
+      '/brand/senai-ceara-colorido.svg',
+    );
   });
 });
