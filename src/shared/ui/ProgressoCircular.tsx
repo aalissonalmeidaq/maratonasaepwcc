@@ -18,7 +18,9 @@ export function ProgressoCircular({
   tamanho = 88,
   inverso = false,
 }: ProgressoCircularProps) {
-  const fracao = maximo > 0 ? Math.min(1, Math.max(0, valor / maximo)) : 0;
+  const limite = Number.isFinite(maximo) ? Math.max(0, maximo) : 0;
+  const atual = Number.isFinite(valor) ? Math.min(limite, Math.max(0, valor)) : 0;
+  const fracao = limite > 0 ? atual / limite : 0;
   const raio = 15.5;
   const circunferencia = 2 * Math.PI * raio;
   return (
@@ -26,9 +28,9 @@ export function ProgressoCircular({
       role="progressbar"
       aria-label={rotulo}
       aria-valuemin={0}
-      aria-valuemax={maximo}
-      aria-valuenow={valor}
-      className="relative grid place-items-center"
+      aria-valuemax={limite}
+      aria-valuenow={atual}
+      className="relative grid shrink-0 place-items-center"
       style={{ width: tamanho, height: tamanho }}
     >
       <svg viewBox="0 0 36 36" className="absolute inset-0 -rotate-90" aria-hidden="true">

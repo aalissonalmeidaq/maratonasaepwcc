@@ -133,7 +133,7 @@ function Paginacao({
   return (
     <nav
       aria-label={`Paginação: ${rotulo}`}
-      className="mt-4 flex items-center justify-between gap-2 sm:justify-end"
+      className="mt-4 flex flex-wrap items-center justify-between gap-2 sm:justify-end"
     >
       <BotaoPagina
         rotulo="Página anterior"

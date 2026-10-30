@@ -62,5 +62,19 @@ describe('ProgressoCircular', () => {
   it('limita o preenchimento entre 0% e 100%', () => {
     render(<ProgressoCircular valor={500} maximo={400} rotulo="x" />);
     expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '400');
+  });
+
+  it.each([
+    [-10, 400, 0, 400],
+    [20, 0, 0, 0],
+    [20, -1, 0, 0],
+    [Number.NaN, 400, 0, 400],
+    [20, Number.POSITIVE_INFINITY, 0, 0],
+  ])('mantém ARIA dentro dos limites para valor %s e máximo %s', (valor, maximo, atual, limite) => {
+    render(<ProgressoCircular valor={valor} maximo={maximo} rotulo="Pontuação" />);
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(atual));
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuemax', String(limite));
+    expect(screen.getByText('0%')).toBeInTheDocument();
   });
 });

@@ -11,6 +11,7 @@ import {
   PageHeader,
   ProgressBar,
   ResponsiveTable,
+  ListaPaginada,
   StatCard,
   StatusBadge,
   BannerDestaque,
@@ -90,14 +91,14 @@ export function AlunoInicioPage() {
             titulo={`Olá, ${p.estudante.nome.split(' ')[0]}!`}
             descricao="Cada desafio é uma oportunidade de evoluir."
             lateral={
-              <div className="flex items-center gap-4">
+              <div className="flex min-w-0 flex-wrap items-center gap-4 wrap-anywhere">
                 <ProgressoCircular
                   valor={p.totais.total}
                   maximo={p.maximo}
                   rotulo="Progresso da pontuação da dupla"
                   inverso
                 />
-                <div>
+                <div className="min-w-0 flex-1 basis-36">
                   <p className="text-sm text-white/80">Pontuação da dupla</p>
                   <p className="font-display text-2xl font-bold tabular-nums">
                     {formatarPontos(p.totais.total)}
@@ -225,8 +226,25 @@ export function AlunoDesafiosPage() {
       {(p: Painel) => (
         <>
           <PageHeader icone="desafio" titulo="Desafios e entregas" />
-          <div className="grid gap-4 lg:grid-cols-2">
-            {p.desafios.map((d) => {
+          <ListaPaginada
+            rotulo="Desafios e entregas"
+            itens={p.desafios}
+            chave={(d) => d.id}
+            vazio="Nenhum desafio cadastrado."
+            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
+            texto={(d) =>
+              [
+                d.titulo,
+                d.resumo,
+                formatarDataHora(d.prazo),
+                d.politicaIA,
+                p.porEncontro.find((e) => e.encontro.id === d.encontroId)?.pontuacao
+                  ? 'Encerrado'
+                  : 'Aberto',
+              ].join(' ')
+            }
+          >
+            {(d) => {
               const encontro = p.porEncontro.find((e) => e.encontro.id === d.encontroId);
               const aberto = !encontro?.pontuacao;
               return (
@@ -255,8 +273,8 @@ export function AlunoDesafiosPage() {
                   )}
                 </Card>
               );
-            })}
-          </div>
+            }}
+          </ListaPaginada>
         </>
       )}
     </ComDadosDemo>

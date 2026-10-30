@@ -51,42 +51,51 @@ export function ResponsiveTable<L>({
     <Listagem rotulo={legenda} itens={linhas} texto={texto} porPagina={porPagina} vazio={vazio}>
       {(pagina) => (
         <>
-          <table className="hidden w-full border-collapse text-left text-sm sm:table">
-            <caption className={legendaVisivel ? 'mb-2 text-left font-semibold' : 'sr-only'}>
-              {legenda}
-            </caption>
-            <thead>
-              <tr className="border-b border-border text-text-secondary">
-                {colunas.map((c) => (
-                  <th
-                    key={c.id}
-                    scope="col"
-                    className={`px-3 py-2 font-semibold whitespace-nowrap ${c.numerica ? 'text-right' : ''}`}
-                  >
-                    {c.titulo}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {pagina.map((l) => (
-                <tr key={chave(l)} className="border-b border-border last:border-0">
+          {/* eslint-disable jsx-a11y/no-noninteractive-tabindex -- A região de rolagem deve receber foco para permitir navegação horizontal por teclado. */}
+          <div
+            role="region"
+            aria-label={`Tabela: ${legenda}`}
+            tabIndex={0}
+            className="relative hidden max-w-full overflow-x-auto rounded-md focus-visible:shadow-(--focus-ring) focus-visible:outline-none sm:block"
+          >
+            <table className="w-full border-collapse text-left text-sm">
+              <caption className={legendaVisivel ? 'mb-2 text-left font-semibold' : 'sr-only'}>
+                {legenda}
+              </caption>
+              <thead>
+                <tr className="border-b border-border text-text-secondary">
                   {colunas.map((c) => (
-                    <td
+                    <th
                       key={c.id}
-                      className={cx(
-                        'px-3 py-3',
-                        c.numerica && 'text-right tabular-nums',
-                        c.compacta && 'whitespace-nowrap',
-                      )}
+                      scope="col"
+                      className={`px-3 py-2 font-semibold whitespace-nowrap ${c.numerica ? 'text-right' : ''}`}
                     >
-                      {c.valor(l)}
-                    </td>
+                      {c.titulo}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {pagina.map((l) => (
+                  <tr key={chave(l)} className="border-b border-border last:border-0">
+                    {colunas.map((c) => (
+                      <td
+                        key={c.id}
+                        className={cx(
+                          'px-3 py-3',
+                          c.numerica && 'text-right tabular-nums',
+                          c.compacta && 'whitespace-nowrap',
+                        )}
+                      >
+                        {c.valor(l)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* eslint-enable jsx-a11y/no-noninteractive-tabindex */}
 
           <ul className="flex flex-col gap-3 sm:hidden" aria-label={legenda}>
             {pagina.map((l) => (
