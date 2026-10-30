@@ -54,22 +54,22 @@ export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): Reposit
     },
     async salvarCurso({ id, edicaoId, nome, categoria }) {
       const linha = { edicao_id: edicaoId, nome: nome.trim(), categoria: categoria.trim() };
-      verificarGravacao(
-        id
-          ? await sb.from('cursos').update(linha).eq('id', id)
-          : await sb.from('cursos').insert(linha),
-      );
+      if (id) {
+        verificar(await sb.from('cursos').update(linha).eq('id', id).select('id').single());
+      } else {
+        verificarGravacao(await sb.from('cursos').insert(linha));
+      }
     },
     async removerCurso(id) {
       verificarGravacao(await sb.from('cursos').delete().eq('id', id));
     },
     async salvarTurma({ id, cursoId, nome, anoLetivo }) {
       const linha = { curso_id: cursoId, nome: nome.trim(), ano_letivo: anoLetivo };
-      verificarGravacao(
-        id
-          ? await sb.from('turmas').update(linha).eq('id', id)
-          : await sb.from('turmas').insert(linha),
-      );
+      if (id) {
+        verificar(await sb.from('turmas').update(linha).eq('id', id).select('id').single());
+      } else {
+        verificarGravacao(await sb.from('turmas').insert(linha));
+      }
     },
     async removerTurma(id) {
       verificarGravacao(await sb.from('turmas').delete().eq('id', id));

@@ -117,11 +117,14 @@ function BotaoRemover({
 const nomeTurma = (turmas: Turma[], id: string | null) =>
   turmas.find((t) => t.id === id)?.nome ?? '—';
 
-const idBotaoEditar = (id: string) => `editar-${id}`;
-
 /** Ao sair da edição, o foco volta ao "Editar" da linha (o formulário de edição deixa de existir). */
 function devolverFoco(id: string) {
-  requestAnimationFrame(() => document.getElementById(idBotaoEditar(id))?.focus());
+  requestAnimationFrame(() => {
+    const botoes = document.querySelectorAll<HTMLButtonElement>('[data-editar]');
+    [...botoes]
+      .find((botao) => botao.dataset.editar === id && botao.getClientRects().length > 0)
+      ?.focus();
+  });
 }
 
 function BotaoEditar({
@@ -134,7 +137,7 @@ function BotaoEditar({
   onEditar: () => void;
 }) {
   return (
-    <Button id={idBotaoEditar(id)} variante="terciario" icone="editar" onClick={onEditar}>
+    <Button data-editar={id} variante="terciario" icone="editar" onClick={onEditar}>
       Editar<span className="sr-only"> {rotulo}</span>
     </Button>
   );

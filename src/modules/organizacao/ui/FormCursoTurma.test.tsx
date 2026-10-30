@@ -129,3 +129,24 @@ describe('FormTurma — edição (FR-001)', () => {
     expect(onSalvar).not.toHaveBeenCalled();
   });
 });
+
+it.each(['curso', 'turma'])('limpa confirmação ao alterar %s depois de salvar', async (tipo) => {
+  const user = userEvent.setup();
+  const props = { onSalvar: vi.fn().mockResolvedValue(undefined), onCancelar: vi.fn() };
+  render(
+    tipo === 'curso' ? (
+      <FormCurso inicial={curso} {...props} />
+    ) : (
+      <FormTurma inicial={turma} cursos={cursos} {...props} />
+    ),
+  );
+  await user.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+  expect(await screen.findByRole('button', { name: 'Concluir' })).toBeInTheDocument();
+  await user.type(
+    screen.getByLabelText(tipo === 'curso' ? 'Nome do curso' : 'Nome da turma'),
+    ' novo',
+  );
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Concluir' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
+});

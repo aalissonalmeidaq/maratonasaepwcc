@@ -8,6 +8,8 @@ export function useListagem<T>(itens: T[], textoDe: (item: T) => string, porPagi
   const [termo, setTermo] = useState('');
   const [pagina, setPagina] = useState(1);
   const resultado = paginar(filtrarPorBusca(itens, termo, textoDe), pagina, porPagina);
+  // Ajusta o estado junto dos dados, antes de renderizar uma página que deixou de existir.
+  if (pagina !== resultado.pagina) setPagina(resultado.pagina);
   return {
     ...resultado,
     termo,

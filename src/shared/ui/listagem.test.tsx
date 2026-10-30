@@ -150,6 +150,10 @@ describe('ResponsiveTable — busca e paginação', () => {
       />,
     );
     expect(screen.getByRole('status')).toHaveTextContent('Mostrando 11–15 de 15');
+    rerender(
+      <ResponsiveTable legenda="Pessoas" colunas={colunas} linhas={pessoas} chave={(p) => p.id} />,
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('Mostrando 11–20 de 23');
   });
 });
 

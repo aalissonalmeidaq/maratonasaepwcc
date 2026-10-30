@@ -25,7 +25,7 @@ export function FormCurso({
   const [categoria, setCategoria] = useState(inicial?.categoria ?? '');
   const primeiro = useFocoNaEdicao<HTMLInputElement>(Boolean(inicial));
   const [erro, setErro] = useState<{ nome?: string; categoria?: string }>({});
-  const { estado, enviando, enviar } = useEnvio();
+  const { estado, enviando, enviar, limpar } = useEnvio();
 
   async function aoEnviar(ev: FormEvent) {
     ev.preventDefault();
@@ -48,7 +48,12 @@ export function FormCurso({
   }
 
   return (
-    <form onSubmit={aoEnviar} noValidate className="grid gap-4 sm:grid-cols-2">
+    <form
+      onChange={enviando ? undefined : limpar}
+      onSubmit={aoEnviar}
+      noValidate
+      className="grid gap-4 sm:grid-cols-2"
+    >
       <TextField
         ref={primeiro}
         rotulo="Nome do curso"
@@ -103,7 +108,7 @@ export function FormTurma({
   const campoCurso = useFocoNaEdicao<HTMLSelectElement>(Boolean(inicial) && !cursoBloqueado);
   const campoNome = useFocoNaEdicao<HTMLInputElement>(Boolean(inicial) && cursoBloqueado);
   const [erro, setErro] = useState<{ cursoId?: string; nome?: string }>({});
-  const { estado, enviando, enviar } = useEnvio();
+  const { estado, enviando, enviar, limpar } = useEnvio();
 
   async function aoEnviar(ev: FormEvent) {
     ev.preventDefault();
@@ -123,7 +128,12 @@ export function FormTurma({
   }
 
   return (
-    <form onSubmit={aoEnviar} noValidate className="grid gap-4 sm:grid-cols-3">
+    <form
+      onChange={enviando ? undefined : limpar}
+      onSubmit={aoEnviar}
+      noValidate
+      className="grid gap-4 sm:grid-cols-3"
+    >
       <SelectField
         ref={campoCurso}
         rotulo="Curso"

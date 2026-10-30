@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router';
-import { RedirecionarParaPainel, RotaProtegida } from '@/modules/auth';
+import { PrimeiroAcessoPage, RedirecionarParaPainel, RotaProtegida } from '@/modules/auth';
 import { LimiteCarregamento } from './layout/LimiteCarregamento';
 import { AguardandoPermissaoPage, EntradaPage, NaoEncontradaPage } from './paginas/comum';
 
@@ -87,6 +87,7 @@ export function AppRotas() {
       >
         <Routes>
           <Route path="/" element={<RedirecionarParaPainel />} />
+          <Route path="/primeiro-acesso" element={<PrimeiroAcessoPage />} />
           <Route path="/entrar" element={<EntradaPage />} />
           <Route path="/aguardando-permissao" element={<AguardandoPermissaoPage />} />
 

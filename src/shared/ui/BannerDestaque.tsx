@@ -20,8 +20,8 @@ export function BannerDestaque({ titulo, descricao, lateral }: BannerDestaquePro
         className="absolute top-0 right-0 -z-10 h-full w-2/3 opacity-90 sm:w-1/2"
       />
       <PadraoGrafico nome="textura" className="absolute inset-0 -z-20 h-full w-full opacity-40" />
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 max-w-xl wrap-anywhere">
+      <div className="flex flex-col flex-wrap gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 max-w-xl flex-1 wrap-anywhere">
           <h1 className="font-display text-2xl font-bold sm:text-3xl">{titulo}</h1>
           {descricao && <p className="mt-2 text-white/85">{descricao}</p>}
         </div>

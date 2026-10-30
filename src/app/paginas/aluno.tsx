@@ -13,6 +13,7 @@ import {
   StatCard,
   StatusBadge,
   BannerDestaque,
+  ListaPaginada,
 } from '@/shared/ui';
 import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
@@ -241,8 +242,25 @@ export function AlunoDesafiosPage() {
       {(p: Painel) => (
         <>
           <PageHeader icone="desafio" titulo="Desafios e entregas" />
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {p.desafios.map((d) => {
+          <ListaPaginada
+            rotulo="Desafios e entregas"
+            itens={p.desafios}
+            chave={(d) => d.id}
+            vazio="Nenhum desafio cadastrado."
+            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
+            texto={(d) =>
+              [
+                d.titulo,
+                d.resumo,
+                formatarDataHora(d.prazo),
+                d.politicaIA,
+                p.porEncontro.find((e) => e.encontro.id === d.encontroId)?.pontuacao
+                  ? 'Encerrado'
+                  : 'Aberto',
+              ].join(' ')
+            }
+          >
+            {(d) => {
               const encontro = p.porEncontro.find((e) => e.encontro.id === d.encontroId);
               const aberto = !encontro?.pontuacao;
               return (
@@ -271,8 +289,8 @@ export function AlunoDesafiosPage() {
                   )}
                 </Card>
               );
-            })}
-          </div>
+            }}
+          </ListaPaginada>
         </>
       )}
     </ComDadosDemo>

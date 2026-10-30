@@ -48,3 +48,19 @@ describe('FormAmbiente — edição (FR-012)', () => {
     expect(screen.getByLabelText('Nome do ambiente')).toHaveValue('');
   });
 });
+
+it('limpa sucesso quando o ambiente muda depois de salvar', async () => {
+  const user = userEvent.setup();
+  render(
+    <FormAmbiente
+      inicial={ambiente}
+      onSalvar={vi.fn().mockResolvedValue(undefined)}
+      onCancelar={vi.fn()}
+    />,
+  );
+  await user.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+  expect(await screen.findByRole('button', { name: 'Concluir' })).toBeInTheDocument();
+  await user.type(screen.getByLabelText('Observações'), ' novas');
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
+});
