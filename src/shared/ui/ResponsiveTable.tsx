@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { cx } from './cx';
 import { Listagem } from './Listagem';
 import { textoDoNo } from './textoDoNo';
 
@@ -12,6 +13,8 @@ export interface Coluna<L> {
   texto?: (linha: L) => string;
   /** `false` tira a coluna da busca (ex.: ações). */
   buscavel?: boolean;
+  /** Conteúdo curto que não deve quebrar linha (números, datas, horários, ações). */
+  compacta?: boolean;
 }
 
 interface ResponsiveTableProps<L> {
@@ -58,7 +61,7 @@ export function ResponsiveTable<L>({
                   <th
                     key={c.id}
                     scope="col"
-                    className={`px-3 py-2 font-semibold ${c.numerica ? 'text-right' : ''}`}
+                    className={`px-3 py-2 font-semibold whitespace-nowrap ${c.numerica ? 'text-right' : ''}`}
                   >
                     {c.titulo}
                   </th>
@@ -71,7 +74,11 @@ export function ResponsiveTable<L>({
                   {colunas.map((c) => (
                     <td
                       key={c.id}
-                      className={`px-3 py-3 ${c.numerica ? 'text-right tabular-nums' : ''}`}
+                      className={cx(
+                        'px-3 py-3',
+                        c.numerica && 'text-right tabular-nums',
+                        c.compacta && 'whitespace-nowrap',
+                      )}
                     >
                       {c.valor(l)}
                     </td>

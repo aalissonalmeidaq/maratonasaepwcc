@@ -42,9 +42,12 @@ export function Listagem<T>({
 
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+      <div className="mb-4 flex flex-wrap items-end gap-x-4 gap-y-2">
         <CampoBusca rotulo={rotulo} termo={l.termo} onBuscar={l.buscar} campo={campo} />
-        <p role="status" className="text-sm text-text-secondary tabular-nums">
+        <p
+          role="status"
+          className="text-sm text-text-secondary tabular-nums sm:flex sm:min-h-(--control-min-height) sm:items-center"
+        >
           {contagem}
         </p>
       </div>
@@ -140,8 +143,9 @@ function Paginacao({
         <Icon nome="voltar" tamanho="sm" />
         Anterior
       </BotaoPagina>
-      <span className="px-2 text-sm text-text-secondary tabular-nums">
-        Página {pagina} de {totalPaginas}
+      <span className="text-sm whitespace-nowrap text-text-secondary tabular-nums sm:px-2">
+        <span className="max-sm:sr-only">Página </span>
+        {pagina} de {totalPaginas}
       </span>
       <BotaoPagina
         rotulo="Próxima página"
@@ -175,7 +179,7 @@ function BotaoPagina({
       onClick={() => {
         if (!indisponivel) onClick();
       }}
-      className="aria-disabled:cursor-not-allowed aria-disabled:opacity-55"
+      className="whitespace-nowrap max-sm:px-3 aria-disabled:cursor-not-allowed aria-disabled:opacity-55"
     >
       {children}
     </Button>

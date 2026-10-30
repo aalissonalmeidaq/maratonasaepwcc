@@ -18,6 +18,7 @@ import {
   ConfirmDialog,
   EmptyState,
   ListaPaginada,
+  NavegacaoSecoes,
   PageHeader,
   ResponsiveTable,
   RetornoEnvio,
@@ -118,8 +119,16 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
   return (
     <>
       <PageHeader icone="gestao" titulo="Organização da edição" descricao={edicao.nome} />
+      <NavegacaoSecoes
+        secoes={[
+          { id: 'cursos', rotulo: 'Cursos', icone: 'educacao' },
+          { id: 'turmas', rotulo: 'Turmas', icone: 'turma' },
+          { id: 'vinculos', rotulo: 'Pessoas e vínculos', icone: 'usuarios' },
+          { id: 'criar-conta', rotulo: 'Criar conta', icone: 'editarUsuario' },
+        ]}
+      />
       <div className="grid gap-6">
-        <Card icone="educacao" titulo="Cursos e categorias">
+        <Card id="cursos" icone="educacao" titulo="Cursos e categorias">
           <Consulta consulta={cursos}>
             {(lista) => (
               <ResponsiveTable
@@ -157,7 +166,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
           </div>
         </Card>
 
-        <Card icone="turma" titulo="Turmas">
+        <Card id="turmas" icone="turma" titulo="Turmas">
           <Consulta consulta={turmas}>
             {(lista) => (
               <ResponsiveTable
@@ -199,15 +208,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
           </div>
         </Card>
 
-        <Card icone="editarUsuario" titulo="Criar conta">
-          <FormConta
-            turmas={turmas.data ?? []}
-            bloqueio={bloqueio}
-            onCriar={(d) => gravar(() => r.organizacao.criarConta({ ...d, edicaoId: edicao.id }))()}
-          />
-        </Card>
-
-        <Card icone="usuarios" titulo="Pessoas e vínculos">
+        <Card id="vinculos" icone="usuarios" titulo="Pessoas e vínculos">
           <Consulta consulta={vinculos}>
             {(lista) => (
               <ResponsiveTable
@@ -265,6 +266,14 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
             />
           </div>
         </Card>
+
+        <Card id="criar-conta" icone="editarUsuario" titulo="Criar conta">
+          <FormConta
+            turmas={turmas.data ?? []}
+            bloqueio={bloqueio}
+            onCriar={(d) => gravar(() => r.organizacao.criarConta({ ...d, edicaoId: edicao.id }))()}
+          />
+        </Card>
       </div>
     </>
   );
@@ -299,7 +308,7 @@ function Historico({ duplaId }: { duplaId: string }) {
     );
   }
   return (
-    <ol className="flex flex-col gap-2 text-sm">
+    <ol aria-label="Histórico de integrantes" className="flex basis-full flex-col gap-2 text-sm">
       {registros.map((h) => (
         <li key={`${h.estudanteId}-${h.entradaEm}`}>
           <strong>{h.nome}</strong> — entrou em {formatarDataHora(h.entradaEm)}
@@ -372,40 +381,39 @@ function Duplas({ edicao }: { edicao: Edicao }) {
                 <p className="text-sm text-text-secondary">
                   {nomeTurma(turmas.data ?? [], d.turmaId)}
                 </p>
-                <p className="mt-1">
+                <p className="mt-1 font-medium">
                   {d.integrantes.map((i) => i.nome).join(' e ') || 'Sem integrantes ativos'}
                 </p>
-                <div className="mt-3 flex flex-col gap-3">
-                  <Historico duplaId={d.id} />
+                <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-3 border-t border-border pt-4">
                   {d.ativa && (
-                    <>
-                      <Button
-                        variante="secundario"
-                        icone="editar"
-                        aria-expanded={aberta === d.id}
-                        onClick={() => setAberta(aberta === d.id ? null : d.id)}
-                        className="self-start"
-                      >
-                        Alterar dupla
-                      </Button>
-                      {aberta === d.id && (
-                        <AcoesDupla
-                          dupla={d}
-                          disponiveis={elegiveis.filter(
-                            (e) => e.turmaId === d.turmaId && !e.duplaAtivaId,
-                          )}
-                          bloqueio={bloqueio}
-                          onSubstituir={(x) =>
-                            gravar(() => r.duplas.substituir({ duplaId: d.id, ...x }))()
-                          }
-                          onDesfazer={(justificativa) =>
-                            gravar(() => r.duplas.desfazer({ duplaId: d.id, justificativa }))()
-                          }
-                        />
-                      )}
-                    </>
+                    <Button
+                      variante="secundario"
+                      icone="editar"
+                      aria-expanded={aberta === d.id}
+                      onClick={() => setAberta(aberta === d.id ? null : d.id)}
+                    >
+                      Alterar dupla
+                    </Button>
                   )}
+                  <Historico duplaId={d.id} />
                 </div>
+                {d.ativa && aberta === d.id && (
+                  <div className="mt-4">
+                    <AcoesDupla
+                      dupla={d}
+                      disponiveis={elegiveis.filter(
+                        (e) => e.turmaId === d.turmaId && !e.duplaAtivaId,
+                      )}
+                      bloqueio={bloqueio}
+                      onSubstituir={(x) =>
+                        gravar(() => r.duplas.substituir({ duplaId: d.id, ...x }))()
+                      }
+                      onDesfazer={(justificativa) =>
+                        gravar(() => r.duplas.desfazer({ duplaId: d.id, justificativa }))()
+                      }
+                    />
+                  </div>
+                )}
               </Card>
             )}
           </ListaPaginada>
@@ -450,10 +458,15 @@ function TabelaEncontros({
       linhas={encontros}
       vazio="Nenhum encontro cadastrado."
       colunas={[
-        { id: 'n', titulo: 'Nº', valor: (e) => e.numero },
+        { id: 'n', titulo: 'Nº', valor: (e) => e.numero, compacta: true },
         { id: 't', titulo: 'Encontro', valor: (e) => e.titulo },
-        { id: 'd', titulo: 'Data', valor: (e) => formatarData(e.data, { weekday: 'short' }) },
-        { id: 'h', titulo: 'Horário', valor: horario },
+        {
+          id: 'd',
+          titulo: 'Data',
+          valor: (e) => formatarData(e.data, { weekday: 'short' }),
+          compacta: true,
+        },
+        { id: 'h', titulo: 'Horário', valor: horario, compacta: true },
         { id: 'a', titulo: 'Ambiente', valor: (e) => e.ambienteNome ?? 'A confirmar' },
         {
           id: 'o',
@@ -464,12 +477,15 @@ function TabelaEncontros({
         {
           id: 's',
           titulo: 'Situação',
+          compacta: true,
           valor: (e) => {
             const b = BADGE_SITUACAO[situacaoEncontro(e, hoje())];
             return <StatusBadge estado={b.estado} rotulo={b.rotulo} />;
           },
         },
-        ...(acoes ? [{ id: 'acoes', titulo: 'Ações', valor: acoes, buscavel: false }] : []),
+        ...(acoes
+          ? [{ id: 'acoes', titulo: 'Ações', valor: acoes, buscavel: false, compacta: true }]
+          : []),
       ]}
     />
   );

@@ -80,7 +80,7 @@ describe('ResponsiveTable — busca e paginação', () => {
     await userEvent.click(proxima);
     await userEvent.click(proxima);
     expect(screen.getByRole('status')).toHaveTextContent('Mostrando 21–23 de 23');
-    expect(within(paginacao).getByText('Página 3 de 3')).toBeInTheDocument();
+    expect(paginacao).toHaveTextContent('Página 3 de 3');
     expect(linhasDaTabela()).toHaveLength(3);
     // Continua focável no fim, para o foco não cair no início da página.
     expect(proxima).toHaveAttribute('aria-disabled', 'true');
