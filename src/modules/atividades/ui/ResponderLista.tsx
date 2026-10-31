@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { formatarDataHora } from '@/shared/lib/formatacao';
 import { Alert, Button, ConfirmDialog } from '@/shared/ui';
+import { novaChaveDeEnvio } from '../domain/chave';
 import type { ListaParaEquipe } from '../domain/tipos';
 
 export type EnviarRespostas = (
@@ -29,7 +30,7 @@ export function ResponderLista({
   const [enviando, setEnviando] = useState(false);
   const [falha, setFalha] = useState<string | null>(null);
   const [enviada, setEnviada] = useState(lista.submissao);
-  const chave = useRef(crypto.randomUUID());
+  const chave = useRef(novaChaveDeEnvio());
 
   if (enviada) {
     return (

@@ -9,6 +9,7 @@ import {
   validarArquivo,
   validarLink,
 } from '../domain/regras';
+import { novaChaveDeEnvio } from '../domain/chave';
 import type { Comprovante, DesafioDaEquipe } from '../domain/tipos';
 
 export type EnviarEntrega = (dados: {
@@ -17,7 +18,7 @@ export type EnviarEntrega = (dados: {
   link?: string;
 }) => Promise<Comprovante>;
 
-const novaChave = () => crypto.randomUUID();
+const novaChave = novaChaveDeEnvio;
 
 function TextoDoComprovante({ c, criterio }: { c: Comprovante; criterio: string }) {
   return (

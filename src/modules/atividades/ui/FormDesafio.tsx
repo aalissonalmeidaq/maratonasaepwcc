@@ -127,7 +127,7 @@ export function FormDesafio({
         value={dados.prazo}
         onChange={texto('prazo')}
         erro={erros.prazo}
-        dica="Horário de Brasília; o servidor confere o prazo pelo próprio relógio."
+        dica="No horário deste aparelho; o servidor confere o prazo pelo próprio relógio."
       />
       <div className="sm:col-span-2">
         <TextField
