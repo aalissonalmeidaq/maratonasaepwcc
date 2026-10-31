@@ -6,6 +6,7 @@ import type { Dupla, RepositorioDuplas } from '@/modules/duplas';
 import type { Encontro, RepositorioEncontros } from '@/modules/encontros';
 import type { RepositorioOrganizacao } from '@/modules/organizacao';
 import type { RepositorioPainelTurma } from '@/modules/painel-turma';
+import { criarAtividadesDemo } from './atividades';
 import { rankingPorCategoria } from './consultas';
 import { cursos, duplas, edicao, encontros, pessoas, turmas } from './dados';
 
@@ -257,5 +258,6 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     duplas: repositorioDuplas,
     encontros: repositorioEncontros,
     painelTurma: repositorioPainelTurma,
+    atividades: criarAtividadesDemo(usuarioAtual),
   };
 }

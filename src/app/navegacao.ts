@@ -65,6 +65,12 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       descricao: 'Turmas e duplas vinculadas',
     },
     {
+      rotulo: 'Atividades',
+      caminho: '/docente/atividades',
+      icone: 'desafio',
+      descricao: 'Desafios e questões',
+    },
+    {
       rotulo: 'Encontros',
       caminho: '/docente/encontros',
       icone: 'calendario',
@@ -113,6 +119,18 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       caminho: '/coordenacao/encontros',
       icone: 'calendario',
       descricao: 'Agenda e ambientes',
+    },
+    {
+      rotulo: 'Presença',
+      caminho: '/coordenacao/presenca',
+      icone: 'presenca',
+      descricao: 'Presença e participação',
+    },
+    {
+      rotulo: 'Avaliações',
+      caminho: '/coordenacao/avaliacoes',
+      icone: 'avaliacao',
+      descricao: 'Correções e prorrogações',
     },
     {
       rotulo: 'Ranking',

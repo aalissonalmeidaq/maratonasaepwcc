@@ -10,10 +10,10 @@ Fonte: PRD v1.0, Documento de Visão v1.0, Design System v1.0 e instruções do 
 | RF04        | Duplas e alterações justificadas             | **Feito**: equipes por convite, trio, nome e gestão com histórico (HU01, spec 003) | `modules/duplas`, migrations 002 e 003          |
 | RF05        | Encontros, horários, ambientes               | **Feito**: encontros e ambientes configuráveis                                     | `modules/encontros`, migration 002              |
 | RF06        | Regulamento e comunicados                    | Resumo das regras a partir da configuração                                         | `AlunoRegulamentoPage`                          |
-| RF07–RF08   | Questões e submissão única                   | Regra de pontuação pronta                                                          | `modules/pontuacao`                             |
-| RF09–RF10   | Desafio e envio com comprovante do servidor  | Componente de envio pronto (sem backend)                                           | `modules/desafios`                              |
-| RF11        | Presença e participação                      | Regras prontas; registro no Inc. 3                                                 | `modules/pontuacao`                             |
-| RF12        | Rubricas e feedback                          | Regras e tela de critérios; lançamento no Inc. 3                                   | `DocenteAvaliacoesPage`                         |
+| RF07–RF08   | Questões e submissão única                   | **Feito (spec 006)**: listas, gabarito só após o prazo, submissão única por equipe | `modules/atividades`, migration 006             |
+| RF09–RF10   | Desafio e envio com comprovante do servidor  | **Feito (spec 006)**: desafios, entrega no Storage privado e comprovante           | `modules/atividades`, bucket `entregas`         |
+| RF11        | Presença e participação                      | **Feito (spec 006)**: presença em lote e participação, correções justificadas      | `modules/atividades`                            |
+| RF12        | Rubricas e feedback                          | **Feito (spec 006)**: rubrica de entrega e apresentação com feedback               | `modules/atividades`                            |
 | RF13        | Prova oficial como registro                  | Regra pendente/confirmada pronta                                                   | `pontuarProvaOficial`                           |
 | RF14        | Cálculo, descontos, desempate                | Núcleo TS pronto e testado; versão SQL no Inc. 4                                   | `modules/pontuacao`                             |
 | RF15        | Ocorrências e recurso                        | Deduplicação/teto prontos; fluxo no Inc. 4                                         | —                                               |
@@ -27,5 +27,5 @@ Fonte: PRD v1.0, Documento de Visão v1.0, Design System v1.0 e instruções do 
 | RNF05–RNF06 | Segurança/privacidade                        | RLS, sem segredos, ranking sem notas individuais                                   | ADR 0006                                        |
 | RNF07–RNF08 | Operação/desempenho                          | Propostas em `operacao-e-homologacao.md`; metas a definir                          | —                                               |
 
-Histórias: HU02 (envio), HU03 (rubrica), HU04 (prova), HU05 (ranking), HU07 (offline) têm
+Histórias: HU02 (envio) e HU03 (rubrica) concluídas na spec 006 (pgTAP + E2E real com upload). HU04 (prova), HU05 (ranking), HU07 (offline) têm
 regras ou componentes testados; HU01 concluída na spec 002 e revista na spec 003 (formação por convite; pgTAP + E2E real); HU06 depende do Incremento 4.

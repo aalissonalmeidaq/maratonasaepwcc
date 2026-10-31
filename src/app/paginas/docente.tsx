@@ -1,13 +1,10 @@
 import { painelDocente } from '@/modules/demo';
-import { REGRAS_PILOTO, type CriterioRubrica } from '@/modules/pontuacao';
 import { formatarData } from '@/shared/lib/formatacao';
 import {
-  Alert,
   Card,
   EmConstrucao,
   EmptyState,
   PageHeader,
-  ResponsiveTable,
   StatCard,
   StatusBadge,
   BannerDestaque,
@@ -87,86 +84,6 @@ export function DocenteInicioPage() {
         </>
       )}
     </ComDadosDemo>
-  );
-}
-
-export function DocentePresencaPage() {
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            icone="presenca"
-            titulo="Presença"
-            descricao={p.ultimoEncontro ? `Registros do ${p.ultimoEncontro.titulo}` : undefined}
-          />
-          <Alert tom="info" titulo="Registro de presença no Incremento 3">
-            Nesta versão a lista é somente leitura. O registro individual com autoria e horário do
-            servidor exige conexão e será habilitado com a especificação de presença.
-          </Alert>
-          <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-            <ResponsiveTable
-              legenda="Presença individual"
-              chave={(l) => l.estudante}
-              linhas={p.presencaUltimoEncontro}
-              colunas={[
-                { id: 'est', titulo: 'Estudante', valor: (l) => l.estudante },
-                { id: 'dupla', titulo: 'Dupla', valor: (l) => l.dupla },
-                {
-                  id: 'sit',
-                  titulo: 'Situação',
-                  valor: (l) =>
-                    l.presente ? (
-                      <StatusBadge estado="concluido" rotulo="Presente" />
-                    ) : (
-                      <StatusBadge estado="nao_enviado" rotulo="Ausente" />
-                    ),
-                },
-              ]}
-            />
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
-function TabelaCriterios({ titulo, criterios }: { titulo: string; criterios: CriterioRubrica[] }) {
-  const total = criterios.reduce((t, c) => t + c.maximo, 0);
-  return (
-    <Card icone="avaliacao" titulo={`${titulo} — até ${total} pontos`}>
-      <ResponsiveTable
-        legenda={titulo}
-        chave={(c) => c.id}
-        linhas={criterios}
-        colunas={[
-          { id: 'crit', titulo: 'Critério', valor: (c) => c.rotulo },
-          { id: 'max', titulo: 'Máximo', numerica: true, valor: (c) => c.maximo },
-        ]}
-      />
-    </Card>
-  );
-}
-
-export function DocenteAvaliacoesPage() {
-  const r = REGRAS_PILOTO;
-  return (
-    <>
-      <PageHeader
-        icone="avaliacao"
-        titulo="Avaliações e rubricas"
-        descricao={`Critérios da edição (regras ${r.versao}).`}
-      />
-      <Alert tom="info" titulo="Lançamento de notas no Incremento 3">
-        O formulário de rubrica com validação no servidor, feedback e autoria será habilitado na
-        especificação de avaliação. As notas aceitam valores de 0 até o máximo de cada critério.
-      </Alert>
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <TabelaCriterios titulo="Entrega prática" criterios={r.entrega.criterios} />
-        <TabelaCriterios titulo="Apresentação" criterios={r.apresentacao.criterios} />
-        <TabelaCriterios titulo="Participação da dupla" criterios={r.participacao.criterios} />
-      </div>
-    </>
   );
 }
 

@@ -144,6 +144,33 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - **Pendente (Incrementos 3/4):** pontuação real por equipe, posição na categoria e publicação do
   ranking para alunos (US3, cenários 1 e 2), com a regra de publicação aplicada no servidor.
 
+## 6.4 Spec 006 — atividades, entregas, presença e avaliação (implementada em 2026-10-30)
+
+- Antes numerada 008; renumerada para 006 a pedido do usuário em 2026-10-30.
+- Implementação: módulo `src/modules/atividades` (absorve `desafios`, `presenca`, `avaliacao` e
+  `questoes`); migration `20261030160000_atividades_avaliacao.sql` com 12 tabelas (RLS, auditoria,
+  sem escrita direta) e bucket privado `entregas`. Toda escrita é RPC idempotente: repetir os
+  mesmos valores não grava nada; entrega e respostas usam chave de envio gerada no navegador.
+- A pontuação parcial (US5) é calculada no navegador com `calcularEncontro` sobre os lançamentos
+  devolvidos pelo servidor; a fonte oficial de pontos gravados continua no Incremento 4.
+- Decidido em 2026-10-30: cada docente cria e publica desafios e listas de questões para as
+  próprias turmas; a equipe pode reenviar a entrega até o prazo (vale a última versão); a
+  avaliação fica visível à equipe ao ser registrada, e correções exigem justificativa.
+- **[validar]** Turmas do mesmo curso podem receber atividades diferentes, o que afeta a
+  comparabilidade do ranking por curso.
+- Formatos e limite de arquivo (decidido em 2026-10-30): PDF, ZIP, PNG e JPG até 50 MB.
+- Presença apenas presente/ausente (decidido em 2026-10-30); atraso/saída antecipada em observação
+  opcional, sem efeito nos pontos.
+- Decidido em 2026-10-30: o mentor da turma tem as mesmas permissões do docente (cria e publica
+  atividades, registra presença, participação, avaliação e prorrogação).
+- **[validar]** Prorrogação/impedimento registrados pelo docente/mentor da turma ou pela
+  coordenação.
+- **[validar]** Trio: presença de três alunos limitada ao máximo por equipe das regras (piloto 10).
+- **Pendente (operação):** limpeza automática de arquivos sem entrega no bucket `entregas` (upload
+  concluído com registro recusado). Exige rotina com a API do Storage no ambiente de produção.
+- Decidido em 2026-10-30: um encontro pode ter vários desafios e listas por turma; a pontuação
+  do componente é a média simples dos itens (o PRD não define a agregação). **[validar]**
+
 ## 6.1 Spec 005 — busca e paginação
 
 - Busca e paginação são feitas no navegador sobre os registros que a RLS já entregou (volume

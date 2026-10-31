@@ -106,6 +106,57 @@ export function usePainelTurma(turmaId?: string) {
     retry: false,
   });
 }
+/** Atividades da turma (spec 006): desafios com entregas e avaliação da equipe, e listas. */
+export function useAtividadesDaTurma(turmaId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('atividades-turma', turmaId),
+    queryFn: () => r.atividades.atividadesDaTurma(turmaId as string),
+    enabled: Boolean(turmaId),
+  });
+}
+export function usePresencasDaTurma(encontroId?: string, turmaId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('presencas', encontroId, turmaId),
+    queryFn: () => r.atividades.presencasDaTurma(encontroId as string, turmaId as string),
+    enabled: Boolean(encontroId && turmaId),
+  });
+}
+export function usePainelAvaliacao(desafioId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('painel-avaliacao', desafioId),
+    queryFn: () => r.atividades.painelAvaliacao(desafioId as string),
+    enabled: Boolean(desafioId),
+  });
+}
+export function useListaParaEquipe(listaId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('lista-equipe', listaId),
+    queryFn: () => r.atividades.listaParaEquipe(listaId as string),
+    enabled: Boolean(listaId),
+  });
+}
+export const useListasGestao = (edicaoId?: string) => {
+  const r = useRepositorios();
+  return useDaEdicao('listas-gestao', edicaoId, (id) => r.atividades.listasDaGestao(id));
+};
+export const useLancamentosDaEquipe = (edicaoId?: string) => {
+  const r = useRepositorios();
+  return useDaEdicao('lancamentos-equipe', edicaoId, (id) =>
+    r.atividades.lancamentosDaMinhaEquipe(id),
+  );
+};
+export const useDesafiosGestao = (edicaoId?: string) => {
+  const r = useRepositorios();
+  return useDaEdicao('desafios-gestao', edicaoId, (id) => r.atividades.desafiosDaGestao(id));
+};
 export const useEncontros = (edicaoId?: string) => {
   const r = useRepositorios();
   return useDaEdicao('encontros', edicaoId, (id) => r.encontros.encontros(id));

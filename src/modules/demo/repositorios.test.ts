@@ -111,4 +111,40 @@ describe('repositórios de demonstração', () => {
       );
     });
   });
+
+  describe('atividades (spec 006)', () => {
+    it('aluno vê os desafios fictícios com a própria equipe; nada é gravado', async () => {
+      const r = como('e01');
+      const { desafios } = await r.atividades.atividadesDaTurma('t-a');
+      expect(desafios.map((d) => d.titulo)).toContain('Projeto final (exemplo)');
+      expect(desafios.every((d) => d.duplaId === 'd1')).toBe(true);
+      await expect(
+        r.atividades.enviarEntrega({
+          desafioId: 'ds4',
+          duplaId: 'd1',
+          chave: 'x',
+          link: 'https://a.b',
+        }),
+      ).rejects.toThrow(/modo demonstração/);
+    });
+
+    it('presença da turma vem dos lançamentos fictícios, com as regras da edição', async () => {
+      const p = await como('u-doc-a').atividades.presencasDaTurma('en1', 't-a');
+      expect(p.regras.versao).toBe(edicaoDemo.regras.versao);
+      expect(p.alunos.find((a) => a.estudanteId === 'e01')?.presente).toBe(true);
+      await expect(
+        como('u-doc-a').atividades.registrarPresencas({
+          encontroId: 'en1',
+          turmaId: 't-a',
+          registros: [],
+        }),
+      ).rejects.toThrow(/modo demonstração/);
+    });
+
+    it('lançamentos da equipe do aluno por encontro', async () => {
+      const l = await como('e01').atividades.lancamentosDaMinhaEquipe('ed-demo');
+      expect(l.equipe?.id).toBe('d1');
+      expect(l.encontros.length).toBeGreaterThan(0);
+    });
+  });
 });
