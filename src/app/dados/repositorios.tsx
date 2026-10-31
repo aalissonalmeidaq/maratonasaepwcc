@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAuth } from '@/modules/auth';
+import { criarRepositorioAtividadesSupabase } from '@/modules/atividades';
 import { criarRepositoriosDemo } from '@/modules/demo';
 import { criarRepositorioDuplasSupabase } from '@/modules/duplas';
 import { criarRepositorioEncontrosSupabase } from '@/modules/encontros';
@@ -17,6 +18,7 @@ function criarRepositoriosSupabase(): Repositorios {
     duplas: criarRepositorioDuplasSupabase(sb),
     encontros: criarRepositorioEncontrosSupabase(sb),
     painelTurma: criarRepositorioPainelTurmaSupabase(sb),
+    atividades: criarRepositorioAtividadesSupabase(sb),
   };
 }
 

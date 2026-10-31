@@ -1,19 +1,16 @@
 import { Link } from 'react-router';
-import { EnvioEntrega } from '@/modules/desafios';
 import { painelAluno, type RankingDaCategoria } from '@/modules/demo';
-import { maximoPorEncontro, REGRAS_PILOTO, type PontuacaoDoEncontro } from '@/modules/pontuacao';
+import { maximoPorEncontro, REGRAS_PILOTO } from '@/modules/pontuacao';
 import { formatarData, formatarDataHora, formatarPontos } from '@/shared/lib/formatacao';
 import {
   Alert,
   Card,
-  EmptyState,
   PageHeader,
   ProgressoCircular,
   ResponsiveTable,
   StatCard,
   StatusBadge,
   BannerDestaque,
-  ListaPaginada,
 } from '@/shared/ui';
 import { useConvitesPendentes } from '../dados/consultas';
 import { Atalhos } from '../layout/Atalhos';
@@ -252,172 +249,6 @@ export function AlunoInicioPage() {
               </ul>
             </Card>
           </div>
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
-export function AlunoDesafiosPage() {
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader icone="desafio" titulo="Desafios e entregas" />
-          <ListaPaginada
-            rotulo="Desafios e entregas"
-            itens={p.desafios}
-            chave={(d) => d.id}
-            vazio="Nenhum desafio cadastrado."
-            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-            texto={(d) =>
-              [
-                d.titulo,
-                d.resumo,
-                formatarDataHora(d.prazo),
-                d.politicaIA,
-                p.porEncontro.find((e) => e.encontro.id === d.encontroId)?.pontuacao
-                  ? 'Encerrado'
-                  : 'Aberto',
-              ].join(' ')
-            }
-          >
-            {(d) => {
-              const encontro = p.porEncontro.find((e) => e.encontro.id === d.encontroId);
-              const aberto = !encontro?.pontuacao;
-              return (
-                <Card
-                  icone="desafio"
-                  key={d.id}
-                  titulo={d.titulo}
-                  acao={
-                    <StatusBadge
-                      estado={aberto ? 'em_andamento' : 'avaliado'}
-                      rotulo={aberto ? 'Aberto' : 'Encerrado'}
-                    />
-                  }
-                >
-                  <p className="text-sm text-text-secondary">{d.resumo}</p>
-                  <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-                    <dt className="font-semibold">Prazo</dt>
-                    <dd>{formatarDataHora(d.prazo)}</dd>
-                    <dt className="font-semibold">Uso de IA</dt>
-                    <dd>{d.politicaIA}</dd>
-                  </dl>
-                  {aberto && (
-                    <div className="mt-4 border-t border-border pt-4">
-                      <EnvioEntrega enviar={null} />
-                    </div>
-                  )}
-                </Card>
-              );
-            }}
-          </ListaPaginada>
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
-function LinhaComponente({
-  rotulo,
-  valor,
-  maximo,
-}: {
-  rotulo: string;
-  valor: number;
-  maximo: number;
-}) {
-  return (
-    <div className="flex justify-between gap-2 text-sm">
-      <dt>{rotulo}</dt>
-      <dd className="tabular-nums">
-        {formatarPontos(valor)} <span className="text-text-secondary">/ {maximo}</span>
-      </dd>
-    </div>
-  );
-}
-
-function DetalheEncontro({ pontuacao }: { pontuacao: PontuacaoDoEncontro }) {
-  const r = REGRAS_PILOTO;
-  const soma = (c: { maximo: number }[]) => c.reduce((t, x) => t + x.maximo, 0);
-  return (
-    <dl className="flex flex-col gap-1">
-      <LinhaComponente
-        rotulo="Presença"
-        valor={pontuacao.presenca}
-        maximo={r.presenca.maximoPorDupla}
-      />
-      <LinhaComponente
-        rotulo="Participação"
-        valor={pontuacao.participacao}
-        maximo={soma(r.participacao.criterios)}
-      />
-      <LinhaComponente
-        rotulo="Questões / prova oficial"
-        valor={pontuacao.avaliacaoObjetiva}
-        maximo={r.questoes.maximo}
-      />
-      <LinhaComponente
-        rotulo="Entrega prática"
-        valor={pontuacao.entrega}
-        maximo={soma(r.entrega.criterios)}
-      />
-      <LinhaComponente
-        rotulo="Apresentação"
-        valor={pontuacao.apresentacao}
-        maximo={soma(r.apresentacao.criterios)}
-      />
-      {pontuacao.descontos > 0 && (
-        <div className="flex justify-between gap-2 text-sm text-error">
-          <dt>Descontos por ocorrências</dt>
-          <dd className="tabular-nums">−{formatarPontos(pontuacao.descontos)}</dd>
-        </div>
-      )}
-      <div className="mt-1 flex justify-between gap-2 border-t border-border pt-2 font-semibold">
-        <dt>Total do encontro</dt>
-        <dd className="tabular-nums">
-          {formatarPontos(pontuacao.total)} / {maximoPorEncontro(r)}
-        </dd>
-      </div>
-    </dl>
-  );
-}
-
-export function AlunoPontuacaoPage() {
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            icone="pontuacao"
-            titulo="Pontuação da dupla"
-            descricao={`${formatarPontos(p.totais.total)} de ${p.maximo} pontos · regras ${REGRAS_PILOTO.versao}`}
-          />
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {p.porEncontro.map(({ encontro, pontuacao }) => (
-              <Card icone="calendario" key={encontro.id} titulo={encontro.titulo}>
-                {pontuacao ? (
-                  <>
-                    <DetalheEncontro pontuacao={pontuacao} />
-                    {pontuacao.pendencias.length > 0 && (
-                      <div className="mt-3">
-                        <Alert tom="alerta" titulo="Componentes ainda não lançados">
-                          A pontuação deste encontro pode aumentar quando a avaliação for concluída.
-                        </Alert>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <EmptyState titulo="Encontro ainda não realizado." icone="calendario" />
-                )}
-              </Card>
-            ))}
-          </div>
-          <p className="mt-6 text-sm text-text-secondary">
-            Discorda de algum lançamento? O pedido de revisão (até 24 horas após a publicação) será
-            disponibilizado no Incremento 4. Até lá, procure a coordenação.
-          </p>
         </>
       )}
     </ComDadosDemo>

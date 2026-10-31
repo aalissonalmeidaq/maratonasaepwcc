@@ -105,3 +105,30 @@ insert into public.dupla_integrantes (dupla_id, edicao_id, estudante_id) values
   ('f0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000006'),
   ('f0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000008'),
   ('f0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000009');
+
+-- Spec 006: desafio e lista de questões fictícios publicados para a turma A no encontro 4
+-- (prazos relativos ao dia do seed), usados pelos E2E reais.
+insert into public.desafios (id, edicao_id, encontro_id, titulo, enunciado, recursos_permitidos,
+                             politica_ia, prazo, aceita_arquivo, aceita_link, estado, criado_por)
+select 'f1000000-0000-0000-0000-000000000001', e.edicao_id, e.id, 'Projeto final (fictício)',
+       'Enunciado fictício para testes locais.', 'Material das aulas.',
+       'Uso de IA permitido para pesquisa, com registro.', now() + interval '7 days', true, true,
+       'publicado', 'a0000000-0000-0000-0000-000000000002'
+from public.encontros e where e.edicao_id = 'b0000000-0000-0000-0000-000000000001' and e.numero = 4;
+insert into public.desafio_turmas (desafio_id, turma_id) values
+  ('f1000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001');
+
+insert into public.listas_questoes (id, edicao_id, encontro_id, titulo, prazo, estado, criado_por)
+select 'f2000000-0000-0000-0000-000000000001', e.edicao_id, e.id, 'Questões do projeto final (fictícias)',
+       now() + interval '7 days', 'publicado', 'a0000000-0000-0000-0000-000000000002'
+from public.encontros e where e.edicao_id = 'b0000000-0000-0000-0000-000000000001' and e.numero = 4;
+insert into public.lista_turmas (lista_id, turma_id) values
+  ('f2000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001');
+insert into public.questoes (id, lista_id, ordem, enunciado, justificativa, capacidade) values
+  ('f3000000-0000-0000-0000-000000000001', 'f2000000-0000-0000-0000-000000000001', 1, 'Questão fictícia 1?', 'Justificativa fictícia 1.', 'Capacidade fictícia'),
+  ('f3000000-0000-0000-0000-000000000002', 'f2000000-0000-0000-0000-000000000001', 2, 'Questão fictícia 2?', 'Justificativa fictícia 2.', 'Capacidade fictícia'),
+  ('f3000000-0000-0000-0000-000000000003', 'f2000000-0000-0000-0000-000000000001', 3, 'Questão fictícia 3?', 'Justificativa fictícia 3.', 'Capacidade fictícia');
+insert into public.alternativas (questao_id, ordem, texto, correta)
+select q.id, a.ordem, 'Alternativa ' || a.ordem, a.ordem = 1
+from public.questoes q cross join generate_series(1, 3) as a (ordem)
+where q.lista_id = 'f2000000-0000-0000-0000-000000000001';

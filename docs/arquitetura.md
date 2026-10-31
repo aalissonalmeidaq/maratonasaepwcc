@@ -38,26 +38,26 @@ valem para os dois lados.
 
 ## Mapa de módulos
 
-| #   | Módulo                              | Pasta                                   | Situação no ciclo 1                                                  |
-| --- | ----------------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
-| 1   | Autenticação e usuários             | `modules/auth`                          | Adaptadores Supabase (real) e demonstração, sessão, rotas protegidas |
-| 2   | Perfis, permissões e vínculos       | `modules/acesso` + tabela `atribuicoes` | Papéis, áreas, RLS e testes pgTAP                                    |
-| 3   | Edições, cursos e turmas            | `modules/organizacao` + tabelas         | Cursos, turmas, vínculos e contas com Supabase (spec 002)            |
-| 4   | Equipes (duplas e trios)            | `modules/duplas`                        | Convites, trio, nome e gestão por RPC; histórico (specs 002 e 003)   |
-| 5   | Encontros e ambientes               | `modules/encontros`                     | Cadastro com validação no servidor (spec 002)                        |
-| 6   | Questões preparatórias              | `modules/questoes`                      | Regra de pontuação pronta; restante no Inc. 3                        |
-| 7   | Desafios, projetos e entregas       | `modules/desafios`                      | `EnvioEntrega` com confirmação só do servidor                        |
-| 8   | Presença e participação             | `modules/presenca`                      | Regras prontas; registro no Inc. 3                                   |
-| 9   | Avaliação e rubricas                | `modules/avaliacao`                     | Regras prontas; formulário no Inc. 3                                 |
-| 10  | Prova oficial (registro)            | `modules/prova-oficial`                 | Regra pendente/confirmada pronta; registro no Inc. 4                 |
-| 11  | Pontuação e classificação           | `modules/pontuacao`                     | Núcleo de cálculo e desempate com TDD                                |
-| 12  | Ocorrências, penalidades e recursos | `modules/ocorrencias`                   | Deduplicação e teto prontos; fluxo no Inc. 4                         |
-| 13  | Comunicados e regulamento           | `modules/comunicados`                   | Resumo das regras; publicação no Inc. 2                              |
-| 14  | Relatórios e acompanhamento         | `modules/relatorios`                    | Inc. 5                                                               |
-| 15  | Componentes compartilhados          | `shared/ui`, `shared/pwa`               | Prontos (botões, campos, tabela, diálogo, badges…)                   |
-| 16  | Auditoria e histórico               | tabela `auditoria` + gatilhos           | Gatilhos ativos em edições, cursos, turmas, atribuições              |
-| 17  | Painel da turma                     | `modules/painel-turma`                  | Leitura por RPC com acesso no servidor (spec 004)                    |
-| —   | Dados fictícios                     | `modules/demo`                          | Somente modo demonstração                                            |
+| #   | Módulo                              | Pasta                                    | Situação no ciclo 1                                                  |
+| --- | ----------------------------------- | ---------------------------------------- | -------------------------------------------------------------------- |
+| 1   | Autenticação e usuários             | `modules/auth`                           | Adaptadores Supabase (real) e demonstração, sessão, rotas protegidas |
+| 2   | Perfis, permissões e vínculos       | `modules/acesso` + tabela `atribuicoes`  | Papéis, áreas, RLS e testes pgTAP                                    |
+| 3   | Edições, cursos e turmas            | `modules/organizacao` + tabelas          | Cursos, turmas, vínculos e contas com Supabase (spec 002)            |
+| 4   | Equipes (duplas e trios)            | `modules/duplas`                         | Convites, trio, nome e gestão por RPC; histórico (specs 002 e 003)   |
+| 5   | Encontros e ambientes               | `modules/encontros`                      | Cadastro com validação no servidor (spec 002)                        |
+| 6   | Questões preparatórias              | `modules/atividades`                     | Listas, gabarito protegido e submissão única por RPC (spec 006)      |
+| 7   | Desafios, projetos e entregas       | `modules/atividades` + bucket `entregas` | Entrega em duas etapas (Storage + RPC), comprovante do servidor      |
+| 8   | Presença e participação             | `modules/atividades`                     | Registro em lote e participação por RPC idempotente (spec 006)       |
+| 9   | Avaliação e rubricas                | `modules/atividades`                     | Rubrica com feedback, correção justificada e prorrogação (spec 006)  |
+| 10  | Prova oficial (registro)            | `modules/prova-oficial`                  | Regra pendente/confirmada pronta; registro no Inc. 4                 |
+| 11  | Pontuação e classificação           | `modules/pontuacao`                      | Núcleo de cálculo e desempate com TDD                                |
+| 12  | Ocorrências, penalidades e recursos | `modules/ocorrencias`                    | Deduplicação e teto prontos; fluxo no Inc. 4                         |
+| 13  | Comunicados e regulamento           | `modules/comunicados`                    | Resumo das regras; publicação no Inc. 2                              |
+| 14  | Relatórios e acompanhamento         | `modules/relatorios`                     | Inc. 5                                                               |
+| 15  | Componentes compartilhados          | `shared/ui`, `shared/pwa`                | Prontos (botões, campos, tabela, diálogo, badges…)                   |
+| 16  | Auditoria e histórico               | tabela `auditoria` + gatilhos            | Gatilhos ativos em edições, cursos, turmas, atribuições              |
+| 17  | Painel da turma                     | `modules/painel-turma`                   | Leitura por RPC com acesso no servidor (spec 004)                    |
+| —   | Dados fictícios                     | `modules/demo`                           | Somente modo demonstração                                            |
 
 Módulos ainda sem código têm apenas `README.md` descrevendo responsabilidade e incremento.
 

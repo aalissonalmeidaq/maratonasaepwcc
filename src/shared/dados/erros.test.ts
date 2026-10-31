@@ -48,6 +48,15 @@ describe('mensagens de erro do servidor', () => {
     ).toBe('Você não tem permissão para esta operação.');
   });
 
+  it('permissão negada com explicação do servidor em português mantém a explicação', () => {
+    expect(mensagemDeErro(pg('42501', 'A coordenação só corrige registros existentes.'))).toBe(
+      'A coordenação só corrige registros existentes.',
+    );
+    expect(mensagemDeErro(pg('42501', 'permission denied for table desafios'))).toBe(
+      'Você não tem permissão para esta operação.',
+    );
+  });
+
   it('falha de rede deixa claro que nada foi gravado', () => {
     expect(mensagemDeErro(new TypeError('Failed to fetch'))).toBe(
       'Sem conexão com o servidor. Nada foi gravado; tente novamente.',

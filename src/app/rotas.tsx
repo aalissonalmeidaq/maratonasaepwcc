@@ -15,10 +15,10 @@ const AlunoInicioPage = lazy(() =>
   import('./paginas/aluno').then((modulo) => ({ default: modulo.AlunoInicioPage })),
 );
 const AlunoDesafiosPage = lazy(() =>
-  import('./paginas/aluno').then((modulo) => ({ default: modulo.AlunoDesafiosPage })),
+  import('./paginas/atividades').then((modulo) => ({ default: modulo.AlunoDesafiosPage })),
 );
 const AlunoPontuacaoPage = lazy(() =>
-  import('./paginas/aluno').then((modulo) => ({ default: modulo.AlunoPontuacaoPage })),
+  import('./paginas/atividades').then((modulo) => ({ default: modulo.AlunoPontuacaoPage })),
 );
 const AlunoRankingPage = lazy(() =>
   import('./paginas/aluno').then((modulo) => ({ default: modulo.AlunoRankingPage })),
@@ -51,11 +51,17 @@ const CoordenacaoRelatoriosPage = lazy(() =>
 const DocenteInicioPage = lazy(() =>
   import('./paginas/docente').then((modulo) => ({ default: modulo.DocenteInicioPage })),
 );
-const DocentePresencaPage = lazy(() =>
-  import('./paginas/docente').then((modulo) => ({ default: modulo.DocentePresencaPage })),
-);
 const DocenteAvaliacoesPage = lazy(() =>
-  import('./paginas/docente').then((modulo) => ({ default: modulo.DocenteAvaliacoesPage })),
+  import('./paginas/atividades').then((modulo) => ({ default: modulo.DocenteAvaliacoesPage })),
+);
+const CoordenacaoAvaliacoesPage = lazy(() =>
+  import('./paginas/atividades').then((modulo) => ({ default: modulo.CoordenacaoAvaliacoesPage })),
+);
+const DocentePresencaPage = lazy(() =>
+  import('./paginas/atividades').then((modulo) => ({ default: modulo.DocentePresencaPage })),
+);
+const CoordenacaoPresencaPage = lazy(() =>
+  import('./paginas/atividades').then((modulo) => ({ default: modulo.CoordenacaoPresencaPage })),
 );
 const DocenteOcorrenciasPage = lazy(() =>
   import('./paginas/docente').then((modulo) => ({ default: modulo.DocenteOcorrenciasPage })),
@@ -76,6 +82,9 @@ const CoordenacaoPainelTurmaPage = lazy(() =>
   import('./paginas/painelTurma').then((modulo) => ({
     default: modulo.CoordenacaoPainelTurmaPage,
   })),
+);
+const DocenteAtividadesPage = lazy(() =>
+  import('./paginas/atividades').then((modulo) => ({ default: modulo.DocenteAtividadesPage })),
 );
 const DocenteTurmasPage = lazy(() =>
   import('./paginas/organizacao').then((modulo) => ({ default: modulo.DocenteTurmasPage })),
@@ -128,6 +137,7 @@ export function AppRotas() {
               <Route index element={<DocenteInicioPage />} />
               <Route path="turmas" element={<DocenteTurmasPage />} />
               <Route path="turmas/:turmaId" element={<DocentePainelTurmaPage />} />
+              <Route path="atividades" element={<DocenteAtividadesPage />} />
               <Route path="encontros" element={<EncontrosLeituraPage />} />
               <Route path="presenca" element={<DocentePresencaPage />} />
               <Route path="avaliacoes" element={<DocenteAvaliacoesPage />} />
@@ -142,6 +152,8 @@ export function AppRotas() {
               <Route path="turmas/:turmaId" element={<CoordenacaoPainelTurmaPage />} />
               <Route path="duplas" element={<CoordenacaoDuplasPage />} />
               <Route path="encontros" element={<CoordenacaoEncontrosPage />} />
+              <Route path="presenca" element={<CoordenacaoPresencaPage />} />
+              <Route path="avaliacoes" element={<CoordenacaoAvaliacoesPage />} />
               <Route path="ranking" element={<CoordenacaoRankingPage />} />
               <Route path="ocorrencias" element={<CoordenacaoOcorrenciasPage />} />
               <Route path="comunicados" element={<CoordenacaoComunicadosPage />} />

@@ -293,3 +293,36 @@ test.describe('painel da turma (spec 004)', () => {
     await semRolagemHorizontal(page);
   });
 });
+
+test.describe('atividades dos encontros na demonstração (spec 006)', () => {
+  test('docente abre Atividades, Presença e Avaliações; nada é gravado', async ({ page }) => {
+    await entrarComo(page, /lúcia exemplo/i);
+    await page.goto('/docente/atividades');
+    await expect(page.getByRole('heading', { level: 1, name: 'Atividades' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Salvar rascunho' }).first()).toBeDisabled();
+    await semRolagemHorizontal(page);
+
+    await page.goto('/docente/presenca');
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Presença e participação' }),
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Salvar presenças' })).toBeDisabled();
+    await expect(page.getByText(/modo demonstração/i).first()).toBeVisible();
+    await semRolagemHorizontal(page);
+
+    await page.goto('/docente/avaliacoes');
+    await expect(page.getByRole('heading', { level: 1, name: 'Avaliações' })).toBeVisible();
+    await expect(page.getByText('Entrega prática — até 40 pontos')).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+
+  test('aluna vê a pontuação parcial calculada com os lançamentos fictícios', async ({ page }) => {
+    await entrarComo(page, /ana exemplo/i);
+    await page.goto('/aluno/pontuacao');
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Pontuação da equipe' }),
+    ).toBeVisible();
+    await expect(page.getByText('Parcial', { exact: true }).first()).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+});
