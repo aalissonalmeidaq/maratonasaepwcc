@@ -40,7 +40,16 @@ export const REGRAS_PILOTO: RegrasDaEdicao = {
     ],
   },
   provaOficial: { pontosRealizacao: 5, notaMinimaBonus: 70, pontosBonus: 10, maximoPorDupla: 30 },
-  penalidades: { tetoDescontosPorEncontro: 10 },
+  penalidades: {
+    tetoDescontosPorEncontro: 10,
+    tipos: [
+      { id: 'reincidencia', rotulo: 'Reincidência após orientação registrada', pontos: 2 },
+      { id: 'desrespeito', rotulo: 'Desrespeito com responsabilidade da equipe', pontos: 5 },
+      { id: 'uso_nao_autorizado', rotulo: 'Uso não autorizado', pontos: 5 },
+      { id: 'plagio', rotulo: 'Plágio comprovado', zeraEntrega: true },
+    ],
+  },
+  prazos: { manifestacaoHoras: 24, revisaoHoras: 24 },
 };
 
 /** Máximo de pontos por encontro derivado das regras (piloto: 100). */

@@ -1,18 +1,14 @@
-import { useState } from 'react';
 import { painelCoordenacao } from '@/modules/demo';
 import { maximoDaEdicao } from '@/modules/pontuacao';
 import {
   Alert,
-  Button,
   Card,
-  ConfirmDialog,
   EmConstrucao,
   PageHeader,
   StatCard,
   StatusBadge,
   BannerDestaque,
 } from '@/shared/ui';
-import { TabelaRanking } from './aluno';
 import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
 
@@ -100,47 +96,6 @@ export function CoordenacaoInicioPage() {
   );
 }
 
-export function CoordenacaoRankingPage() {
-  const [confirmando, setConfirmando] = useState(false);
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            icone="ranking"
-            titulo="Ranking"
-            descricao="Cálculo com as regras da edição; desempate: entrega → questões/prova → presença."
-            acoes={
-              <Button variante="secundario" icone="noticia" onClick={() => setConfirmando(true)}>
-                Publicar como provisório
-              </Button>
-            }
-          />
-          {p.ranking.map((r) => (
-            <Card
-              icone="ranking"
-              key={r.categoria}
-              titulo={r.categoria}
-              acao={<StatusBadge estado={r.estado} />}
-              className="mb-4"
-            >
-              <TabelaRanking ranking={r} />
-            </Card>
-          ))}
-          <ConfirmDialog
-            aberto={confirmando}
-            titulo="Publicação indisponível no modo demonstração"
-            descricao="A publicação versionada e auditada do ranking será feita no servidor (Incremento 4). Nada será publicado agora."
-            rotuloConfirmar="Entendi"
-            onConfirmar={() => setConfirmando(false)}
-            onCancelar={() => setConfirmando(false)}
-          />
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
 export function CoordenacaoPremiacaoPage() {
   return (
     <ComDadosDemo carregar={carregar}>
@@ -170,18 +125,6 @@ export function CoordenacaoPremiacaoPage() {
         </>
       )}
     </ComDadosDemo>
-  );
-}
-
-export function CoordenacaoOcorrenciasPage() {
-  return (
-    <>
-      <PageHeader icone="ocorrencia" titulo="Ocorrências e revisões" />
-      <EmConstrucao
-        modulo="Ocorrências, penalidades e pedidos de revisão"
-        incremento="Incremento 4"
-      />
-    </>
   );
 }
 

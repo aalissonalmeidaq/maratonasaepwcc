@@ -54,7 +54,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 | Ranking                              | Por categoria; no piloto, categoria = curso. **[validar]**                                               |
 | Desempate "questões e prova oficial" | Soma do componente objetivo (30) de todos os encontros                                                   |
 | Prova oficial                        | Encontro em que o componente objetivo é a prova; realização "pendente" também deixa o resultado pendente |
-| Pedido de revisão                    | 24 h, exceção registrada pela coordenação (fluxo no Incremento 4)                                        |
+| Pedido de revisão                    | 24 h, exceção registrada pela coordenação (spec 007, §6.5)                                               |
 | Premiação                            | Itens registrados como configuração; valores, quantidade, validade e entrega **[validar]**               |
 | Cronograma                           | Nada fixado no código; demo usa datas relativas ao dia atual                                             |
 
@@ -151,8 +151,8 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   `questoes`); migration `20261030160000_atividades_avaliacao.sql` com 12 tabelas (RLS, auditoria,
   sem escrita direta) e bucket privado `entregas`. Toda escrita é RPC idempotente: repetir os
   mesmos valores não grava nada; entrega e respostas usam chave de envio gerada no navegador.
-- A pontuação parcial (US5) é calculada no navegador com `calcularEncontro` sobre os lançamentos
-  devolvidos pelo servidor; a fonte oficial de pontos gravados continua no Incremento 4.
+- A pontuação parcial (US5) era calculada no navegador com `calcularEncontro`; desde a spec 007,
+  a página do aluno lê a prévia calculada no servidor (fonte oficial, §6.5).
 - Decidido em 2026-10-30: cada docente cria e publica desafios e listas de questões para as
   próprias turmas; a equipe pode reenviar a entrega até o prazo (vale a última versão); a
   avaliação fica visível à equipe ao ser registrada, e correções exigem justificativa.
@@ -170,6 +170,38 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   concluído com registro recusado). Exige rotina com a API do Storage no ambiente de produção.
 - Decidido em 2026-10-30: um encontro pode ter vários desafios e listas por turma; a pontuação
   do componente é a média simples dos itens (o PRD não define a agregação). **[validar]**
+
+## 6.5 Spec 007 — resultado oficial, ocorrências e ranking (implementada em 2026-11-01)
+
+- Implementação: módulo `src/modules/resultado`; migration
+  `20261101120000_resultado_oficial_ranking.sql` com 8 tabelas (RLS, auditoria, sem escrita
+  direta), bucket privado `evidencias` e a coluna `auditoria.pedido_revisao_id`. ADR 0011.
+- Cálculo oficial no servidor em PL/pgSQL (`app.calcular_encontro`, `app.classificar`), com os
+  mesmos casos de contrato do núcleo TS (`casos-contrato.json`, `casos-ranking.json`) conferidos
+  por `scripts/testar-paridade-calculo.mjs`. A página de pontuação do aluno passou a ler a prévia
+  do servidor ("Prévia — não oficial").
+- Regras completadas pela migration: `penalidades.tipos` (reincidência 2, desrespeito 5, uso não
+  autorizado 5, plágio zera a entrega) e `prazos` (24 h para manifestação e revisão), valores do
+  PRD. Só edições não encerradas, com o sufixo `+inc4` no `regras_versao`; a auditoria de
+  `edicoes` guarda o antes. **[validar]** com o regulamento.
+- Nota da prova "indisponível": mantém os 5 pontos da realização, sem bônus e sem pendência. Nota
+  sem escala 0–100 e autorização confirmadas fica pendente; o sistema não converte escalas.
+  **[validar]** a equivalência para escalas diferentes.
+- Decididos em 2026-11-01: revisão vale para decisão de ocorrência e para componente da
+  publicação **provisória** (parcial não abre prazo; definitiva é final); revisão aceita corrige o
+  registro de origem, ligado ao pedido, sem ajuste manual de pontos; a coordenação só decide
+  depois da manifestação ou do fim do prazo; a equipe docente vê a prévia da própria turma sem
+  nota individual; avisos só no aplicativo, sem e-mail.
+- Ex-integrantes listados no registro da ocorrência continuam vendo a ocorrência do fato em que
+  estavam (o registro guarda a composição da equipe no momento do fato).
+- Pedido aberto sobre a versão provisória N continua válido quando sai a versão N+1, que abre
+  prazo próprio.
+- **Pendente:** um pedido de revisão sobre questões pode ser respondido, mas não há correção de
+  origem para submissão de questões nem de gabarito (spec 006 não prevê). Exige spec própria.
+- **Pendente (operação):** limpeza de arquivos de evidência sem ocorrência registrada no bucket
+  `evidencias`, como na spec 006.
+- Diferenças em relação ao contrato de telas, sem efeito nas regras: ver
+  `specs/007-resultado-oficial-ranking/quickstart.md`.
 
 ## 6.1 Spec 005 — busca e paginação
 

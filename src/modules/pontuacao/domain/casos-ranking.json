@@ -1,0 +1,184 @@
+{
+  "descricao": "Casos de contrato da classificação (desempate: total → entrega → componente objetivo → presença; empate persistente compartilha a posição; nome em pt-BR só ordena). Conferidos contra classificar (TS) e app.classificar (SQL).",
+  "casos": [
+    {
+      "nome": "desempate pela entrega prática",
+      "equipes": [
+        {
+          "duplaId": "a",
+          "nome": "Alfa",
+          "totais": {
+            "total": 100,
+            "entrega": 30,
+            "avaliacaoObjetiva": 30,
+            "presenca": 10,
+            "pendente": false
+          }
+        },
+        {
+          "duplaId": "b",
+          "nome": "Beta",
+          "totais": {
+            "total": 100,
+            "entrega": 35,
+            "avaliacaoObjetiva": 25,
+            "presenca": 10,
+            "pendente": false
+          }
+        }
+      ],
+      "esperado": [
+        { "duplaId": "b", "posicao": 1, "compartilhada": false },
+        { "duplaId": "a", "posicao": 2, "compartilhada": false }
+      ]
+    },
+    {
+      "nome": "desempate pelo componente objetivo (questões e prova)",
+      "equipes": [
+        {
+          "duplaId": "a",
+          "nome": "Alfa",
+          "totais": {
+            "total": 90,
+            "entrega": 30,
+            "avaliacaoObjetiva": 20,
+            "presenca": 10,
+            "pendente": false
+          }
+        },
+        {
+          "duplaId": "b",
+          "nome": "Beta",
+          "totais": {
+            "total": 90,
+            "entrega": 30,
+            "avaliacaoObjetiva": 25,
+            "presenca": 5,
+            "pendente": true
+          }
+        }
+      ],
+      "esperado": [
+        { "duplaId": "b", "posicao": 1, "compartilhada": false },
+        { "duplaId": "a", "posicao": 2, "compartilhada": false }
+      ]
+    },
+    {
+      "nome": "desempate pela presença",
+      "equipes": [
+        {
+          "duplaId": "a",
+          "nome": "Alfa",
+          "totais": {
+            "total": 80,
+            "entrega": 30,
+            "avaliacaoObjetiva": 20,
+            "presenca": 5,
+            "pendente": false
+          }
+        },
+        {
+          "duplaId": "b",
+          "nome": "Beta",
+          "totais": {
+            "total": 80,
+            "entrega": 30,
+            "avaliacaoObjetiva": 20,
+            "presenca": 10,
+            "pendente": false
+          }
+        }
+      ],
+      "esperado": [
+        { "duplaId": "b", "posicao": 1, "compartilhada": false },
+        { "duplaId": "a", "posicao": 2, "compartilhada": false }
+      ]
+    },
+    {
+      "nome": "empate persistente compartilha a posição e a seguinte salta",
+      "equipes": [
+        {
+          "duplaId": "c",
+          "nome": "Gama",
+          "totais": {
+            "total": 50,
+            "entrega": 20,
+            "avaliacaoObjetiva": 10,
+            "presenca": 10,
+            "pendente": false
+          }
+        },
+        {
+          "duplaId": "b",
+          "nome": "Beta",
+          "totais": {
+            "total": 70,
+            "entrega": 30,
+            "avaliacaoObjetiva": 20,
+            "presenca": 10,
+            "pendente": false
+          }
+        },
+        {
+          "duplaId": "a",
+          "nome": "Alfa",
+          "totais": {
+            "total": 70,
+            "entrega": 30,
+            "avaliacaoObjetiva": 20,
+            "presenca": 10,
+            "pendente": false
+          }
+        }
+      ],
+      "esperado": [
+        { "duplaId": "a", "posicao": 1, "compartilhada": true },
+        { "duplaId": "b", "posicao": 1, "compartilhada": true },
+        { "duplaId": "c", "posicao": 3, "compartilhada": false }
+      ]
+    },
+    {
+      "nome": "totais com decimais e equipe sem lançamentos no fim",
+      "equipes": [
+        {
+          "duplaId": "z",
+          "nome": "Zeta",
+          "totais": {
+            "total": 0,
+            "entrega": 0,
+            "avaliacaoObjetiva": 0,
+            "presenca": 0,
+            "pendente": true
+          }
+        },
+        {
+          "duplaId": "e",
+          "nome": "Épsilon",
+          "totais": {
+            "total": 88.33,
+            "entrega": 40,
+            "avaliacaoObjetiva": 23.33,
+            "presenca": 5,
+            "pendente": false
+          }
+        },
+        {
+          "duplaId": "d",
+          "nome": "Delta",
+          "totais": {
+            "total": 88.34,
+            "entrega": 30,
+            "avaliacaoObjetiva": 30,
+            "presenca": 10,
+            "pendente": false
+          }
+        }
+      ],
+      "esperado": [
+        { "duplaId": "d", "posicao": 1, "compartilhada": false },
+        { "duplaId": "e", "posicao": 2, "compartilhada": false },
+        { "duplaId": "z", "posicao": 3, "compartilhada": false }
+      ]
+    }
+  ]
+}

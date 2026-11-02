@@ -6,8 +6,6 @@ import {
   FormDesafio,
   FormLista,
   FormProrrogacao,
-  PontuacaoDoEncontro,
-  calcularParcial,
   FormParticipacao,
   RegistroPresenca,
   ResponderLista,
@@ -21,7 +19,7 @@ import {
 } from '@/modules/atividades';
 import type { Encontro } from '@/modules/encontros';
 import type { Edicao, Turma } from '@/modules/organizacao';
-import { maximoDaEdicao, type CriterioRubrica, type RegrasDaEdicao } from '@/modules/pontuacao';
+import type { CriterioRubrica, RegrasDaEdicao } from '@/modules/pontuacao';
 import { formatarDataHora } from '@/shared/lib/formatacao';
 import {
   Alert,
@@ -44,7 +42,6 @@ import {
   useDesafiosGestao,
   useEncontros,
   useGravar,
-  useLancamentosDaEquipe,
   useListaParaEquipe,
   useListasGestao,
   usePainelAvaliacao,
@@ -53,6 +50,7 @@ import {
 } from '../dados/consultas';
 import { useRepositorios } from '../dados/useRepositorios';
 import { ComEdicao } from './ComEdicao';
+import { usePedidoDaRota } from './usePedidoDaRota';
 
 const BADGE_ESTADO: Record<Desafio['estado'], { estado: EstadoVisual; rotulo: string }> = {
   rascunho: { estado: 'parcial', rotulo: 'Rascunho' },
@@ -592,6 +590,7 @@ function SeletorTurmaEncontro({
 
 function PresencaDoEncontro({ turmaId, encontroId }: { turmaId: string; encontroId: string }) {
   const r = useRepositorios();
+  const pedidoId = usePedidoDaRota();
   const gravar = useGravar();
   const bloqueio = useBloqueioDeEscrita();
   const presencas = usePresencasDaTurma(encontroId, turmaId);
@@ -611,6 +610,7 @@ function PresencaDoEncontro({ turmaId, encontroId }: { turmaId: string; encontro
                     turmaId,
                     registros,
                     justificativa,
+                    pedidoId,
                   }),
                 )()
               }
@@ -639,6 +639,7 @@ function PresencaDoEncontro({ turmaId, encontroId }: { turmaId: string; encontro
                             duplaId: e.id,
                             notas,
                             justificativa,
+                            pedidoId,
                           }),
                         )()
                       }
@@ -755,6 +756,7 @@ function EquipeAvaliada({
   coordenacao: boolean;
 }) {
   const r = useRepositorios();
+  const pedidoId = usePedidoDaRota();
   const gravar = useGravar();
   const bloqueio = useBloqueioDeEscrita();
   const ultima = equipe.ultimaEntrega;
@@ -800,7 +802,7 @@ function EquipeAvaliada({
         somenteCorrecao={coordenacao}
         onSalvar={(dados) =>
           gravar(() =>
-            r.atividades.registrarAvaliacao({ ...dados, desafioId, duplaId: equipe.id }),
+            r.atividades.registrarAvaliacao({ ...dados, desafioId, duplaId: equipe.id, pedidoId }),
           )()
         }
       />
@@ -918,60 +920,4 @@ export function DocenteAvaliacoesPage() {
 
 export function CoordenacaoAvaliacoesPage() {
   return <ComEdicao>{(edicao) => <Avaliacoes edicao={edicao} coordenacao />}</ComEdicao>;
-}
-
-// ===========================================================================
-// Pontuação parcial da equipe (US5)
-// ===========================================================================
-
-function PontuacaoDaEquipe({ edicao }: { edicao: Edicao }) {
-  const lancamentos = useLancamentosDaEquipe(edicao.id);
-  return (
-    <Consulta consulta={lancamentos}>
-      {(l) => {
-        if (!l.equipe) {
-          return (
-            <>
-              <PageHeader icone="pontuacao" titulo="Pontuação da equipe" />
-              <EmptyState
-                icone="dupla"
-                titulo="Você ainda não faz parte de uma equipe."
-                descricao="A pontuação aparece quando você estiver numa equipe."
-              />
-            </>
-          );
-        }
-        const total = l.encontros.reduce(
-          (t, e) => t + calcularParcial(e, l.regras).pontuacao.total,
-          0,
-        );
-        return (
-          <>
-            <PageHeader
-              icone="pontuacao"
-              titulo="Pontuação da equipe"
-              descricao={`${total.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} de ${maximoDaEdicao(l.regras)} pontos (parcial) · regras ${l.regras.versao}`}
-            />
-            <Alert tom="info" titulo="Pontuação parcial">
-              Os pontos podem mudar até a publicação do ranking. Componentes ainda não registrados
-              aparecem como “Aguardando registro”.
-            </Alert>
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {l.encontros.map((e) => (
-                <PontuacaoDoEncontro key={e.encontroId} encontro={e} regras={l.regras} />
-              ))}
-            </div>
-            <p className="mt-6 text-sm text-text-secondary">
-              Discorda de algum lançamento? O pedido de revisão (até 24 horas após a publicação)
-              será disponibilizado no Incremento 4. Até lá, procure a coordenação.
-            </p>
-          </>
-        );
-      }}
-    </Consulta>
-  );
-}
-
-export function AlunoPontuacaoPage() {
-  return <ComEdicao>{(edicao) => <PontuacaoDaEquipe edicao={edicao} />}</ComEdicao>;
 }

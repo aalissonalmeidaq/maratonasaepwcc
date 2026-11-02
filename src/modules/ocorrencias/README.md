@@ -6,3 +6,5 @@
 
 Estrutura prevista: `domain/` (TS puro), `data/` (repositórios Supabase), `ui/` (React) e
 `index.ts` (API pública). Ver `docs/arquitetura.md`.
+
+> Spec 007: implementado no módulo [`resultado`](../resultado/README.md).

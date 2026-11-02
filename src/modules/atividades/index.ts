@@ -13,6 +13,7 @@ export {
 export type * from './domain/tipos';
 export { EnvioEntrega, type EnviarEntrega } from './ui/EnvioEntrega';
 export { paraDataHoraLocal } from './domain/datas';
+export { novaChaveDeEnvio } from './domain/chave';
 export { FormDesafio, GrupoDeMarcacao, Marcacao } from './ui/FormDesafio';
 export { CamposDeNotas, FormParticipacao } from './ui/FormParticipacao';
 export { RegistroPresenca } from './ui/RegistroPresenca';

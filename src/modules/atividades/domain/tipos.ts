@@ -205,6 +205,8 @@ export interface DadosAvaliacao {
   apresentacaoNaoAvaliavel: boolean;
   feedback: string;
   justificativa?: string;
+  /** Pedido de revisão aberto ao qual a correção fica ligada (spec 007). */
+  pedidoId?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -268,12 +270,14 @@ export interface RepositorioAtividades {
     turmaId: string;
     registros: RegistroDePresenca[];
     justificativa?: string;
+    pedidoId?: string | null;
   }): Promise<void>;
   registrarParticipacao(dados: {
     encontroId: string;
     duplaId: string;
     notas: Notas;
     justificativa?: string;
+    pedidoId?: string | null;
   }): Promise<void>;
 
   painelAvaliacao(desafioId: string): Promise<PainelAvaliacao>;

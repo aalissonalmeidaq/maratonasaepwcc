@@ -5,7 +5,8 @@ import { useAuth } from '@/modules/auth';
 import { ContadorConvites } from '@/modules/duplas';
 import { BotaoInstalar } from '@/shared/pwa';
 import { Brand, Button, Icon, MarcaSenai, PadraoGrafico, cx } from '@/shared/ui';
-import { useConvitesPendentes } from '../dados/consultas';
+import { ContadorAvisos } from '@/modules/resultado';
+import { useConvitesPendentes, useMeusAvisos } from '../dados/consultas';
 import { MENUS, ROTULO_AREA } from '../navegacao';
 
 function obterIniciais(nome?: string): string {
@@ -94,6 +95,7 @@ function Menu({
 export function AppShell({ area }: { area: Area }) {
   const { sessao, sair } = useAuth();
   const convitesPendentes = useConvitesPendentes(area === 'aluno');
+  const avisos = useMeusAvisos();
   const extrasDoMenu = {
     '/aluno/dupla': <ContadorConvites quantidade={convitesPendentes} />,
   };
@@ -491,7 +493,10 @@ export function AppShell({ area }: { area: Area }) {
               <p className="hidden text-sm font-semibold text-text-secondary lg:block">
                 {ROTULO_AREA[area]}
               </p>
-              <div className="ml-auto hidden items-center gap-2 lg:flex">
+              <div className="ml-auto">
+                <ContadorAvisos naoLidos={avisos.data?.naoLidos ?? 0} caminho={`/${area}/avisos`} />
+              </div>
+              <div className="hidden items-center gap-2 lg:flex">
                 <BotaoInstalar />
                 <div className="text-right">
                   <p className="text-sm font-semibold text-text">{sessao?.nome}</p>

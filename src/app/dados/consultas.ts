@@ -198,3 +198,84 @@ export function useBloqueioDeEscrita(): string | undefined {
   if (!online) return 'Sem conexão: gravações exigem conexão com o servidor.';
   return undefined;
 }
+
+// ---------------------------------------------------------------------------
+// Resultado oficial (spec 007): prova, ocorrências, pontos, ranking, revisão e avisos.
+// ---------------------------------------------------------------------------
+function useResultado<T>(
+  nome: string,
+  partes: (string | null | undefined)[],
+  ativo: boolean,
+  buscar: () => Promise<T>,
+) {
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave(nome, ...partes.map((p) => p ?? '')),
+    queryFn: buscar,
+    enabled: ativo,
+  });
+}
+export function useResultadosProva(encontroId?: string) {
+  const r = useRepositorios();
+  return useResultado('resultados-prova', [encontroId], Boolean(encontroId), () =>
+    r.resultado.resultadosProva(encontroId as string),
+  );
+}
+export function useOcorrencias(edicaoId?: string, turmaId?: string | null) {
+  const r = useRepositorios();
+  return useResultado('ocorrencias', [edicaoId, turmaId], Boolean(edicaoId), () =>
+    r.resultado.ocorrencias(edicaoId as string, turmaId ?? null),
+  );
+}
+export function usePontosDaMinhaEquipe(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('pontos-equipe', [edicaoId], Boolean(edicaoId), () =>
+    r.resultado.pontosDaMinhaEquipe(edicaoId as string),
+  );
+}
+export function usePontosDaTurma(turmaId?: string) {
+  const r = useRepositorios();
+  return useResultado('pontos-turma', [turmaId], Boolean(turmaId), () =>
+    r.resultado.pontosDaTurma(turmaId as string),
+  );
+}
+export function usePendenciasDaCategoria(edicaoId?: string, categoria?: string) {
+  const r = useRepositorios();
+  return useResultado(
+    'pendencias-categoria',
+    [edicaoId, categoria],
+    Boolean(edicaoId && categoria),
+    () => r.resultado.pendenciasDaCategoria(edicaoId as string, categoria as string),
+  );
+}
+export function useRankingPublicado(edicaoId?: string, categoria?: string | null) {
+  const r = useRepositorios();
+  return useResultado('ranking-publicado', [edicaoId, categoria], Boolean(edicaoId), () =>
+    r.resultado.rankingPublicado(edicaoId as string, categoria ?? null),
+  );
+}
+export function useHistoricoPublicacoes(edicaoId?: string, categoria?: string) {
+  const r = useRepositorios();
+  return useResultado(
+    'historico-publicacoes',
+    [edicaoId, categoria],
+    Boolean(edicaoId && categoria),
+    () => r.resultado.historicoPublicacoes(edicaoId as string, categoria as string),
+  );
+}
+export function usePedidosRevisao(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('pedidos-revisao', [edicaoId], Boolean(edicaoId), () =>
+    r.resultado.pedidosRevisao(edicaoId as string),
+  );
+}
+export function useMeusAvisos(ativo = true) {
+  const r = useRepositorios();
+  return useResultado('avisos', [], ativo, () => r.resultado.meusAvisos());
+}
+export function useTiposDeOcorrencia(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('tipos-ocorrencia', [edicaoId], Boolean(edicaoId), () =>
+    r.resultado.tiposDeOcorrencia(edicaoId as string),
+  );
+}

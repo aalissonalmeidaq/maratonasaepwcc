@@ -181,6 +181,7 @@ export function criarRepositorioAtividadesSupabase(sb: SupabaseClient): Reposito
           p_turma: p.turmaId,
           p_registros: p.registros,
           p_justificativa: p.justificativa ?? null,
+          p_pedido: p.pedidoId ?? null,
         }),
       );
     },
@@ -191,6 +192,7 @@ export function criarRepositorioAtividadesSupabase(sb: SupabaseClient): Reposito
           p_dupla: p.duplaId,
           p_notas: p.notas,
           p_justificativa: p.justificativa ?? null,
+          p_pedido: p.pedidoId ?? null,
         }),
       );
     },
@@ -210,6 +212,7 @@ export function criarRepositorioAtividadesSupabase(sb: SupabaseClient): Reposito
           p_apresentacao_nao_avaliavel: a.apresentacaoNaoAvaliavel,
           p_feedback: a.feedback.trim() || null,
           p_justificativa: a.justificativa ?? null,
+          p_pedido: a.pedidoId ?? null,
         }),
       );
     },

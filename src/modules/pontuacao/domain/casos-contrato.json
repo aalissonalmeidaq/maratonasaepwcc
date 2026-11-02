@@ -1,0 +1,562 @@
+{
+  "descricao": "Casos de contrato do cálculo do encontro. Fonte única dos esperados: o Vitest confere calcularEncontro e scripts/testar-paridade-calculo.mjs confere app.calcular_encontro (spec 007, R2). Regras 'piloto' = REGRAS_PILOTO.",
+  "casos": [
+    {
+      "nome": "soma os componentes até 100 pontos",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 0
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 40,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 100,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "questões proporcionais com duas casas e uma falta isolada",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": false }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 7, "total": 9 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 0
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 5,
+        "participacao": 10,
+        "avaliacaoObjetiva": 23.33,
+        "entrega": 40,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 88.33,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "atraso de 20 minutos desconta só do critério organização, sem ficar negativo",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 3 },
+          "atrasoMinutos": 20
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 30,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 90,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "atraso de 10 minutos desconta 2 pontos",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 10
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 38,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 98,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "mais de 30 minutos de atraso torna a entrega não realizada",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 45
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 0,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 60,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "exceção autorizada dispensa o desconto de atraso",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 45,
+          "excecaoAutorizada": true
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 40,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 100,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "sem entrega: zero na entrega e apresentação continua valendo",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": { "situacao": "nao_entregue" },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 0,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 60,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "plágio comprovado zera a entrega",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 0,
+          "plagioComprovado": true
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 0,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 60,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "apresentação não avaliável recebe zero",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 0
+        },
+        "apresentacao": { "situacao": "nao_avaliavel", "justificativa": "sem compreensão" },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 40,
+        "apresentacao": 0,
+        "descontos": 0,
+        "total": 90,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "penalidades pelo mesmo fato não se acumulam",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 0
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": [
+          { "id": "p1", "fatoId": "f1", "pontos": 5 },
+          { "id": "p2", "fatoId": "f1", "pontos": 5 },
+          { "id": "p3", "fatoId": "f2", "pontos": 2 }
+        ]
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 40,
+        "apresentacao": 10,
+        "descontos": 7,
+        "total": 93,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "descontos de fatos distintos limitados ao teto do encontro",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 10, "total": 10 },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 0
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": [
+          { "id": "p1", "fatoId": "f1", "pontos": 5 },
+          { "id": "p2", "fatoId": "f2", "pontos": 5 },
+          { "id": "p3", "fatoId": "f3", "pontos": 2 }
+        ]
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 40,
+        "apresentacao": 10,
+        "descontos": 10,
+        "total": 90,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "total do encontro nunca fica negativo",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": false }
+        ],
+        "participacao": { "envolvimento": 0, "colaboracao": 0, "organizacao": 0 },
+        "avaliacaoObjetiva": { "tipo": "questoes", "acertos": 0, "total": 10 },
+        "entrega": { "situacao": "nao_entregue" },
+        "apresentacao": { "situacao": "nao_avaliavel", "justificativa": "sem entrega" },
+        "penalidades": [
+          { "id": "p1", "fatoId": "f1", "pontos": 5 },
+          { "id": "p2", "fatoId": "f2", "pontos": 5 }
+        ]
+      },
+      "esperado": {
+        "presenca": 5,
+        "participacao": 0,
+        "avaliacaoObjetiva": 0,
+        "entrega": 0,
+        "apresentacao": 0,
+        "descontos": 10,
+        "total": 0,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "componentes não avaliados ficam pendentes, sem pontos inventados",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "entrega": { "situacao": "pendente" },
+        "apresentacao": { "situacao": "pendente" },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 0,
+        "avaliacaoObjetiva": 0,
+        "entrega": 0,
+        "apresentacao": 0,
+        "descontos": 0,
+        "total": 10,
+        "pendencias": ["participacao", "avaliacaoObjetiva", "entrega", "apresentacao"]
+      }
+    },
+    {
+      "nome": "prova oficial no lugar das questões propaga a pendência da nota",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": {
+          "tipo": "prova_oficial",
+          "resultados": [
+            { "estudanteId": "a", "realizacao": "confirmada", "nota": { "estado": "pendente" } },
+            {
+              "estudanteId": "b",
+              "realizacao": "confirmada",
+              "nota": { "estado": "confirmada", "valor": 80 }
+            }
+          ]
+        },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": { "compreensao": 10, "aplicacao": 10, "qualidade": 10, "organizacao": 10 },
+          "atrasoMinutos": 0
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": { "clareza": 3, "explicacao": 4, "respostas": 3 }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 20,
+        "entrega": 40,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 90,
+        "pendencias": ["avaliacaoObjetiva"]
+      }
+    },
+    {
+      "nome": "prova oficial: nota 70 dá bônus, 69,9 não, e limite de 30",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": {
+          "tipo": "prova_oficial",
+          "resultados": [
+            {
+              "estudanteId": "a",
+              "realizacao": "confirmada",
+              "nota": { "estado": "confirmada", "valor": 70 }
+            },
+            {
+              "estudanteId": "b",
+              "realizacao": "confirmada",
+              "nota": { "estado": "confirmada", "valor": 69.9 }
+            }
+          ]
+        },
+        "entrega": { "situacao": "nao_entregue" },
+        "apresentacao": { "situacao": "nao_avaliavel", "justificativa": "sem entrega" },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 20,
+        "entrega": 0,
+        "apresentacao": 0,
+        "descontos": 0,
+        "total": 40,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "prova oficial: nota indisponível e não realização sem pendência",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": false }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": {
+          "tipo": "prova_oficial",
+          "resultados": [
+            {
+              "estudanteId": "a",
+              "realizacao": "confirmada",
+              "nota": { "estado": "indisponivel" }
+            },
+            { "estudanteId": "b", "realizacao": "nao_realizou", "nota": { "estado": "pendente" } }
+          ]
+        },
+        "entrega": { "situacao": "nao_entregue" },
+        "apresentacao": { "situacao": "nao_avaliavel", "justificativa": "sem entrega" },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 5,
+        "participacao": 10,
+        "avaliacaoObjetiva": 5,
+        "entrega": 0,
+        "apresentacao": 0,
+        "descontos": 0,
+        "total": 20,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "prova oficial: realização pendente deixa o componente pendente",
+      "regras": "piloto",
+      "lancamentos": {
+        "presencas": [
+          { "estudanteId": "a", "presente": true },
+          { "estudanteId": "b", "presente": true }
+        ],
+        "participacao": { "envolvimento": 4, "colaboracao": 3, "organizacao": 3 },
+        "avaliacaoObjetiva": {
+          "tipo": "prova_oficial",
+          "resultados": [
+            {
+              "estudanteId": "a",
+              "realizacao": "confirmada",
+              "nota": { "estado": "confirmada", "valor": 100 }
+            },
+            { "estudanteId": "b", "realizacao": "pendente", "nota": { "estado": "pendente" } }
+          ]
+        },
+        "entrega": { "situacao": "nao_entregue" },
+        "apresentacao": { "situacao": "nao_avaliavel", "justificativa": "sem entrega" },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 15,
+        "entrega": 0,
+        "apresentacao": 0,
+        "descontos": 0,
+        "total": 35,
+        "pendencias": ["avaliacaoObjetiva"]
+      }
+    }
+  ]
+}

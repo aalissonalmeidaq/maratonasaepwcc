@@ -81,7 +81,7 @@ export function pontuarProvaOficial(
     pontos += p.pontosRealizacao;
     if (r.nota.estado === 'pendente') {
       pendente = true;
-    } else if (r.nota.valor >= p.notaMinimaBonus) {
+    } else if (r.nota.estado === 'confirmada' && r.nota.valor >= p.notaMinimaBonus) {
       pontos += p.pontosBonus;
     }
   }

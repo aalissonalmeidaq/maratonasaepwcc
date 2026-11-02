@@ -161,6 +161,17 @@ describe('prova oficial', () => {
     expect(r).toEqual({ pontos: 0, pendente: true });
   });
 
+  it('nota indisponível mantém a realização, sem bônus e sem pendência (spec 007, R4)', () => {
+    const r = pontuarProvaOficial(
+      [
+        { estudanteId: 'a', realizacao: 'confirmada', nota: { estado: 'indisponivel' } },
+        { estudanteId: 'b', realizacao: 'nao_realizou', nota: { estado: 'pendente' } },
+      ],
+      regras,
+    );
+    expect(r).toEqual({ pontos: 5, pendente: false });
+  });
+
   it('não ultrapassa 30 pontos por dupla', () => {
     const ok = { realizacao: 'confirmada', nota: { estado: 'confirmada', valor: 100 } } as const;
     const r = pontuarProvaOficial(
