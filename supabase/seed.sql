@@ -43,7 +43,7 @@ insert into public.edicoes (id, nome, estado, regras, regras_versao, premiacao) 
   'b0000000-0000-0000-0000-000000000001',
   'Maratona SAEP — edição local de teste (fictícia)',
   'ativa',
-  '{"versao":"piloto-2026.0-a-confirmar","quantidadeEncontros":4,"casasDecimais":2,"presenca":{"pontosPorIntegrante":5,"maximoPorDupla":10},"participacao":{"criterios":[{"id":"envolvimento","rotulo":"Envolvimento nas atividades","maximo":4},{"id":"colaboracao","rotulo":"Colaboração","maximo":3},{"id":"organizacao","rotulo":"Organização e cumprimento das orientações","maximo":3}]},"questoes":{"maximo":30},"entrega":{"criterios":[{"id":"compreensao","rotulo":"Compreensão do problema","maximo":10},{"id":"aplicacao","rotulo":"Aplicação de conhecimentos técnicos","maximo":10},{"id":"qualidade","rotulo":"Qualidade e adequação da solução","maximo":10},{"id":"organizacao","rotulo":"Organização e entrega","maximo":10}],"criterioDeAtraso":"organizacao","faixasDeAtraso":[{"ateMinutos":15,"desconto":2},{"ateMinutos":30,"desconto":5}],"limiteAtrasoMinutos":30},"apresentacao":{"criterios":[{"id":"clareza","rotulo":"Clareza","maximo":3},{"id":"explicacao","rotulo":"Explicação das decisões e etapas","maximo":4},{"id":"respostas","rotulo":"Respostas às perguntas","maximo":3}]},"provaOficial":{"pontosRealizacao":5,"notaMinimaBonus":70,"pontosBonus":10,"maximoPorDupla":30},"penalidades":{"tetoDescontosPorEncontro":10}}',
+  '{"versao":"piloto-2026.0-a-confirmar","quantidadeEncontros":4,"casasDecimais":2,"presenca":{"pontosPorIntegrante":5,"maximoPorDupla":10},"participacao":{"criterios":[{"id":"envolvimento","rotulo":"Envolvimento nas atividades","maximo":4},{"id":"colaboracao","rotulo":"Colaboração","maximo":3},{"id":"organizacao","rotulo":"Organização e cumprimento das orientações","maximo":3}]},"questoes":{"maximo":30},"entrega":{"criterios":[{"id":"compreensao","rotulo":"Compreensão do problema","maximo":10},{"id":"aplicacao","rotulo":"Aplicação de conhecimentos técnicos","maximo":10},{"id":"qualidade","rotulo":"Qualidade e adequação da solução","maximo":10},{"id":"organizacao","rotulo":"Organização e entrega","maximo":10}],"criterioDeAtraso":"organizacao","faixasDeAtraso":[{"ateMinutos":15,"desconto":2},{"ateMinutos":30,"desconto":5}],"limiteAtrasoMinutos":30},"apresentacao":{"criterios":[{"id":"clareza","rotulo":"Clareza","maximo":3},{"id":"explicacao","rotulo":"Explicação das decisões e etapas","maximo":4},{"id":"respostas","rotulo":"Respostas às perguntas","maximo":3}]},"provaOficial":{"pontosRealizacao":5,"notaMinimaBonus":70,"pontosBonus":10,"maximoPorDupla":30},"penalidades":{"tetoDescontosPorEncontro":10,"tipos":[{"id":"reincidencia","rotulo":"Reincidência após orientação registrada","pontos":2},{"id":"desrespeito","rotulo":"Desrespeito com responsabilidade da equipe","pontos":5},{"id":"uso_nao_autorizado","rotulo":"Uso não autorizado","pontos":5},{"id":"plagio","rotulo":"Plágio comprovado","zeraEntrega":true}]},"prazos":{"manifestacaoHoras":24,"revisaoHoras":24}}',
   'piloto-2026.0-a-confirmar',
   '[{"posicao":1,"descricao":"Vale gastronômico","detalhes":null},
     {"posicao":2,"descricao":"Voucher para o Arajara Park (aluno e acompanhante)","detalhes":null},
@@ -132,3 +132,15 @@ insert into public.alternativas (questao_id, ordem, texto, correta)
 select q.id, a.ordem, 'Alternativa ' || a.ordem, a.ordem = 1
 from public.questoes q cross join generate_series(1, 3) as a (ordem)
 where q.lista_id = 'f2000000-0000-0000-0000-000000000001';
+
+-- Spec 007: ocorrência fictícia registrada pela equipe docente da turma B (categoria B), para
+-- demonstrar a lista, a manifestação e as pendências do ranking. A prova oficial é o encontro 3.
+insert into public.ocorrencias (id, edicao_id, encontro_id, dupla_id, tipo, fato, fato_chave, evidencia,
+                                integrantes, prazo_manifestacao, chave_envio, autor_id)
+select 'f4000000-0000-0000-0000-000000000001', e.edicao_id, e.id, 'f0000000-0000-0000-0000-000000000003',
+       'reincidencia', 'Ocorrência fictícia: uso de celular após orientação registrada.', 'f4000000-0000-0000-0000-000000000001',
+       'Relato fictício do docente.',
+       '[{"estudanteId": "a0000000-0000-0000-0000-000000000008", "nome": "Íris Exemplo"},
+         {"estudanteId": "a0000000-0000-0000-0000-000000000009", "nome": "João Exemplo"}]',
+       now() + interval '24 hours', 'f5000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000010'
+from public.encontros e where e.edicao_id = 'b0000000-0000-0000-0000-000000000001' and e.numero = 1;

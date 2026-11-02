@@ -7,6 +7,7 @@ import type { Encontro, RepositorioEncontros } from '@/modules/encontros';
 import type { RepositorioOrganizacao } from '@/modules/organizacao';
 import type { RepositorioPainelTurma } from '@/modules/painel-turma';
 import { criarAtividadesDemo } from './atividades';
+import { criarResultadoDemo } from './resultado';
 import { rankingPorCategoria } from './consultas';
 import { cursos, duplas, edicao, encontros, pessoas, turmas } from './dados';
 
@@ -259,5 +260,6 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     encontros: repositorioEncontros,
     painelTurma: repositorioPainelTurma,
     atividades: criarAtividadesDemo(usuarioAtual),
+    resultado: criarResultadoDemo(usuarioAtual),
   };
 }

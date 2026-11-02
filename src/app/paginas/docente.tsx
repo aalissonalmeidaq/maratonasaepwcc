@@ -1,14 +1,6 @@
 import { painelDocente } from '@/modules/demo';
 import { formatarData } from '@/shared/lib/formatacao';
-import {
-  Card,
-  EmConstrucao,
-  EmptyState,
-  PageHeader,
-  StatCard,
-  StatusBadge,
-  BannerDestaque,
-} from '@/shared/ui';
+import { Card, EmptyState, StatCard, StatusBadge, BannerDestaque } from '@/shared/ui';
 import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
 
@@ -84,14 +76,5 @@ export function DocenteInicioPage() {
         </>
       )}
     </ComDadosDemo>
-  );
-}
-
-export function DocenteOcorrenciasPage() {
-  return (
-    <>
-      <PageHeader icone="ocorrencia" titulo="Ocorrências" />
-      <EmConstrucao modulo="Registro de ocorrências e evidências" incremento="Incremento 4" />
-    </>
   );
 }

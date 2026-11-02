@@ -211,14 +211,15 @@ test.describe('US5 — pontuação parcial da equipe', () => {
     });
     await expect(
       encontro1.getByText('Presença').locator('xpath=following-sibling::dd[1]'),
-    ).toHaveText('10 / 10');
+    ).toHaveText('10');
     await expect(
       encontro1.getByText('Participação').locator('xpath=following-sibling::dd[1]'),
-    ).toHaveText('9,5 / 10');
+    ).toHaveText('9,5');
     await expect(
       encontro1.getByText('Entrega prática').locator('xpath=following-sibling::dd[1]'),
     ).toHaveText('Aguardando registro');
-    await expect(encontro1.getByText('Parcial', { exact: true })).toBeVisible();
+    // Spec 007: a pontuação vem do cálculo oficial do servidor, como prévia não oficial.
+    await expect(encontro1.getByText('Prévia — não oficial', { exact: true })).toBeVisible();
     const encontro4 = page.getByRole('region', {
       name: '4. Encontro 4 — Projeto final e premiação',
     });

@@ -91,12 +91,7 @@ test.describe('jornadas por perfil (modo demonstração)', () => {
 
     await navegarPeloMenu(page, 'Ranking');
     await expect(page.getByRole('heading', { level: 1, name: 'Ranking' })).toBeVisible();
-    await expect(
-      page
-        .getByText(/(sua dupla)/)
-        .filter({ visible: true })
-        .first(),
-    ).toBeVisible();
+    await expect(page.getByText('(sua equipe)').filter({ visible: true }).first()).toBeVisible();
     await expect(page.getByText(/notas individuais não são exibidas/i)).toBeVisible();
     await semRolagemHorizontal(page);
   });
@@ -166,7 +161,7 @@ test.describe('jornadas por perfil (modo demonstração)', () => {
     await expect(page.getByText('A confirmar').first()).toBeVisible();
 
     await navegarPeloMenu(page, 'Ranking');
-    await expect(page.getByText('(compartilhada)').filter({ visible: true }).first()).toBeVisible();
+    await expect(page.getByText('(empate)').filter({ visible: true }).first()).toBeVisible();
   });
 
   test('sem conexão, a aplicação avisa a pessoa usuária', async ({ page, context }) => {
@@ -210,7 +205,7 @@ test('menu do celular pode ser fechado pelo botão (não fica coberto)', async (
 test('atalhos do painel levam às seções do perfil', async ({ page }) => {
   await entrarComo(page, /ana exemplo/i);
   const atalhos = page.getByRole('navigation', { name: 'Acesso rápido' });
-  await expect(atalhos.getByRole('link')).toHaveCount(7);
+  await expect(atalhos.getByRole('link')).toHaveCount(9);
   await atalhos.getByRole('link', { name: 'Ranking' }).click();
   await expect(page).toHaveURL(/\/aluno\/ranking$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Ranking' })).toBeVisible();
@@ -322,7 +317,60 @@ test.describe('atividades dos encontros na demonstração (spec 006)', () => {
     await expect(
       page.getByRole('heading', { level: 1, name: 'Pontuação da equipe' }),
     ).toBeVisible();
+    await expect(page.getByText('Prévia — não oficial').first()).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+});
+
+test.describe('resultado oficial na demonstração (spec 007)', () => {
+  test('aluna vê a prévia, o ranking parcial com o detalhe só da própria equipe e o contador de avisos', async ({
+    page,
+  }) => {
+    await entrarComo(page, /ana exemplo/i);
+    await expect(page.getByRole('link', { name: /avisos não lidos/ })).toBeVisible();
+    await page.goto('/aluno/ranking');
     await expect(page.getByText('Parcial', { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Detalhe — Dupla Órbita' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Detalhe — Dupla (?!Órbita)/ })).toHaveCount(0);
+    await expect(page.getByText(/nota oficial/i)).toHaveCount(0);
+    await semRolagemHorizontal(page);
+  });
+
+  test('aluna vê a ocorrência da equipe e a manifestação fica bloqueada na demonstração', async ({
+    page,
+  }) => {
+    await entrarComo(page, /ana exemplo/i);
+    await page.goto('/aluno/ocorrencias');
+    await expect(
+      page.getByRole('heading', { name: /Reincidência após orientação registrada/ }),
+    ).toBeVisible();
+    await expect(page.getByText('Registrada', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Enviar manifestação' })).toBeDisabled();
+    await expect(page.getByText(/Indisponível no modo demonstração/).first()).toBeVisible();
+    await page.goto('/aluno/avisos');
+    await expect(page.getByText(/Nova ocorrência registrada para a sua equipe/)).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+
+  test('coordenação vê pendências e histórico; publicar fica bloqueado na demonstração', async ({
+    page,
+  }) => {
+    await entrarComo(page, /coordenação \(fictícia\)/i);
+    await page.goto('/coordenacao/ranking');
+    await expect(page.getByText(/pendência\(s\) impedem o definitivo/)).toBeVisible();
+    await expect(page.getByRole('radio', { name: 'Definitivo' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Publicar ranking' })).toBeDisabled();
+    await expect(page.getByRole('heading', { name: 'Histórico de versões' })).toBeVisible();
+    await expect(page.getByText('Coordenação (fictícia)').filter({ visible: true }).first()).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+
+  test('docente vê a prévia dos pontos da turma, sem nota individual', async ({ page }) => {
+    await entrarComo(page, /lúcia/i);
+    await page.goto('/docente/pontos');
+    await expect(page.getByRole('heading', { level: 1, name: 'Pontos da turma' })).toBeVisible();
+    await expect(page.getByText('Dupla Órbita').first()).toBeVisible();
+    await expect(page.getByText(/nota oficial/i)).toHaveCount(0);
     await semRolagemHorizontal(page);
   });
 });

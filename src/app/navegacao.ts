@@ -50,6 +50,18 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       descricao: 'Classificação da categoria',
     },
     {
+      rotulo: 'Ocorrências',
+      caminho: '/aluno/ocorrencias',
+      icone: 'ocorrencia',
+      descricao: 'Ocorrências e manifestação',
+    },
+    {
+      rotulo: 'Revisões',
+      caminho: '/aluno/revisoes',
+      icone: 'revisao',
+      descricao: 'Pedidos de revisão da equipe',
+    },
+    {
       rotulo: 'Regulamento e avisos',
       caminho: '/aluno/regulamento',
       icone: 'conhecimento',
@@ -87,6 +99,12 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       caminho: '/docente/avaliacoes',
       icone: 'avaliacao',
       descricao: 'Rubricas e critérios',
+    },
+    {
+      rotulo: 'Pontos da turma',
+      caminho: '/docente/pontos',
+      icone: 'pontuacao',
+      descricao: 'Prévia dos pontos das equipes',
     },
     {
       rotulo: 'Ocorrências',
@@ -133,6 +151,12 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       descricao: 'Correções e prorrogações',
     },
     {
+      rotulo: 'Prova oficial',
+      caminho: '/coordenacao/prova-oficial',
+      icone: 'prova',
+      descricao: 'Realização e nota oficial',
+    },
+    {
       rotulo: 'Ranking',
       caminho: '/coordenacao/ranking',
       icone: 'ranking',
@@ -142,7 +166,13 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       rotulo: 'Ocorrências',
       caminho: '/coordenacao/ocorrencias',
       icone: 'ocorrencia',
-      descricao: 'Ocorrências e revisões',
+      descricao: 'Registro e decisão',
+    },
+    {
+      rotulo: 'Revisões',
+      caminho: '/coordenacao/revisoes',
+      icone: 'revisao',
+      descricao: 'Pedidos de revisão das equipes',
     },
     {
       rotulo: 'Comunicados',

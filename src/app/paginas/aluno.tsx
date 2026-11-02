@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { painelAluno, type RankingDaCategoria } from '@/modules/demo';
+import { painelAluno } from '@/modules/demo';
 import { maximoPorEncontro, REGRAS_PILOTO } from '@/modules/pontuacao';
 import { formatarData, formatarDataHora, formatarPontos } from '@/shared/lib/formatacao';
 import {
@@ -7,7 +7,6 @@ import {
   Card,
   PageHeader,
   ProgressoCircular,
-  ResponsiveTable,
   StatCard,
   StatusBadge,
   BannerDestaque,
@@ -19,64 +18,6 @@ import { ComDadosDemo } from './comum';
 type Painel = NonNullable<ReturnType<typeof painelAluno>>;
 
 const carregar = (s: { usuarioId: string }) => painelAluno(s.usuarioId);
-
-export function TabelaRanking({
-  ranking,
-  destaque,
-}: {
-  ranking: RankingDaCategoria;
-  destaque?: string;
-}) {
-  return (
-    <ResponsiveTable
-      legenda={`Classificação — ${ranking.categoria}`}
-      chave={(p) => p.duplaId}
-      linhas={ranking.posicoes}
-      colunas={[
-        {
-          id: 'pos',
-          titulo: 'Posição',
-          valor: (p) => (
-            <span className="font-semibold">
-              {p.posicao}º
-              {p.compartilhada && (
-                <span className="ml-1 text-xs font-medium text-text-secondary">
-                  (compartilhada)
-                </span>
-              )}
-            </span>
-          ),
-        },
-        {
-          id: 'dupla',
-          titulo: 'Dupla',
-          valor: (p) => (
-            <span className={p.duplaId === destaque ? 'font-bold text-blue-700' : undefined}>
-              {p.nome}
-              {p.duplaId === destaque && ' (sua dupla)'}
-            </span>
-          ),
-        },
-        {
-          id: 'total',
-          titulo: 'Pontos',
-          numerica: true,
-          valor: (p) => formatarPontos(p.totais.total),
-        },
-        {
-          id: 'sit',
-          titulo: 'Situação',
-          valor: (p) =>
-            p.totais.pendente ? (
-              <StatusBadge estado="pendente" rotulo="Com pendências" />
-            ) : (
-              <StatusBadge estado="concluido" rotulo="Lançamentos completos" />
-            ),
-        },
-      ]}
-    />
-  );
-}
 
 /** Convites de equipe recebidos que esperam resposta (FR-016). */
 function CardConvitesEquipe() {
@@ -248,30 +189,6 @@ export function AlunoInicioPage() {
                 ))}
               </ul>
             </Card>
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
-  );
-}
-
-export function AlunoRankingPage() {
-  return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            icone="ranking"
-            titulo="Ranking"
-            descricao={p.curso?.categoria}
-            acoes={p.ranking && <StatusBadge estado={p.ranking.estado} />}
-          />
-          <Alert tom="info" titulo="Classificação parcial">
-            O ranking mostra apenas o total de cada dupla. Notas individuais não são exibidas.
-            Desempate: entrega prática, depois questões/prova oficial, depois presença.
-          </Alert>
-          <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-            {p.ranking && <TabelaRanking ranking={p.ranking} destaque={p.dupla.id} />}
           </div>
         </>
       )}

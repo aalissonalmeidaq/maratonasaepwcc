@@ -18,10 +18,10 @@ const AlunoDesafiosPage = lazy(() =>
   import('./paginas/atividades').then((modulo) => ({ default: modulo.AlunoDesafiosPage })),
 );
 const AlunoPontuacaoPage = lazy(() =>
-  import('./paginas/atividades').then((modulo) => ({ default: modulo.AlunoPontuacaoPage })),
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.AlunoPontuacaoPage })),
 );
 const AlunoRankingPage = lazy(() =>
-  import('./paginas/aluno').then((modulo) => ({ default: modulo.AlunoRankingPage })),
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.AlunoRankingPage })),
 );
 const AlunoRegulamentoPage = lazy(() =>
   import('./paginas/aluno').then((modulo) => ({ default: modulo.AlunoRegulamentoPage })),
@@ -30,12 +30,30 @@ const CoordenacaoInicioPage = lazy(() =>
   import('./paginas/coordenacao').then((modulo) => ({ default: modulo.CoordenacaoInicioPage })),
 );
 const CoordenacaoRankingPage = lazy(() =>
-  import('./paginas/coordenacao').then((modulo) => ({ default: modulo.CoordenacaoRankingPage })),
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.CoordenacaoRankingPage })),
+);
+const CoordenacaoProvaOficialPage = lazy(() =>
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.CoordenacaoProvaOficialPage })),
 );
 const CoordenacaoOcorrenciasPage = lazy(() =>
-  import('./paginas/coordenacao').then((modulo) => ({
+  import('./paginas/resultado').then((modulo) => ({
     default: modulo.CoordenacaoOcorrenciasPage,
   })),
+);
+const AlunoOcorrenciasPage = lazy(() =>
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.AlunoOcorrenciasPage })),
+);
+const DocentePontosPage = lazy(() =>
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.DocentePontosPage })),
+);
+const AlunoRevisoesPage = lazy(() =>
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.AlunoRevisoesPage })),
+);
+const CoordenacaoRevisoesPage = lazy(() =>
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.CoordenacaoRevisoesPage })),
+);
+const AvisosPage = lazy(() =>
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.AvisosPage })),
 );
 const CoordenacaoComunicadosPage = lazy(() =>
   import('./paginas/coordenacao').then((modulo) => ({
@@ -64,7 +82,7 @@ const CoordenacaoPresencaPage = lazy(() =>
   import('./paginas/atividades').then((modulo) => ({ default: modulo.CoordenacaoPresencaPage })),
 );
 const DocenteOcorrenciasPage = lazy(() =>
-  import('./paginas/docente').then((modulo) => ({ default: modulo.DocenteOcorrenciasPage })),
+  import('./paginas/resultado').then((modulo) => ({ default: modulo.DocenteOcorrenciasPage })),
 );
 const AlunoDuplaPage = lazy(() =>
   import('./paginas/organizacao').then((modulo) => ({ default: modulo.AlunoDuplaPage })),
@@ -128,6 +146,9 @@ export function AppRotas() {
               <Route path="desafios" element={<AlunoDesafiosPage />} />
               <Route path="pontuacao" element={<AlunoPontuacaoPage />} />
               <Route path="ranking" element={<AlunoRankingPage />} />
+              <Route path="ocorrencias" element={<AlunoOcorrenciasPage />} />
+              <Route path="revisoes" element={<AlunoRevisoesPage />} />
+              <Route path="avisos" element={<AvisosPage />} />
               <Route path="regulamento" element={<AlunoRegulamentoPage />} />
             </Route>
           </Route>
@@ -142,6 +163,8 @@ export function AppRotas() {
               <Route path="presenca" element={<DocentePresencaPage />} />
               <Route path="avaliacoes" element={<DocenteAvaliacoesPage />} />
               <Route path="ocorrencias" element={<DocenteOcorrenciasPage />} />
+              <Route path="pontos" element={<DocentePontosPage />} />
+              <Route path="avisos" element={<AvisosPage />} />
             </Route>
           </Route>
 
@@ -154,8 +177,11 @@ export function AppRotas() {
               <Route path="encontros" element={<CoordenacaoEncontrosPage />} />
               <Route path="presenca" element={<CoordenacaoPresencaPage />} />
               <Route path="avaliacoes" element={<CoordenacaoAvaliacoesPage />} />
+              <Route path="prova-oficial" element={<CoordenacaoProvaOficialPage />} />
               <Route path="ranking" element={<CoordenacaoRankingPage />} />
               <Route path="ocorrencias" element={<CoordenacaoOcorrenciasPage />} />
+              <Route path="revisoes" element={<CoordenacaoRevisoesPage />} />
+              <Route path="avisos" element={<AvisosPage />} />
               <Route path="comunicados" element={<CoordenacaoComunicadosPage />} />
               <Route path="premiacao" element={<CoordenacaoPremiacaoPage />} />
               <Route path="relatorios" element={<CoordenacaoRelatoriosPage />} />

@@ -120,3 +120,45 @@ describe('repositório Supabase de atividades — envio da entrega (FR-003/004, 
     expect(assinar).toHaveBeenCalledWith('d1/e1/k1.pdf', 300);
   });
 });
+
+describe('repositório Supabase de atividades — correção ligada a pedido de revisão (spec 007, R7)', () => {
+  it('presença, participação e avaliação enviam o pedido junto da justificativa', async () => {
+    const { sb, chamar } = clienteFalso({ rpc: { data: 1, error: null } });
+    const repo = criarRepositorioAtividadesSupabase(sb);
+    await repo.registrarPresencas({
+      encontroId: 'en1',
+      turmaId: 't1',
+      registros: [{ estudanteId: 'a', presente: false, observacao: '' }],
+      justificativa: 'Correção pedida na revisão.',
+      pedidoId: 'r1',
+    });
+    expect(chamar).toHaveBeenLastCalledWith(
+      'registrar_presencas',
+      expect.objectContaining({ p_pedido: 'r1' }),
+    );
+    await repo.registrarParticipacao({
+      encontroId: 'en1',
+      duplaId: 'e1',
+      notas: {},
+      justificativa: 'x',
+    });
+    expect(chamar).toHaveBeenLastCalledWith(
+      'registrar_participacao',
+      expect.objectContaining({ p_pedido: null }),
+    );
+    await repo.registrarAvaliacao({
+      desafioId: 'd1',
+      duplaId: 'e1',
+      notasEntrega: null,
+      notasApresentacao: null,
+      apresentacaoNaoAvaliavel: true,
+      feedback: '',
+      justificativa: 'Correção pedida na revisão.',
+      pedidoId: 'r1',
+    });
+    expect(chamar).toHaveBeenLastCalledWith(
+      'registrar_avaliacao',
+      expect.objectContaining({ p_pedido: 'r1' }),
+    );
+  });
+});

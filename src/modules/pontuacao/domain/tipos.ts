@@ -5,6 +5,11 @@ export interface CriterioRubrica {
   maximo: number;
 }
 
+/** Tipo de ocorrência das regras da edição: desconto geral em pontos ou zeramento da entrega. */
+export type TipoOcorrencia =
+  | { id: string; rotulo: string; pontos: number }
+  | { id: string; rotulo: string; zeraEntrega: true };
+
 export interface FaixaDeAtraso {
   /** Limite superior inclusivo, em minutos. */
   ateMinutos: number;
@@ -35,7 +40,9 @@ export interface RegrasDaEdicao {
     pontosBonus: number;
     maximoPorDupla: number;
   };
-  penalidades: { tetoDescontosPorEncontro: number };
+  penalidades: { tetoDescontosPorEncontro: number; tipos: TipoOcorrencia[] };
+  /** Prazos, em horas, contados pelo horário do servidor (spec 007). */
+  prazos: { manifestacaoHoras: number; revisaoHoras: number };
 }
 
 export type Notas = Readonly<Record<string, number>>;
@@ -45,7 +52,11 @@ export interface RegistroPresenca {
   presente: boolean;
 }
 
-export type NotaOficial = { estado: 'pendente' } | { estado: 'confirmada'; valor: number };
+/** `indisponivel`: a nota não será fornecida; mantém a realização, sem bônus e sem pendência. */
+export type NotaOficial =
+  | { estado: 'pendente' }
+  | { estado: 'indisponivel' }
+  | { estado: 'confirmada'; valor: number };
 
 export interface ResultadoProvaOficial {
   estudanteId: string;
