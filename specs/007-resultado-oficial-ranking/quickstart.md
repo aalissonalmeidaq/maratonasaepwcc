@@ -65,7 +65,7 @@
 | Portão                                                                              | Resultado                                                                                                             |
 | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `npm run verify`                                                                    | 68 arquivos, 593 testes; build OK                                                                                     |
-| `npm run test:db`                                                                   | 685 asserções (239 novas em `008_resultado_oficial_ranking.test.sql`), incluindo as da spec 006 com as RPCs recriadas |
+| `npm run test:db`                                                                   | 687 asserções (241 novas em `008_resultado_oficial_ranking.test.sql`), incluindo as da spec 006 com as RPCs recriadas |
 | `node scripts/testar-paridade-calculo.mjs`                                          | 22 casos, 0 divergências entre TS e SQL                                                                               |
 | `node scripts/testar-concorrencia-publicacao.mjs`                                   | aprovado: versões 1 e 2, sem repetição                                                                                |
 | `node scripts/testar-concorrencia-questoes.mjs` e `testar-concorrencia-equipes.mjs` | aprovados                                                                                                             |
