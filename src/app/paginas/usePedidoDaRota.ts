@@ -5,3 +5,9 @@ export function usePedidoDaRota(): string | null {
   const [params] = useSearchParams();
   return params.get('pedido');
 }
+
+/** `?ocorrencia=`: a ocorrência do pedido; só ela recebe o formulário de nova decisão. */
+export function useOcorrenciaDaRota(): string | null {
+  const [params] = useSearchParams();
+  return params.get('ocorrencia');
+}

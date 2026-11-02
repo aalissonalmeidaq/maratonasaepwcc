@@ -924,6 +924,10 @@ select lives_ok($$ select public.decidir_ocorrencia(pg_temp.g('o1')::uuid, 'arqu
 select throws_ok(format($f$ select public.registrar_participacao(pg_temp.en('1'), pg_temp.d('a1'),
     '{"envolvimento":2,"colaboracao":3,"organizacao":3}', 'Correção com pedido de outra equipe.', %L) $f$, pg_temp.g('r4')),
   '23514', null, 'R7: pedido de outra equipe não liga a correção');
+select throws_ok($$ select public.decidir_ocorrencia(pg_temp.g('o5')::uuid, 'arquivada', 'Redecisão com pedido de outra ocorrência.', false, pg_temp.g('r3')::uuid) $$,
+  '23514', null, 'R7: redecisão exige o pedido sobre a própria ocorrência');
+select throws_ok($$ select public.decidir_ocorrencia(pg_temp.g('o5')::uuid, 'arquivada', 'Redecisão com pedido sobre a publicação.', false, pg_temp.g('r2')::uuid) $$,
+  '23514', null, 'R7: pedido sobre a publicação não redecide ocorrência');
 reset role;
 select ok(pg_temp.ligadas(pg_temp.g('r2')) >= 4, 'FR-022: as correções ficam ligadas ao pedido na auditoria');
 select ok(pg_temp.ligadas(pg_temp.g('r1')) >= 1, 'FR-022: a redecisão fica ligada ao pedido');

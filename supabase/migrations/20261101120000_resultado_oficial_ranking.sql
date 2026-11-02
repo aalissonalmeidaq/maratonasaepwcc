@@ -1123,6 +1123,11 @@ begin
     if p_pedido is null then
       raise exception 'Para alterar uma decisão, informe o pedido de revisão da equipe.' using errcode = '23514';
     end if;
+    -- A redecisão só vale para o pedido sobre esta mesma ocorrência.
+    if not exists (select 1 from public.pedidos_revisao r
+                   where r.id = p_pedido and r.objeto = 'ocorrencia' and r.ocorrencia_id = p_ocorrencia) then
+      raise exception 'O pedido de revisão informado não é sobre esta ocorrência.' using errcode = '23514';
+    end if;
     perform app.vincular_pedido(p_pedido, v_o.dupla_id);
   elsif v_o.estado = 'registrada' and now() <= app.prazo_manifestacao_efetivo(p_ocorrencia) then
     raise exception 'O prazo de manifestação da equipe ainda está aberto.' using errcode = '23514';

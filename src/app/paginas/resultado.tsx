@@ -45,7 +45,7 @@ import {
 } from '../dados/consultas';
 import { useRepositorios } from '../dados/useRepositorios';
 import { ComEdicao } from './ComEdicao';
-import { usePedidoDaRota } from './usePedidoDaRota';
+import { useOcorrenciaDaRota, usePedidoDaRota } from './usePedidoDaRota';
 
 // ===========================================================================
 // Coordenação — prova oficial (US1)
@@ -141,8 +141,10 @@ function useAbrirEvidencia() {
     void r.resultado
       .urlEvidencia(caminho)
       .then((url) => {
-        if (janela) janela.location.href = url;
-        else window.open(url, '_blank', 'noopener');
+        if (janela) {
+          janela.opener = null;
+          janela.location.href = url;
+        } else window.open(url, '_blank', 'noopener');
       })
       .catch(() => janela?.close());
   };
@@ -348,7 +350,9 @@ function AcoesDaCoordenacao({ o, edicao }: { o: Ocorrencia; edicao: Edicao }) {
   const gravar = useGravar();
   const bloqueio = useBloqueioDeEscrita();
   const tipos = useTiposDeOcorrencia(edicao.id);
-  const pedidoId = usePedidoDaRota();
+  const pedidoDaRota = usePedidoDaRota();
+  // Nova decisão só na ocorrência do pedido aberto (o servidor confere o mesmo vínculo).
+  const pedidoId = useOcorrenciaDaRota() === o.id ? pedidoDaRota : null;
   if (o.decisao && !pedidoId) return null;
   const plagio = (tipos.data ?? []).some((t) => t.id === o.tipo && 'zeraEntrega' in t);
   return (
@@ -771,7 +775,7 @@ export function AlunoRevisoesPage() {
 /** Atalho da coordenação à correção de origem, já ligada ao pedido (R7). */
 function linkCorrecao(p: PedidoRevisao): string | null {
   const q = `?pedido=${p.id}`;
-  if (p.objeto === 'ocorrencia') return `/coordenacao/ocorrencias${q}`;
+  if (p.objeto === 'ocorrencia') return `/coordenacao/ocorrencias${q}&ocorrencia=${p.ocorrenciaId}`;
   switch (p.componente) {
     case 'presenca':
     case 'participacao':
