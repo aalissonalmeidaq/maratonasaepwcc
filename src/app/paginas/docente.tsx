@@ -1,80 +1,29 @@
-import { painelDocente } from '@/modules/demo';
-import { formatarData } from '@/shared/lib/formatacao';
-import { Card, EmptyState, StatCard, StatusBadge, BannerDestaque } from '@/shared/ui';
+import { useAuth } from '@/modules/auth';
+import { PainelGestao } from '@/modules/relatorios';
+import { Consulta } from '../dados/Consulta';
+import { usePainelDaGestao } from '../dados/consultas';
 import { Atalhos } from '../layout/Atalhos';
-import { ComDadosDemo } from './comum';
+import { ComEdicao } from './ComEdicao';
 
-type Painel = ReturnType<typeof painelDocente>;
-const carregar = (s: { usuarioId: string }) => painelDocente(s.usuarioId);
+function PainelDaEdicao({ edicaoId }: { edicaoId: string }) {
+  const { sessao } = useAuth();
+  return (
+    <Consulta consulta={usePainelDaGestao(edicaoId)}>
+      {(painel) => (
+        <PainelGestao painel={painel} nome={sessao?.nome ?? 'docente'} ficticio={sessao?.demo} />
+      )}
+    </Consulta>
+  );
+}
 
+/** Painel inicial da equipe docente com dados do servidor (spec 008, US2). */
 export function DocenteInicioPage() {
   return (
-    <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="docente" />}>
-      {(p: Painel) => (
-        <>
-          <BannerDestaque
-            titulo={`Olá, ${p.docente?.nome ?? 'docente'}`}
-            descricao="Turmas autorizadas, presenças e avaliações pendentes."
-          />
-          <Atalhos area="docente" />
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard icone="turma" rotulo="Turmas vinculadas" valor={p.turmas.length} />
-            <StatCard
-              icone="dupla"
-              acento="ciano"
-              rotulo="Duplas acompanhadas"
-              valor={p.duplas.length}
-            />
-            <StatCard
-              icone="avaliacao"
-              acento="coral"
-              rotulo="Avaliações pendentes"
-              valor={p.entregasAAvaliar.length}
-            />
-          </div>
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            <Card icone="calendario" titulo="Próximo encontro">
-              {p.proximoEncontro ? (
-                <>
-                  <p className="font-semibold">{p.proximoEncontro.titulo}</p>
-                  <p className="text-sm text-text-secondary">
-                    {formatarData(p.proximoEncontro.data, { weekday: 'long' })} ·{' '}
-                    {p.proximoEncontro.horario} · {p.proximoEncontro.ambiente}
-                  </p>
-                </>
-              ) : (
-                <EmptyState titulo="Nenhum encontro futuro." />
-              )}
-            </Card>
-            <Card icone="avaliacao" titulo="Avaliações a concluir">
-              {p.entregasAAvaliar.length ? (
-                <ul className="flex flex-col gap-2">
-                  {p.entregasAAvaliar.map((e) => (
-                    <li
-                      key={`${e.dupla.id}-${e.encontro.id}`}
-                      className="flex flex-wrap items-center justify-between gap-2"
-                    >
-                      <span>
-                        <span className="font-semibold">{e.dupla.nome}</span>
-                        <span className="block text-sm text-text-secondary">
-                          {e.encontro.titulo}
-                        </span>
-                      </span>
-                      <span className="flex flex-wrap gap-1">
-                        {e.pendentes.map((x) => (
-                          <StatusBadge key={x} estado="pendente" rotulo={x} />
-                        ))}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <EmptyState titulo="Nenhuma avaliação pendente." icone="correta" />
-              )}
-            </Card>
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
+    <>
+      <ComEdicao>{(edicao) => <PainelDaEdicao edicaoId={edicao.id} />}</ComEdicao>
+      <section aria-label="Acessos da equipe docente" className="mt-6">
+        <Atalhos area="docente" compacto />
+      </section>
+    </>
   );
 }

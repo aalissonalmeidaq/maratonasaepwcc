@@ -2,13 +2,29 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthContext, type ValorAuth } from '@/modules/auth';
+import type { PainelDoAluno } from '@/modules/relatorios';
 import { AlunoInicioPage } from './aluno';
 
-// A contagem vem do servidor; aqui só interessa como o painel a apresenta (FR-016).
-vi.mock('../dados/consultas', () => ({ useConvitesPendentes: () => 2 }));
+const painel: PainelDoAluno = {
+  equipe: { id: 'd1', nome: 'Equipe Real' },
+  previa: { total: 42, pendente: false },
+  ranking: null,
+  proximoEncontro: null,
+  proximoPrazo: null,
+  acoes: [],
+  avisosNaoLidos: 0,
+};
+
+// Os números vêm do servidor; aqui só interessa como a página os apresenta (FR-001, FR-016).
+const consulta = <T,>(data: T) => ({ isPending: false, isError: false, data });
+vi.mock('../dados/consultas', () => ({
+  useConvitesPendentes: () => 2,
+  useEdicaoAtual: () => consulta({ id: 'ed', nome: 'Edição', estado: 'ativa' }),
+  usePainelDoAluno: () => consulta(painel),
+}));
 
 describe('Painel inicial do aluno', () => {
-  it('mantém o título e orienta o estudante sem dados de demonstração', () => {
+  it('usa o painel do servidor, sem dados de demonstração', () => {
     const auth: ValorAuth = {
       modo: 'supabase',
       carregando: false,
@@ -24,13 +40,15 @@ describe('Painel inicial do aluno', () => {
         </MemoryRouter>
       </AuthContext.Provider>,
     );
-    expect(screen.getByRole('heading', { level: 1, name: 'Início' })).toBeInTheDocument();
-    expect(screen.getByText(/procure seu docente ou a coordenação/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Olá, Ana!' })).toBeInTheDocument();
+    expect(screen.getByText('Equipe Equipe Real')).toBeInTheDocument();
+    expect(screen.getByText('42 pontos')).toBeInTheDocument();
     expect(screen.getByText('Você tem 2 convites pendentes.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ver convites de equipe' })).toHaveAttribute(
       'href',
       '/aluno/dupla',
     );
-    expect(container).not.toHaveTextContent(/Supabase|Incremento 2|170,5|Ana Exemplo/);
+    expect(screen.queryByText('Dados fictícios')).not.toBeInTheDocument();
+    expect(container).not.toHaveTextContent(/Supabase|170,5|Ana Exemplo|indisponíveis/);
   });
 });

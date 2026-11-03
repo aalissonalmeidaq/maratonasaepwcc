@@ -279,3 +279,25 @@ export function useTiposDeOcorrencia(edicaoId?: string) {
     r.resultado.tiposDeOcorrencia(edicaoId as string),
   );
 }
+
+// ---------------------------------------------------------------------------
+// Painéis iniciais (spec 008): uma consulta por perfil, montada e autorizada no servidor.
+// ---------------------------------------------------------------------------
+export function usePainelDoAluno(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('painel-aluno', [edicaoId], Boolean(edicaoId), () =>
+    r.paineis.painelDoAluno(edicaoId as string),
+  );
+}
+export function usePainelDaGestao(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('painel-gestao', [edicaoId], Boolean(edicaoId), () =>
+    r.paineis.painelDaGestao(edicaoId as string),
+  );
+}
+export function usePainelDaCoordenacao(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('painel-coordenacao', [edicaoId], Boolean(edicaoId), () =>
+    r.paineis.painelDaCoordenacao(edicaoId as string),
+  );
+}

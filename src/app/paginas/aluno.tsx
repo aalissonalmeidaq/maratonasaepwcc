@@ -1,29 +1,18 @@
 import { Link } from 'react-router';
-import { painelAluno } from '@/modules/demo';
+import { useAuth } from '@/modules/auth';
 import { maximoPorEncontro, REGRAS_PILOTO } from '@/modules/pontuacao';
-import { formatarData, formatarDataHora, formatarPontos } from '@/shared/lib/formatacao';
-import {
-  Alert,
-  Card,
-  PageHeader,
-  ProgressoCircular,
-  StatCard,
-  StatusBadge,
-  BannerDestaque,
-} from '@/shared/ui';
-import { useConvitesPendentes } from '../dados/consultas';
+import { PainelAluno } from '@/modules/relatorios';
+import { Alert, Card, PageHeader } from '@/shared/ui';
+import { Consulta } from '../dados/Consulta';
+import { useConvitesPendentes, usePainelDoAluno } from '../dados/consultas';
 import { Atalhos } from '../layout/Atalhos';
-import { ComDadosDemo } from './comum';
-
-type Painel = NonNullable<ReturnType<typeof painelAluno>>;
-
-const carregar = (s: { usuarioId: string }) => painelAluno(s.usuarioId);
+import { ComEdicao } from './ComEdicao';
 
 /** Convites de equipe recebidos que esperam resposta (FR-016). */
 function CardConvitesEquipe() {
   const pendentes = useConvitesPendentes(true);
   return (
-    <Card icone="dupla" titulo="Convites de equipe" className="mb-6">
+    <Card icone="dupla" titulo="Convites de equipe" className="mt-4">
       <p>
         {pendentes === 0
           ? 'Nenhum convite pendente.'
@@ -39,160 +28,29 @@ function CardConvitesEquipe() {
   );
 }
 
-export function AlunoInicioPage() {
+function PainelDaEdicao({ edicaoId }: { edicaoId: string }) {
+  const { sessao } = useAuth();
   return (
-    <ComDadosDemo
-      carregar={carregar}
-      foraDaDemo={
+    <Consulta consulta={usePainelDoAluno(edicaoId)}>
+      {(painel) => (
         <>
-          <PageHeader titulo="Início" descricao="Acompanhe as atividades da sua equipe." />
+          <PainelAluno painel={painel} nome={sessao?.nome ?? ''} ficticio={sessao?.demo} />
           <CardConvitesEquipe />
-          <Atalhos area="aluno" />
-        </>
-      }
-    >
-      {(p: Painel) => (
-        <>
-          <BannerDestaque
-            titulo={`Olá, ${p.estudante.nome.split(' ')[0]}!`}
-            descricao="Cada desafio é uma oportunidade de evoluir."
-            lateral={
-              <section aria-label="Pontuação acumulada" className="min-w-0 wrap-anywhere">
-                <div className="flex flex-wrap items-center gap-3">
-                  <ProgressoCircular
-                    valor={p.totais.total}
-                    maximo={p.maximo}
-                    rotulo="Pontuação acumulada da dupla"
-                    inverso
-                  />
-                  <div className="min-w-0 flex-1 basis-36">
-                    <h2 className="text-sm font-semibold text-white">Pontuação acumulada</h2>
-                    <p className="mt-1 text-3xl font-bold tabular-nums">
-                      {formatarPontos(p.totais.total)}
-                    </p>
-                    <p className="text-sm text-white/85">
-                      de {p.maximo} pontos possíveis na edição
-                    </p>
-                  </div>
-                </div>
-                {p.totais.pendente && (
-                  <p className="mt-2 text-sm text-white/85">
-                    Há lançamentos pendentes: a pontuação pode mudar.
-                  </p>
-                )}
-                <Link
-                  to="/aluno/pontuacao"
-                  className="mt-2 inline-flex min-h-11 items-center rounded-md text-sm font-semibold text-white underline underline-offset-4 hover:text-cyan-500"
-                >
-                  Ver detalhes por encontro
-                </Link>
-              </section>
-            }
-          />
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card icone="calendario" titulo="Próximo encontro">
-              {p.proximoEncontro ? (
-                <>
-                  <p className="text-lg font-semibold">{p.proximoEncontro.titulo}</p>
-                  <p className="mt-2 text-text-secondary">
-                    {formatarData(p.proximoEncontro.data)} · {p.proximoEncontro.horario}
-                  </p>
-                  <p className="mt-1 text-sm text-text-secondary">{p.proximoEncontro.ambiente}</p>
-                </>
-              ) : (
-                <p>Nenhum encontro futuro cadastrado.</p>
-              )}
-              <Link
-                to="/aluno/encontros"
-                className="mt-3 inline-flex min-h-11 items-center rounded-md font-semibold text-link underline-offset-4 hover:underline"
-              >
-                Ver encontros
-              </Link>
-            </Card>
-            <Card icone="tarefa" titulo="Próxima tarefa">
-              {p.proximoDesafio ? (
-                <>
-                  <p className="text-lg font-semibold">{p.proximoDesafio.titulo}</p>
-                  <p className="mt-2 text-sm text-text-secondary">
-                    Prazo: {formatarDataHora(p.proximoDesafio.prazo)}
-                  </p>
-                  <p className="mt-1 text-sm text-text-secondary">
-                    {
-                      p.porEncontro.find((e) => e.encontro.id === p.proximoDesafio?.encontroId)
-                        ?.encontro.titulo
-                    }
-                  </p>
-                </>
-              ) : (
-                <p>Nenhuma tarefa com prazo futuro cadastrada.</p>
-              )}
-              <Link
-                to="/aluno/desafios"
-                className="mt-3 inline-flex min-h-11 items-center rounded-md font-semibold text-link underline-offset-4 hover:underline"
-              >
-                {p.proximoDesafio ? 'Ver desafio' : 'Ver desafios'}
-              </Link>
-            </Card>
-          </div>
-          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <>
-              <StatCard
-                icone="ranking"
-                acento="amarelo"
-                rotulo="Posição na categoria"
-                valor={p.minhaPosicao ? `${p.minhaPosicao.posicao}º` : '—'}
-                complemento={p.ranking && <StatusBadge estado={p.ranking.estado} />}
-              />
-              <StatCard
-                icone="dupla"
-                rotulo="Minha equipe"
-                valor={p.dupla.nome}
-                complemento={p.colega ? `com ${p.colega.nome}` : undefined}
-              />
-            </>
-          </div>
-          <section aria-label="Acessos do aluno" className="mt-6">
-            <Atalhos area="aluno" compacto />
-          </section>
-          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card icone="calendario" titulo="Encontros">
-              <ul className="flex flex-col divide-y divide-border">
-                {p.porEncontro.map(({ encontro, pontuacao }) => (
-                  <li
-                    key={encontro.id}
-                    className="flex flex-wrap items-center justify-between gap-2 py-2"
-                  >
-                    <span>
-                      <span className="font-semibold">{encontro.titulo}</span>
-                      <span className="block text-sm text-text-secondary">
-                        {formatarData(encontro.data, { weekday: 'short' })} · {encontro.ambiente}
-                      </span>
-                    </span>
-                    {pontuacao ? (
-                      <StatusBadge estado={pontuacao.pendencias.length ? 'pendente' : 'avaliado'} />
-                    ) : (
-                      <StatusBadge estado="agendado" />
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-            <Card icone="noticia" titulo="Comunicados">
-              <ul className="flex flex-col gap-3">
-                {p.comunicados.map((c) => (
-                  <li key={c.id}>
-                    <p className="font-semibold">{c.titulo}</p>
-                    <p className="text-sm text-text-secondary">
-                      {formatarData(c.data)} — {c.texto}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
         </>
       )}
-    </ComDadosDemo>
+    </Consulta>
+  );
+}
+
+/** Painel inicial do aluno com dados do servidor (spec 008, US1); na demonstração, fictícios. */
+export function AlunoInicioPage() {
+  return (
+    <>
+      <ComEdicao>{(edicao) => <PainelDaEdicao edicaoId={edicao.id} />}</ComEdicao>
+      <section aria-label="Acessos do aluno" className="mt-6">
+        <Atalhos area="aluno" compacto />
+      </section>
+    </>
   );
 }
 

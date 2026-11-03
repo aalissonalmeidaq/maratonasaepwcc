@@ -86,7 +86,7 @@ test.describe('jornadas por perfil (modo demonstração)', () => {
     await entrarComo(page, /ana exemplo/i);
     await expect(page).toHaveURL(/\/aluno$/);
     await expect(page.getByRole('heading', { level: 1, name: /olá, ana/i })).toBeVisible();
-    await expect(page.getByText('de 400 pontos possíveis na edição')).toBeVisible();
+    await expect(page.getByText('Prévia — não oficial').first()).toBeVisible();
     await semRolagemHorizontal(page);
 
     await navegarPeloMenu(page, 'Ranking');
@@ -361,7 +361,9 @@ test.describe('resultado oficial na demonstração (spec 007)', () => {
     await expect(page.getByRole('radio', { name: 'Definitivo' })).toBeDisabled();
     await expect(page.getByRole('button', { name: 'Publicar ranking' })).toBeDisabled();
     await expect(page.getByRole('heading', { name: 'Histórico de versões' })).toBeVisible();
-    await expect(page.getByText('Coordenação (fictícia)').filter({ visible: true }).first()).toBeVisible();
+    await expect(
+      page.getByText('Coordenação (fictícia)').filter({ visible: true }).first(),
+    ).toBeVisible();
     await semRolagemHorizontal(page);
   });
 
@@ -371,6 +373,56 @@ test.describe('resultado oficial na demonstração (spec 007)', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Pontos da turma' })).toBeVisible();
     await expect(page.getByText('Dupla Órbita').first()).toBeVisible();
     await expect(page.getByText(/nota oficial/i)).toHaveCount(0);
+    await semRolagemHorizontal(page);
+  });
+});
+
+test.describe('painéis e relatórios (spec 008, demonstração)', () => {
+  test('aluna vê o painel com dados fictícios identificados, sem nota individual', async ({
+    page,
+  }) => {
+    await entrarComo(page, /ana exemplo/i);
+    await expect(page.getByText('Equipe Dupla Órbita')).toBeVisible();
+    await expect(page.getByText('Dados fictícios').first()).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Pontos' })).toContainText(
+      'Prévia — não oficial',
+    );
+    await expect(page.getByRole('region', { name: 'Posição' })).toContainText('Parcial');
+    await expect(
+      page.getByRole('region', { name: 'Ações pendentes' }).getByRole('link'),
+    ).toHaveAttribute('href', '/aluno/ocorrencias');
+    await expect(page.locator('#conteudo')).not.toContainText(/nota individual/i);
+    await semRolagemHorizontal(page);
+  });
+
+  test('docente vê as pendências das turmas e a exportação fica desabilitada', async ({ page }) => {
+    await entrarComo(page, /lúcia exemplo/i);
+    await expect(page.getByText('Dados fictícios').first()).toBeVisible();
+    await expect(page.getByRole('region', { name: '3º ano A (fictícia)' })).toBeVisible();
+    await expect(page.getByRole('region', { name: '3º ano B (fictícia)' })).toHaveCount(0);
+    await semRolagemHorizontal(page);
+    await page.getByRole('link', { name: 'Relatórios', exact: true }).first().click();
+    await expect(page).toHaveURL(/\/docente\/relatorios$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Relatórios' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Exportar CSV' })).toBeDisabled();
+    await expect(page.getByText(/modo demonstração: a exportação exige o servidor/i)).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+
+  test('coordenação vê pendências por categoria e a exportação fica desabilitada', async ({
+    page,
+  }) => {
+    await entrarComo(page, /coordenação \(fictícia\)/i);
+    await expect(page.getByText('Dados fictícios').first()).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Categoria A (exemplo)' })).toContainText(
+      'Ocorrências sem decisão',
+    );
+    await page.getByRole('link', { name: 'Relatórios', exact: true }).first().click();
+    await expect(page).toHaveURL(/\/coordenacao\/relatorios$/);
+    await expect(page.getByRole('combobox', { name: 'Relatório' }).locator('option')).toHaveCount(
+      5,
+    );
+    await expect(page.getByRole('button', { name: 'Exportar CSV' })).toBeDisabled();
     await semRolagemHorizontal(page);
   });
 });

@@ -24,7 +24,17 @@ export default defineConfig({
   timeout: 60_000,
   reporter: [['list']],
   use: { baseURL: `http://localhost:${PORT}`, locale: 'pt-BR', trace: 'retain-on-failure' },
-  projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: /paineis\.spec\.ts/ },
+    // Os painéis (spec 008) leem o estado deixado pelas outras jornadas e publicam o ranking da
+    // Categoria B; rodam por último para não mudar as versões que resultado.spec espera.
+    {
+      name: 'paineis',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: /paineis\.spec\.ts/,
+      dependencies: ['desktop'],
+    },
+  ],
   webServer: {
     command: `npm run dev -- --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,

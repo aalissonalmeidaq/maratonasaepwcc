@@ -4,6 +4,7 @@ import type { RepositorioDuplas } from '@/modules/duplas';
 import type { RepositorioEncontros } from '@/modules/encontros';
 import type { RepositorioOrganizacao } from '@/modules/organizacao';
 import type { RepositorioPainelTurma } from '@/modules/painel-turma';
+import type { RepositorioPaineis } from '@/modules/relatorios';
 import type { RepositorioResultado } from '@/modules/resultado';
 
 export interface Repositorios {
@@ -14,6 +15,7 @@ export interface Repositorios {
   painelTurma: RepositorioPainelTurma;
   atividades: RepositorioAtividades;
   resultado: RepositorioResultado;
+  paineis: RepositorioPaineis;
 }
 
 export const ContextoRepositorios = createContext<Repositorios | null>(null);

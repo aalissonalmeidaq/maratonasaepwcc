@@ -203,6 +203,38 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Diferenças em relação ao contrato de telas, sem efeito nas regras: ver
   `specs/007-resultado-oficial-ranking/quickstart.md`.
 
+## 6.6 Spec 008 — painéis com dados reais e relatórios CSV (implementada em 2026-11-02)
+
+- Implementação: módulo `src/modules/relatorios`; migration
+  `20261102120000_paineis_relatorios.sql` com a tabela `exportacoes_relatorio` (RLS, auditoria,
+  sem escrita direta) e as RPCs `painel_do_aluno`, `painel_da_gestao`, `painel_da_coordenacao` e
+  `relatorio`. Os painéis só compõem as funções das specs 004, 006 e 007; nenhuma regra de cálculo
+  nova. A demonstração usa um repositório próprio com os mesmos formatos e o selo
+  "Dados fictícios"; a exportação fica desabilitada nela.
+- **Encontro realizado** (pendências dos painéis): estado "realizado" ou data anterior a hoje no
+  horário de Brasília, sem estar cancelado. O encontro de hoje só conta no dia seguinte. A recusa
+  do definitivo (spec 007) continua usando todos os encontros.
+- **Formato do CSV:** UTF-8 com BOM, separador `;`, linhas CRLF, vírgula decimal sem separador de
+  milhar, datas `DD/MM/AAAA HH:MM`, "Sim"/"Não", nulo como célula vazia e apóstrofo antes de texto
+  que começa com `=`, `+`, `-`, `@`, tabulação ou CR (injeção de fórmula). Arquivo
+  `maratona-<tipo>-<AAAA-MM-DD>.csv`.
+- **Fuso:** datas do CSV e o corte de "encontro realizado" em `America/Sao_Paulo`. **[validar]**
+- **Textos livres fora do CSV:** fato, evidência, manifestação, justificativas e respostas podem
+  conter dados pessoais e ficam só nas telas. A observação da presença entra no relatório de
+  presença (R6). Nenhum relatório traz nota individual, e-mail ou identificador interno.
+- **Pedidos de revisão:** só a coordenação exporta, porque a equipe docente não vê os pedidos nas
+  telas (spec 007, FR-013 desta spec). O servidor recusa com `42501`.
+- **Presença por equipe da época:** a equipe é a de que o estudante era integrante na data do
+  encontro (`entrada_em`/`saida_em`), ou "Sem equipe". O seed local passou a formar as equipes 30
+  dias antes, para que os relatórios mostrem a equipe nos encontros passados.
+- **Indicadores da coordenação:** "encontros realizados de N" não conta os encontros cancelados.
+  "Prova oficial pendente" soma os resultados pendentes (realização ou nota) e os integrantes
+  atuais sem resultado, só em encontros de prova realizados.
+- **Ações do aluno:** manifestação no prazo, revisão de decisão de ocorrência sem pedido e revisão
+  da publicação provisória no prazo. Na edição encerrada o painel não pede ações.
+- O E2E real dos painéis roda como projeto dependente (`paineis`), depois das outras jornadas,
+  porque publica o ranking da Categoria B e lê o estado deixado por elas.
+
 ## 6.1 Spec 005 — busca e paginação
 
 - Busca e paginação são feitas no navegador sobre os registros que a RLS já entregou (volume

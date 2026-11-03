@@ -1,98 +1,37 @@
+import { useAuth } from '@/modules/auth';
 import { painelCoordenacao } from '@/modules/demo';
-import { maximoDaEdicao } from '@/modules/pontuacao';
-import {
-  Alert,
-  Card,
-  EmConstrucao,
-  PageHeader,
-  StatCard,
-  StatusBadge,
-  BannerDestaque,
-} from '@/shared/ui';
+import type { Edicao } from '@/modules/organizacao';
+import { PainelCoordenacao } from '@/modules/relatorios';
+import { Alert, EmConstrucao, PageHeader, StatCard, StatusBadge } from '@/shared/ui';
+import { Consulta } from '../dados/Consulta';
+import { usePainelDaCoordenacao } from '../dados/consultas';
 import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
+import { ComEdicao } from './ComEdicao';
 
 type Painel = ReturnType<typeof painelCoordenacao>;
 const carregar = () => painelCoordenacao();
 
+function PainelDaEdicao({ edicao }: { edicao: Edicao }) {
+  const { sessao } = useAuth();
+  return (
+    <Consulta consulta={usePainelDaCoordenacao(edicao.id)}>
+      {(painel) => (
+        <PainelCoordenacao painel={painel} edicaoNome={edicao.nome} ficticio={sessao?.demo} />
+      )}
+    </Consulta>
+  );
+}
+
+/** Painel inicial da coordenação com dados do servidor (spec 008, US3). */
 export function CoordenacaoInicioPage() {
   return (
-    <ComDadosDemo carregar={carregar} foraDaDemo={<Atalhos area="coordenacao" />}>
-      {(p: Painel) => (
-        <>
-          <BannerDestaque titulo="Visão geral" descricao={p.edicao.nome} />
-          <Atalhos area="coordenacao" />
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard
-              icone="turma"
-              rotulo="Cursos e turmas"
-              valor={`${p.indicadores.cursos} / ${p.indicadores.turmas}`}
-              complemento="cursos / turmas"
-            />
-            <StatCard
-              icone="dupla"
-              acento="ciano"
-              rotulo="Duplas"
-              valor={p.indicadores.duplas}
-              complemento={`${p.indicadores.estudantes} estudantes`}
-            />
-            <StatCard
-              icone="calendario"
-              acento="roxo"
-              rotulo="Encontros realizados"
-              valor={`${p.indicadores.encontrosRealizados} de ${p.indicadores.encontrosTotal}`}
-            />
-            <StatCard
-              icone="pontuacao"
-              acento="amarelo"
-              rotulo="Pontuação máxima"
-              valor={maximoDaEdicao(p.edicao.regras)}
-              complemento={`regras ${p.edicao.regras.versao}`}
-            />
-          </div>
-
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <Card icone="aviso" titulo="Pendências">
-              <ul className="flex flex-col gap-3 text-sm">
-                <li className="flex items-center justify-between gap-2">
-                  Componentes de avaliação em aberto
-                  <StatusBadge estado="pendente" rotulo={String(p.pendencias.avaliacoesEmAberto)} />
-                </li>
-                <li className="flex items-center justify-between gap-2">
-                  Notas oficiais pendentes (estudantes)
-                  <StatusBadge
-                    estado="pendente"
-                    rotulo={String(p.pendencias.notasOficiaisPendentes)}
-                  />
-                </li>
-                <li className="flex items-center justify-between gap-2">
-                  Ocorrências em análise
-                  <StatusBadge
-                    estado="concluido"
-                    rotulo={String(p.pendencias.ocorrenciasEmAnalise)}
-                  />
-                </li>
-              </ul>
-            </Card>
-            <Card icone="ranking" titulo="Classificação por categoria" className="lg:col-span-2">
-              <ul className="flex flex-col gap-2">
-                {p.ranking.map((r) => (
-                  <li
-                    key={r.categoria}
-                    className="flex flex-wrap items-center justify-between gap-2"
-                  >
-                    <span className="font-semibold">{r.categoria}</span>
-                    <span className="flex items-center gap-2 text-sm">
-                      Líder: {r.posicoes[0]?.nome ?? '—'} <StatusBadge estado={r.estado} />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
+    <>
+      <ComEdicao>{(edicao) => <PainelDaEdicao edicao={edicao} />}</ComEdicao>
+      <section aria-label="Acessos da coordenação" className="mt-6">
+        <Atalhos area="coordenacao" compacto />
+      </section>
+    </>
   );
 }
 
@@ -133,15 +72,6 @@ export function CoordenacaoComunicadosPage() {
     <>
       <PageHeader icone="noticia" titulo="Comunicados e regulamento" />
       <EmConstrucao modulo="Publicação de comunicados e do regulamento" incremento="Incremento 2" />
-    </>
-  );
-}
-
-export function CoordenacaoRelatoriosPage() {
-  return (
-    <>
-      <PageHeader icone="relatorio" titulo="Relatórios" />
-      <EmConstrucao modulo="Relatórios e exportação CSV" incremento="Incremento 5" />
     </>
   );
 }
