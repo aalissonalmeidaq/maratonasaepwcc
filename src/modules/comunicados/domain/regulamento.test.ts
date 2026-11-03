@@ -19,8 +19,12 @@ describe('resumoDoRegulamento (US4, FR-014, SC-005)', () => {
       'Até 10 (envolvimento nas atividades 4, colaboração 3, organização e cumprimento das orientações 3).',
     );
     expect(valor(r, 'Questões')).toBe('Acertos ÷ total × 30.');
-    expect(valor(r, 'Entrega prática')).toBe('Até 40 (4 critérios).');
-    expect(valor(r, 'Apresentação')).toBe('Até 10.');
+    expect(valor(r, 'Entrega prática')).toBe(
+      'Até 40 (compreensão do problema 10, aplicação de conhecimentos técnicos 10, qualidade e adequação da solução 10, organização e entrega 10).',
+    );
+    expect(valor(r, 'Apresentação')).toBe(
+      'Até 10 (clareza 3, explicação das decisões e etapas 4, respostas às perguntas 3).',
+    );
     expect(valor(r, 'Total')).toBe(`Até ${maximoPorEncontro(REGRAS_PILOTO)} por encontro.`);
   });
 
@@ -56,5 +60,24 @@ describe('resumoDoRegulamento (US4, FR-014, SC-005)', () => {
     expect(vazio.grupos.flatMap((g) => g.itens).every((i) => i.valor === null || i.fixo)).toBe(
       true,
     );
+  });
+
+  it('regras da turma: critérios próprios, grupos marcados e pontuação máxima (spec 011, FR-014)', () => {
+    const daTurma = resumoDoRegulamento(
+      {
+        ...REGRAS_PILOTO,
+        apresentacao: { criterios: [{ id: 'demonstracao', rotulo: 'Demonstração', maximo: 5 }] },
+      },
+      { gruposAjustados: ['apresentacao', 'prazos'], maximo: 304 },
+    );
+    const itens = daTurma.grupos.flatMap((g) => g.itens);
+    expect(valor(daTurma, 'Apresentação')).toBe('Até 5 (demonstração 5).');
+    expect(itens.filter((i) => i.daTurma).map((i) => i.rotulo)).toEqual([
+      'Apresentação',
+      'Manifestação',
+      'Pedido de revisão',
+    ]);
+    expect(valor(daTurma, 'Pontuação máxima da turma')).toBe('304 pontos nos encontros da turma.');
+    expect(valor(r, 'Pontuação máxima da turma')).toBeUndefined();
   });
 });

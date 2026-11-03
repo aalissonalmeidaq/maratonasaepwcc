@@ -9,6 +9,7 @@ import type { RepositorioPainelTurma } from '@/modules/painel-turma';
 import { criarAtividadesDemo } from './atividades';
 import { criarComunicadosDemo } from './comunicados';
 import { criarEdicoesDemo, edicoesDemo } from './edicoes';
+import { criarRegrasDemo } from './regras';
 import { criarPaineisDemo } from './paineis';
 import { criarResultadoDemo } from './resultado';
 import { rankingPorCategoria } from './consultas';
@@ -259,5 +260,6 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     resultado,
     paineis: criarPaineisDemo(usuarioAtual, resultado),
     comunicados: criarComunicadosDemo(usuarioAtual),
+    regras: criarRegrasDemo(coordena),
   };
 }

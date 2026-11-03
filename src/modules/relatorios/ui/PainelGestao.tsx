@@ -1,11 +1,35 @@
 import { BannerDestaque, Card, EmptyState, StatusBadge } from '@/shared/ui';
-import type { PainelDaGestao, TurmaDoPainel } from '../domain/tipos';
-import { LinkDoPainel, SeloFicticio, TextoEncontro } from './comum';
-import { plural } from './texto';
+import type { PainelDaGestao, TipoPendenciaGestao, TurmaDoPainel } from '../domain/tipos';
+import {
+  AcaoDoBanner,
+  FaixaDeIndicadores,
+  Indicador,
+  IndicadorEncontro,
+  LinkDoPainel,
+  SeloFicticio,
+} from './comum';
+import { nomeDeSaudacao, plural } from './texto';
+
+const TIPOS: TipoPendenciaGestao[] = ['presenca', 'participacao', 'avaliacao', 'ocorrencia'];
+const ROTULO_DO_TIPO: Record<TipoPendenciaGestao, string> = {
+  presenca: 'Presença',
+  participacao: 'Participação',
+  avaliacao: 'Avaliação',
+  ocorrencia: 'Ocorrência',
+};
 
 function Turma({ turma: t }: { turma: TurmaDoPainel }) {
   return (
-    <Card icone="turma" titulo={t.nome}>
+    <Card
+      icone="turma"
+      titulo={t.nome}
+      acao={
+        <LinkDoPainel para={`/docente/turmas/${t.id}`}>
+          <span aria-hidden="true">Abrir painel</span>
+          <span className="sr-only">Abrir painel da turma {t.nome}</span>
+        </LinkDoPainel>
+      }
+    >
       <p className="text-sm text-text-secondary">{t.categoria}</p>
       <p className="mt-1 font-semibold">
         {t.equipesPendentes} de {plural(t.equipes, 'equipe', 'equipes')} com pendência
@@ -42,28 +66,59 @@ export function PainelGestao({
   nome: string;
   ficticio?: boolean;
 }) {
+  const equipes = p.turmas.reduce((soma, t) => soma + t.equipes, 0);
+  const equipesPendentes = p.turmas.reduce((soma, t) => soma + t.equipesPendentes, 0);
+  const pendencias = p.turmas.flatMap((t) => t.pendencias);
+  const porTipo = (tipo: TipoPendenciaGestao) => pendencias.filter((x) => x.tipo === tipo).length;
   return (
     <>
       <BannerDestaque
-        titulo={`Olá, ${nome}`}
+        titulo={`Olá, ${nomeDeSaudacao(nome) || nome}!`}
         descricao={
           <span className="flex flex-wrap items-center gap-2">
             Pendências de registro dos encontros já realizados nas suas turmas.
             {ficticio && <SeloFicticio />}
           </span>
         }
+        acao={
+          <AcaoDoBanner para="/docente/relatorios" icone="relatorio">
+            Relatórios
+          </AcaoDoBanner>
+        }
       />
-      <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Card icone="calendario" titulo="Próximo encontro">
-          <TextoEncontro encontro={p.proximoEncontro} />
-        </Card>
-        <Card icone="relatorio" titulo="Exportação">
-          <p>Baixe em CSV os dados das turmas em que você atua.</p>
-          <LinkDoPainel para="/docente/relatorios">Relatórios</LinkDoPainel>
-        </Card>
-      </div>
+      <FaixaDeIndicadores>
+        <Indicador titulo="Turmas" icone="turma" valor={String(p.turmas.length)}>
+          {plural(equipes, 'equipe', 'equipes')} nas suas turmas
+        </Indicador>
+        <Indicador
+          titulo="Equipes com pendência"
+          icone="dupla"
+          acento={equipesPendentes > 0 ? 'amarelo' : 'ciano'}
+          valor={`${equipesPendentes} de ${equipes}`}
+        >
+          {equipesPendentes > 0 ? (
+            <StatusBadge estado="pendente" rotulo="Registros a completar" />
+          ) : (
+            <StatusBadge estado="concluido" rotulo="Tudo registrado" />
+          )}
+        </Indicador>
+        <Indicador
+          titulo="Pendências de registro"
+          icone="checklist"
+          acento={pendencias.length > 0 ? 'coral' : 'ciano'}
+          valor={String(pendencias.length)}
+        >
+          {pendencias.length > 0
+            ? TIPOS.filter((tipo) => porTipo(tipo) > 0)
+                .map((tipo) => `${ROTULO_DO_TIPO[tipo]}: ${porTipo(tipo)}`)
+                .join(' · ')
+            : 'Nenhuma nos encontros realizados'}
+        </Indicador>
+        <IndicadorEncontro encontro={p.proximoEncontro} />
+      </FaixaDeIndicadores>
+      <h2 className="mb-3 font-display text-xl font-semibold">Pendências por turma</h2>
       {p.turmas.length ? (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
           {p.turmas.map((t) => (
             <Turma key={t.id} turma={t} />
           ))}

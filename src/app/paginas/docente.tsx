@@ -2,7 +2,6 @@ import { useAuth } from '@/modules/auth';
 import { PainelGestao } from '@/modules/relatorios';
 import { Consulta } from '../dados/Consulta';
 import { usePainelDaGestao } from '../dados/consultas';
-import { Atalhos } from '../layout/Atalhos';
 import { ComEdicao } from './ComEdicao';
 
 function PainelDaEdicao({ edicaoId }: { edicaoId: string }) {
@@ -21,9 +20,6 @@ export function DocenteInicioPage() {
   return (
     <>
       <ComEdicao>{(edicao) => <PainelDaEdicao edicaoId={edicao.id} />}</ComEdicao>
-      <section aria-label="Acessos da equipe docente" className="mt-6">
-        <Atalhos area="docente" compacto />
-      </section>
     </>
   );
 }

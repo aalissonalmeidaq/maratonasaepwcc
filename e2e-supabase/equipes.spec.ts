@@ -32,8 +32,9 @@ test('convidado vê o contador no menu e aceita; os dois veem a equipe (SC-004, 
   page,
 }) => {
   await entrar(page, 'fabio@exemplo.invalid');
+  // Com a categoria recolhida, o contador aparece no botão dela.
   await expect(
-    page.getByRole('link', { name: /Minha equipe.*1 convite pendente/ }).first(),
+    page.getByRole('button', { name: /Minha participação.*1 convite pendente/ }).first(),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: /Ver convites de equipe/ })).toBeVisible();
 

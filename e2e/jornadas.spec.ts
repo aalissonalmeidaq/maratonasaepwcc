@@ -44,7 +44,7 @@ test('aluno busca desafios, vê vazio e limpa a busca sem perder o foco', async 
   await expect(page.getByRole('heading', { name: 'Desafio 1 (exemplo)' })).toBeVisible();
 });
 
-test('painel do aluno mantém atalhos legíveis com texto a 200%', async ({ page }) => {
+test('painel do aluno mantém os indicadores legíveis com texto a 200%', async ({ page }) => {
   await entrarComo(page, /ana exemplo/i);
   await expect(page.getByRole('heading', { level: 1, name: /olá, ana/i })).toBeVisible();
   await page.evaluate(() => {
@@ -54,10 +54,11 @@ test('painel do aluno mantém atalhos legíveis com texto a 200%', async ({ page
     await page.setViewportSize({ width, height: 900 });
     await page.evaluate(() => document.fonts.ready);
     await semRolagemHorizontal(page);
-    const atalhos = page.getByRole('navigation', { name: 'Acesso rápido' }).getByRole('link');
-    for (const atalho of await atalhos.all()) {
-      await expect(atalho).toBeVisible();
-      const tamanho = await atalho.evaluate((el) => ({
+    const indicadores = page.getByRole('region', { name: 'Indicadores' }).getByRole('region');
+    await expect(indicadores).toHaveCount(4);
+    for (const indicador of await indicadores.all()) {
+      await expect(indicador).toBeVisible();
+      const tamanho = await indicador.evaluate((el) => ({
         largura: el.clientWidth,
         conteudo: el.scrollWidth,
       }));
@@ -73,12 +74,21 @@ async function abrirMenuSeNecessario(page: Page) {
   if (await botao.isVisible()) await botao.click();
 }
 
-async function navegarPeloMenu(page: Page, nome: string) {
+/** Abre, no menu visível, a categoria recolhida que contém o item (uma aberta por vez). */
+async function mostrarNoMenu(page: Page, nome: string) {
   await abrirMenuSeNecessario(page);
-  await page
-    .locator('nav:not([aria-label="Acesso rápido"])')
-    .getByRole('link', { name: nome, exact: true })
-    .click();
+  const menu = page.locator('nav:not([aria-label="Acesso rápido"])').filter({ visible: true });
+  const item = menu.getByRole('link', { name: nome, exact: true });
+  const categorias = menu.locator('button[aria-expanded]');
+  for (let i = 0; !(await item.isVisible()) && i < (await categorias.count()); i++) {
+    const categoria = categorias.nth(i);
+    if ((await categoria.getAttribute('aria-expanded')) === 'false') await categoria.click();
+  }
+  return item;
+}
+
+async function navegarPeloMenu(page: Page, nome: string) {
+  await (await mostrarNoMenu(page, nome)).click();
 }
 
 test.describe('jornadas por perfil (modo demonstração)', () => {
@@ -189,7 +199,13 @@ test('menu do celular pode ser fechado pelo botão (não fica coberto)', async (
   test.skip(!isMobile, 'menu recolhível só existe em telas pequenas');
   await entrarComo(page, /ana exemplo/i);
   await page.getByRole('button', { name: 'Abrir menu' }).click();
-  await expect(page.locator('#menu-movel').getByRole('link', { name: 'Ranking' })).toBeVisible();
+  const menuMovel = page.locator('#menu-movel');
+  await expect(menuMovel.getByRole('button', { name: 'Resultados' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  );
+  await menuMovel.getByRole('button', { name: 'Resultados' }).click();
+  await expect(menuMovel.getByRole('link', { name: 'Ranking' })).toBeVisible();
   const fechar = page.getByRole('button', { name: 'Fechar menu' });
   // O botão precisa ser o elemento visível no próprio centro (não coberto pelo painel).
   const coberto = await fechar.evaluate((b) => {
@@ -202,11 +218,15 @@ test('menu do celular pode ser fechado pelo botão (não fica coberto)', async (
   await expect(page.locator('#menu-movel')).toHaveCount(0);
 });
 
-test('atalhos do painel levam às seções do perfil', async ({ page }) => {
+test('painel inicial é um dashboard: indicadores levam às seções do perfil', async ({ page }) => {
   await entrarComo(page, /ana exemplo/i);
-  const atalhos = page.getByRole('navigation', { name: 'Acesso rápido' });
-  await expect(atalhos.getByRole('link')).toHaveCount(9);
-  await atalhos.getByRole('link', { name: 'Ranking' }).click();
+  // A navegação fica no menu; a tela inicial não repete os itens como atalhos.
+  await expect(page.getByRole('navigation', { name: 'Acesso rápido' })).toHaveCount(0);
+  const indicadores = page.getByRole('region', { name: 'Indicadores' });
+  for (const nome of ['Pontos', 'Posição', 'Próximo encontro', 'Próximo prazo']) {
+    await expect(indicadores.getByRole('region', { name: nome })).toBeVisible();
+  }
+  await indicadores.getByRole('link', { name: 'Ver ranking' }).click();
   await expect(page).toHaveURL(/\/aluno\/ranking$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Ranking' })).toBeVisible();
 });
@@ -233,10 +253,7 @@ test.describe('painel da turma (spec 004)', () => {
     page,
   }) => {
     await entrarComo(page, /lúcia exemplo/i);
-    await page
-      .getByRole('navigation', { name: 'Acesso rápido' })
-      .getByRole('link', { name: 'Minhas turmas' })
-      .click();
+    // Cada turma do painel inicial tem o link direto para o painel dela (uma interação).
     await page
       .getByRole('link', { name: /Abrir painel da turma/ })
       .first()
@@ -267,10 +284,7 @@ test.describe('painel da turma (spec 004)', () => {
 
   test('aluno vê a própria turma sem dados da gestão', async ({ page }) => {
     await entrarComo(page, /ana exemplo/i);
-    await page
-      .getByRole('navigation', { name: 'Acesso rápido' })
-      .getByRole('link', { name: 'Minha turma' })
-      .click();
+    await navegarPeloMenu(page, 'Minha turma');
     await expect(
       page.getByRole('heading', { level: 1, name: '3º ano A (fictícia)' }),
     ).toBeVisible();
@@ -430,7 +444,7 @@ test.describe('painéis e relatórios (spec 008, demonstração)', () => {
 test.describe('comunicados e regulamento (spec 009, demonstração)', () => {
   test('aluna lê os comunicados fictícios e o resumo das regras da edição', async ({ page }) => {
     await entrarComo(page, /ana exemplo/i);
-    await page.getByRole('link', { name: 'Regulamento e avisos' }).first().click();
+    await navegarPeloMenu(page, 'Regulamento e avisos');
     await expect(page).toHaveURL(/\/aluno\/regulamento$/);
     await expect(page.getByRole('article', { name: 'Boas-vindas à demonstração' })).toBeVisible();
     await expect(page.getByText('Dados fictícios').first()).toBeVisible();
@@ -445,7 +459,7 @@ test.describe('comunicados e regulamento (spec 009, demonstração)', () => {
 
   test('docente vê o item Comunicados, os recebidos e a escrita desabilitada', async ({ page }) => {
     await entrarComo(page, /lúcia exemplo/i);
-    await page.getByRole('link', { name: 'Comunicados', exact: true }).first().click();
+    await navegarPeloMenu(page, 'Comunicados');
     await expect(page).toHaveURL(/\/docente\/comunicados$/);
     await expect(page.getByRole('region', { name: 'Recebidos' })).toContainText(
       'Regulamento em validação',
@@ -461,7 +475,7 @@ test.describe('comunicados e regulamento (spec 009, demonstração)', () => {
     page,
   }) => {
     await entrarComo(page, /coordenação \(fictícia\)/i);
-    await page.getByRole('link', { name: 'Comunicados', exact: true }).first().click();
+    await navegarPeloMenu(page, 'Comunicados');
     await expect(page).toHaveURL(/\/coordenacao\/comunicados$/);
     await expect(
       page.getByRole('heading', { level: 1, name: 'Comunicados e regulamento' }),
@@ -510,6 +524,64 @@ test.describe('gestão de edições (spec 010, demonstração)', () => {
     await expect(gestao.getByRole('region', { name: 'Alunos', exact: true })).toContainText(
       'Ana Exemplo',
     );
+    await semRolagemHorizontal(page);
+  });
+});
+
+test.describe('regras e menu (spec 011, demonstração)', () => {
+  test('coordenação vê as regras da edição com a escrita desabilitada', async ({ page }) => {
+    await entrarComo(page, /coordenação/i);
+    await page.goto('/coordenacao/edicoes');
+    const regras = page.getByRole('region', { name: 'Regras da edição' });
+    await expect(regras).toBeVisible();
+    await expect(regras.getByRole('group', { name: 'Entrega e atrasos' })).toBeVisible();
+    await expect(regras.getByText(/valores do PRD \(HU04\)/)).toBeVisible();
+    await expect(regras.getByRole('button', { name: 'Gravar versão' })).toBeDisabled();
+    await semRolagemHorizontal(page);
+  });
+
+  test('painel da turma mostra o ajuste fictício, a pontuação máxima e os encontros', async ({
+    page,
+  }) => {
+    await entrarComo(page, /coordenação/i);
+    await page.goto('/coordenacao/organizacao');
+    await page.getByRole('link', { name: /Gerir turma 3º ano A/ }).click();
+    await expect(page.getByText(/Pontuação máxima da turma: .* pontos/)).toBeVisible();
+    const regras = page.getByRole('region', { name: 'Regras da turma' });
+    await expect(
+      regras
+        .getByRole('group', { name: 'Apresentação' })
+        .getByRole('radio', { name: 'Definir para a turma' }),
+    ).toBeChecked();
+    await expect(regras.getByRole('button', { name: 'Gravar regras da turma' })).toBeDisabled();
+    await expect(regras.getByText(/Ajuste da turma: Apresentação/)).toBeVisible();
+    await expect(
+      page
+        .getByRole('region', { name: 'Encontros da turma' })
+        .getByRole('button', { name: 'Gravar encontros da turma' }),
+    ).toBeDisabled();
+    await semRolagemHorizontal(page);
+  });
+
+  test('menu da coordenação em categorias (desktop e celular)', async ({ page }) => {
+    await entrarComo(page, /coordenação/i);
+    await abrirMenuSeNecessario(page);
+    const menu = page.getByRole('navigation', { name: 'Coordenação' }).filter({ visible: true });
+    // Começa recolhido no Início; abrir uma categoria fecha a anterior.
+    await expect(menu.getByRole('list', { name: 'Preparação' })).toHaveCount(0);
+    await menu.getByRole('button', { name: 'Preparação' }).click();
+    await expect(
+      menu.getByRole('list', { name: 'Preparação' }).getByRole('link', { name: 'Edições' }),
+    ).toBeVisible();
+    await menu.getByRole('button', { name: 'Durante os encontros' }).click();
+    await expect(
+      menu
+        .getByRole('list', { name: 'Durante os encontros' })
+        .getByRole('link', { name: 'Ocorrências' }),
+    ).toBeVisible();
+    await expect(menu.getByRole('list', { name: 'Preparação' })).toHaveCount(0);
+    await expect(menu.getByRole('button', { name: 'Resultado' })).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Comunicação' })).toBeVisible();
     await semRolagemHorizontal(page);
   });
 });

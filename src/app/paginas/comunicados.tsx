@@ -1,10 +1,5 @@
 import { useAuth } from '@/modules/auth';
-import {
-  GestaoComunicados,
-  ListaComunicados,
-  ResumoRegulamento,
-  type AcoesComunicado,
-} from '@/modules/comunicados';
+import { GestaoComunicados, ListaComunicados, type AcoesComunicado } from '@/modules/comunicados';
 import type { Edicao } from '@/modules/organizacao';
 import { Card, EmptyState, PageHeader } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
@@ -17,6 +12,7 @@ import {
 } from '../dados/consultas';
 import { useRepositorios } from '../dados/useRepositorios';
 import { ComEdicao } from './ComEdicao';
+import { RegulamentoVigente } from './RegulamentoVigente';
 
 /** Escritas dos comunicados: cada uma invalida as consultas depois da resposta do servidor. */
 function useAcoesComunicado(edicaoId: string): AcoesComunicado {
@@ -98,7 +94,7 @@ export function CoordenacaoComunicadosPage() {
             <Card icone="noticia" titulo="Comunicados da edição">
               <Gestao edicao={edicao} perfil="coordenacao" />
             </Card>
-            <ResumoRegulamento regras={edicao.regras} versao={edicao.regrasVersao} />
+            <RegulamentoVigente edicao={edicao} />
           </div>
         )}
       </ComEdicao>
@@ -123,7 +119,7 @@ export function DocenteComunicadosPage() {
             <Card icone="noticia" titulo="Escritos por mim">
               <Gestao edicao={edicao} perfil="docente" />
             </Card>
-            <ResumoRegulamento regras={edicao.regras} versao={edicao.regrasVersao} />
+            <RegulamentoVigente edicao={edicao} />
           </div>
         )}
       </ComEdicao>

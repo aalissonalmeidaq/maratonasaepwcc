@@ -11,6 +11,7 @@ import {
   SeloDaEdicao,
   type EdicaoGerida,
 } from '@/modules/organizacao';
+import { FormRegras, HistoricoRegras } from '@/modules/pontuacao';
 import { Button, Card, ConfirmDialog, EmptyState, Icon, PageHeader } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
 import { useEdicaoEmUso } from '../dados/edicaoEmUsoContexto';
@@ -20,6 +21,8 @@ import {
   useEdicaoAtual,
   useEdicoesQueCoordeno,
   useGravar,
+  useHistoricoRegras,
+  useRegrasDaEdicaoVigentes,
   useTurmas,
   useVinculos,
 } from '../dados/consultas';
@@ -108,6 +111,43 @@ function ApagarEdicao({ edicao, bloqueio }: { edicao: EdicaoGerida; bloqueio?: s
   );
 }
 
+/** Regras da edição com versões (spec 011, US1); só leitura em edição encerrada. */
+function RegrasDaEdicaoCard({ edicao, bloqueio }: { edicao: EdicaoGerida; bloqueio?: string }) {
+  const consulta = useRegrasDaEdicaoVigentes(edicao.id);
+  const historico = useHistoricoRegras(edicao.id, null);
+  const { regras } = useRepositorios();
+  const gravar = useGravar();
+  const encerrada = edicao.estado === 'encerrada';
+  return (
+    <Card titulo="Regras da edição" icone="pontuacao">
+      <Consulta consulta={consulta}>
+        {(v) => (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-text-secondary">
+              Versão vigente: {v.rotulo}.{' '}
+              {encerrada
+                ? 'Edição encerrada: as regras não mudam mais.'
+                : 'Cada encontro usa a versão vigente no seu início.'}
+            </p>
+            <FormRegras
+              key={edicao.id}
+              regras={v.regras}
+              rotuloSugerido={v.sugestao}
+              somenteLeitura={encerrada}
+              bloqueio={bloqueio}
+              onGravar={(r, rotulo, justificativa) =>
+                gravar(() => regras.gravarRegras(edicao.id, v.rotulo, rotulo, r, justificativa))()
+              }
+            />
+          </div>
+        )}
+      </Consulta>
+      <h3 className="mt-6 mb-2 font-semibold">Histórico das regras</h3>
+      <Consulta consulta={historico}>{(itens) => <HistoricoRegras itens={itens} />}</Consulta>
+    </Card>
+  );
+}
+
 function DetalheDaEdicao({ edicao }: { edicao: EdicaoGerida }) {
   const { sessao } = useAuth();
   const vinculos = useVinculos(edicao.id).data ?? [];
@@ -124,6 +164,7 @@ function DetalheDaEdicao({ edicao }: { edicao: EdicaoGerida }) {
           bloqueio={bloqueio}
         />
       </Card>
+      <RegrasDaEdicaoCard edicao={edicao} bloqueio={bloqueio} />
       <Card titulo="Passos da edição" icone="checklist">
         <PassosDaEdicao edicao={edicao} />
       </Card>

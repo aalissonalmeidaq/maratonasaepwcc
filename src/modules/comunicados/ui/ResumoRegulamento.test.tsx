@@ -22,4 +22,22 @@ describe('ResumoRegulamento (US4, FR-014)', () => {
     const presenca = screen.getByText('Presença:').closest('li');
     expect(presenca).toHaveTextContent('Presença: a definir');
   });
+
+  it('marca o que foi definido para a turma e mostra a pontuação máxima (spec 011)', async () => {
+    const { container } = render(
+      <ResumoRegulamento
+        regras={REGRAS_PILOTO}
+        versao="v"
+        gruposAjustados={['apresentacao']}
+        maximo={304}
+      />,
+    );
+    const apresentacao = screen.getByText('Apresentação:').closest('li');
+    expect(apresentacao).toHaveTextContent('definido para a sua turma');
+    expect(screen.getByText('Presença:').closest('li')).not.toHaveTextContent(
+      'definido para a sua turma',
+    );
+    expect(screen.getByText('304 pontos nos encontros da turma.')).toBeInTheDocument();
+    expect(await violacoesA11y(container)).toEqual([]);
+  });
 });

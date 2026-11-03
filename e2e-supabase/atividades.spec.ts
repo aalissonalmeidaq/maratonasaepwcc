@@ -41,10 +41,10 @@ test.describe('US1 — desafio e entrega com comprovante do servidor', () => {
 
   test('aluna envia o PDF e vê protocolo e horário do servidor (SC-001)', async ({ page }) => {
     await entrar(page, 'aluna@exemplo.invalid');
-    // 1ª interação: menu; 2ª: escolher o arquivo; 3ª: enviar.
+    // 1ª interação: o próximo prazo do painel inicial; 2ª: escolher o arquivo; 3ª: enviar.
     await page
-      .getByRole('navigation', { name: 'Acesso rápido' })
-      .getByRole('link', { name: 'Desafios e entregas' })
+      .getByRole('region', { name: 'Próximo prazo' })
+      .getByRole('link', { name: 'Ver desafios e listas' })
       .click();
     const cartao = page.getByRole('region', { name: 'Desafio E2E' });
     await cartao.getByLabel('Arquivo da entrega').setInputFiles(PDF);

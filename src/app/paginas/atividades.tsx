@@ -533,7 +533,7 @@ function DesafiosDoAluno({ edicao }: { edicao: Edicao }) {
                       className="grid grid-cols-1 gap-4 lg:grid-cols-2"
                       texto={(d) => [d.titulo, d.enunciado, d.politicaIa].join(' ')}
                     >
-                      {(d) => <CartaoDesafio desafio={d} regras={a.regras} />}
+                      {(d) => <CartaoDesafio desafio={d} regras={d.regras ?? a.regras} />}
                     </ListaPaginada>
                   )}
                 </div>
@@ -831,8 +831,14 @@ function PainelDoDesafio({ desafioId, coordenacao }: { desafioId: string; coorde
       {(p) => (
         <div className="grid gap-6">
           <div className="grid gap-4 lg:grid-cols-2">
-            <TabelaCriterios titulo="Entrega prática" criterios={p.regras.entrega.criterios} />
-            <TabelaCriterios titulo="Apresentação" criterios={p.regras.apresentacao.criterios} />
+            <TabelaCriterios
+              titulo="Entrega prática"
+              criterios={(p.equipes[0]?.regras ?? p.regras).entrega.criterios}
+            />
+            <TabelaCriterios
+              titulo="Apresentação"
+              criterios={(p.equipes[0]?.regras ?? p.regras).apresentacao.criterios}
+            />
           </div>
           {p.equipes.length === 0 ? (
             <EmptyState titulo="Nenhuma equipe nesta turma." />
@@ -842,7 +848,7 @@ function PainelDoDesafio({ desafioId, coordenacao }: { desafioId: string; coorde
                 key={e.id}
                 desafioId={desafioId}
                 equipe={e}
-                regras={p.regras}
+                regras={e.regras ?? p.regras}
                 coordenacao={coordenacao}
               />
             ))

@@ -5,7 +5,6 @@ import { PainelCoordenacao } from '@/modules/relatorios';
 import { Alert, PageHeader, StatCard, StatusBadge } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
 import { usePainelDaCoordenacao } from '../dados/consultas';
-import { Atalhos } from '../layout/Atalhos';
 import { ComDadosDemo } from './comum';
 import { ComEdicao } from './ComEdicao';
 
@@ -28,9 +27,6 @@ export function CoordenacaoInicioPage() {
   return (
     <>
       <ComEdicao>{(edicao) => <PainelDaEdicao edicao={edicao} />}</ComEdicao>
-      <section aria-label="Acessos da coordenação" className="mt-6">
-        <Atalhos area="coordenacao" compacto />
-      </section>
     </>
   );
 }

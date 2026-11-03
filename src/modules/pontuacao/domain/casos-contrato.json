@@ -1,5 +1,5 @@
 {
-  "descricao": "Casos de contrato do cálculo do encontro. Fonte única dos esperados: o Vitest confere calcularEncontro e scripts/testar-paridade-calculo.mjs confere app.calcular_encontro (spec 007, R2). Regras 'piloto' = REGRAS_PILOTO.",
+  "descricao": "Casos de contrato do cálculo do encontro. Fonte única dos esperados: o Vitest confere calcularEncontro e scripts/testar-paridade-calculo.mjs confere app.calcular_encontro (spec 007, R2). Regras 'piloto' = REGRAS_PILOTO. Spec 011: 'ajustes' (opcional) são grupos que substituem os da base, como uma versão nova da edição ou um ajuste de turma (no servidor, regras || ajustes).",
   "casos": [
     {
       "nome": "soma os componentes até 100 pontos",
@@ -556,6 +556,278 @@
         "descontos": 0,
         "total": 35,
         "pendencias": ["avaliacaoObjetiva"]
+      }
+    },
+    {
+      "nome": "versão nova: critério de entrega a mais entra na soma do encontro",
+      "regras": "piloto",
+      "ajustes": {
+        "entrega": {
+          "criterios": [
+            {
+              "id": "compreensao",
+              "rotulo": "Compreensão do problema",
+              "maximo": 10
+            },
+            {
+              "id": "aplicacao",
+              "rotulo": "Aplicação de conhecimentos técnicos",
+              "maximo": 10
+            },
+            {
+              "id": "qualidade",
+              "rotulo": "Qualidade e adequação da solução",
+              "maximo": 10
+            },
+            {
+              "id": "organizacao",
+              "rotulo": "Organização e entrega",
+              "maximo": 10
+            },
+            {
+              "id": "documentacao",
+              "rotulo": "Documentação",
+              "maximo": 5
+            }
+          ],
+          "criterioDeAtraso": "organizacao",
+          "faixasDeAtraso": [
+            {
+              "ateMinutos": 15,
+              "desconto": 2
+            },
+            {
+              "ateMinutos": 30,
+              "desconto": 5
+            }
+          ],
+          "limiteAtrasoMinutos": 30
+        }
+      },
+      "lancamentos": {
+        "presencas": [
+          {
+            "estudanteId": "a",
+            "presente": true
+          },
+          {
+            "estudanteId": "b",
+            "presente": true
+          }
+        ],
+        "participacao": {
+          "envolvimento": 4,
+          "colaboracao": 3,
+          "organizacao": 3
+        },
+        "avaliacaoObjetiva": {
+          "tipo": "questoes",
+          "acertos": 10,
+          "total": 10
+        },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": {
+            "compreensao": 8,
+            "aplicacao": 7,
+            "qualidade": 9,
+            "organizacao": 10,
+            "documentacao": 4
+          },
+          "atrasoMinutos": 0
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": {
+            "clareza": 3,
+            "explicacao": 4,
+            "respostas": 3
+          }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 38,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 98,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "ajuste da turma: apresentação com critério próprio",
+      "regras": "piloto",
+      "ajustes": {
+        "apresentacao": {
+          "criterios": [
+            {
+              "id": "clareza",
+              "rotulo": "Clareza",
+              "maximo": 3
+            },
+            {
+              "id": "explicacao",
+              "rotulo": "Explicação das decisões e etapas",
+              "maximo": 4
+            },
+            {
+              "id": "demonstracao",
+              "rotulo": "Demonstração",
+              "maximo": 3
+            }
+          ]
+        }
+      },
+      "lancamentos": {
+        "presencas": [
+          {
+            "estudanteId": "a",
+            "presente": true
+          },
+          {
+            "estudanteId": "b",
+            "presente": true
+          }
+        ],
+        "participacao": {
+          "envolvimento": 4,
+          "colaboracao": 3,
+          "organizacao": 3
+        },
+        "avaliacaoObjetiva": {
+          "tipo": "questoes",
+          "acertos": 10,
+          "total": 10
+        },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": {
+            "compreensao": 10,
+            "aplicacao": 10,
+            "qualidade": 10,
+            "organizacao": 10
+          },
+          "atrasoMinutos": 0
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": {
+            "clareza": 3,
+            "explicacao": 2,
+            "demonstracao": 3
+          }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 40,
+        "apresentacao": 8,
+        "descontos": 0,
+        "total": 98,
+        "pendencias": []
+      }
+    },
+    {
+      "nome": "versão nova: limite de 45 minutos e desconto no critério de atraso trocado",
+      "regras": "piloto",
+      "ajustes": {
+        "entrega": {
+          "criterios": [
+            {
+              "id": "compreensao",
+              "rotulo": "Compreensão do problema",
+              "maximo": 10
+            },
+            {
+              "id": "aplicacao",
+              "rotulo": "Aplicação de conhecimentos técnicos",
+              "maximo": 10
+            },
+            {
+              "id": "qualidade",
+              "rotulo": "Qualidade e adequação da solução",
+              "maximo": 10
+            },
+            {
+              "id": "organizacao",
+              "rotulo": "Organização e entrega",
+              "maximo": 10
+            }
+          ],
+          "criterioDeAtraso": "qualidade",
+          "faixasDeAtraso": [
+            {
+              "ateMinutos": 15,
+              "desconto": 2
+            },
+            {
+              "ateMinutos": 30,
+              "desconto": 5
+            },
+            {
+              "ateMinutos": 45,
+              "desconto": 8
+            }
+          ],
+          "limiteAtrasoMinutos": 45
+        }
+      },
+      "lancamentos": {
+        "presencas": [
+          {
+            "estudanteId": "a",
+            "presente": true
+          },
+          {
+            "estudanteId": "b",
+            "presente": true
+          }
+        ],
+        "participacao": {
+          "envolvimento": 4,
+          "colaboracao": 3,
+          "organizacao": 3
+        },
+        "avaliacaoObjetiva": {
+          "tipo": "questoes",
+          "acertos": 10,
+          "total": 10
+        },
+        "entrega": {
+          "situacao": "avaliada",
+          "notas": {
+            "compreensao": 10,
+            "aplicacao": 10,
+            "qualidade": 10,
+            "organizacao": 10
+          },
+          "atrasoMinutos": 40
+        },
+        "apresentacao": {
+          "situacao": "avaliada",
+          "notas": {
+            "clareza": 3,
+            "explicacao": 4,
+            "respostas": 3
+          }
+        },
+        "penalidades": []
+      },
+      "esperado": {
+        "presenca": 10,
+        "participacao": 10,
+        "avaliacaoObjetiva": 30,
+        "entrega": 32,
+        "apresentacao": 10,
+        "descontos": 0,
+        "total": 92,
+        "pendencias": []
       }
     }
   ]

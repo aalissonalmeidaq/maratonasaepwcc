@@ -48,6 +48,16 @@ describe('PainelCoordenacao (US3, FR-004, FR-005)', () => {
     expect(screen.getByText('2 / 3')).toBeInTheDocument();
     expect(screen.getByText('11 estudantes ativos')).toBeInTheDocument();
     expect(screen.getByText('1 de 3')).toBeInTheDocument();
+    const indicadores = screen.getByRole('region', { name: 'Indicadores' });
+    // Soma das pendências das categorias: A (4 + 0 + 1 + 2) e B (0 + 3 + 0 + 0).
+    expect(
+      within(within(indicadores).getByRole('region', { name: 'Pendências abertas' })).getByText(
+        '10',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(indicadores).getByRole('progressbar', { name: 'Encontros realizados' }),
+    ).toHaveAttribute('aria-valuenow', '1');
 
     const a = screen.getByRole('region', { name: 'Categoria A' });
     expect(within(a).getByRole('link', { name: 'Componentes sem registro: 4' })).toHaveAttribute(

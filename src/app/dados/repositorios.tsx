@@ -8,6 +8,7 @@ import { criarRepositorioDuplasSupabase } from '@/modules/duplas';
 import { criarRepositorioEncontrosSupabase } from '@/modules/encontros';
 import { criarRepositorioOrganizacaoSupabase } from '@/modules/organizacao';
 import { criarRepositorioPainelTurmaSupabase } from '@/modules/painel-turma';
+import { criarRepositorioRegrasSupabase } from '@/modules/pontuacao';
 import { criarRepositorioPaineisSupabase } from '@/modules/relatorios';
 import { criarRepositorioResultadoSupabase } from '@/modules/resultado';
 import { obterSupabase } from '@/shared/lib/supabase';
@@ -26,6 +27,7 @@ function criarRepositoriosSupabase(): Repositorios {
     resultado: criarRepositorioResultadoSupabase(sb),
     paineis: criarRepositorioPaineisSupabase(sb),
     comunicados: criarRepositorioComunicadosSupabase(sb),
+    regras: criarRepositorioRegrasSupabase(sb),
   };
 }
 
