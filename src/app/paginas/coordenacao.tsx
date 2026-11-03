@@ -2,7 +2,7 @@ import { useAuth } from '@/modules/auth';
 import { painelCoordenacao } from '@/modules/demo';
 import type { Edicao } from '@/modules/organizacao';
 import { PainelCoordenacao } from '@/modules/relatorios';
-import { Alert, EmConstrucao, PageHeader, StatCard, StatusBadge } from '@/shared/ui';
+import { Alert, PageHeader, StatCard, StatusBadge } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
 import { usePainelDaCoordenacao } from '../dados/consultas';
 import { Atalhos } from '../layout/Atalhos';
@@ -64,14 +64,5 @@ export function CoordenacaoPremiacaoPage() {
         </>
       )}
     </ComDadosDemo>
-  );
-}
-
-export function CoordenacaoComunicadosPage() {
-  return (
-    <>
-      <PageHeader icone="noticia" titulo="Comunicados e regulamento" />
-      <EmConstrucao modulo="Publicação de comunicados e do regulamento" incremento="Incremento 2" />
-    </>
   );
 }

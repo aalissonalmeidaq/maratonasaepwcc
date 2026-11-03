@@ -52,7 +52,7 @@ valem para os dois lados.
 | 10  | Prova oficial (registro)            | `modules/resultado`                       | Registro pela coordenação; nota só para ela (spec 007)               |
 | 11  | Pontuação e classificação           | `modules/pontuacao` + `app.calcular_*`    | Núcleo TS e cálculo oficial no servidor com paridade (ADR 0011)      |
 | 12  | Ocorrências, penalidades e recursos | `modules/resultado` + bucket `evidencias` | Ocorrência, manifestação, decisão, ranking e revisão (spec 007)      |
-| 13  | Comunicados e regulamento           | `modules/comunicados`                     | Resumo das regras; publicação no Inc. 2                              |
+| 13  | Comunicados e regulamento           | `modules/comunicados`                     | Comunicados por público e resumo das regras da edição (spec 009)     |
 | 14  | Relatórios e acompanhamento         | `modules/relatorios`                      | Painéis por perfil e CSV autorizados no servidor (spec 008)          |
 | 15  | Componentes compartilhados          | `shared/ui`, `shared/pwa`                 | Prontos (botões, campos, tabela, diálogo, badges…)                   |
 | 16  | Auditoria e histórico               | tabela `auditoria` + gatilhos             | Gatilhos ativos em edições, cursos, turmas, atribuições              |

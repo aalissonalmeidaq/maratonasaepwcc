@@ -113,6 +113,12 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       descricao: 'Registros e evidências',
     },
     {
+      rotulo: 'Comunicados',
+      caminho: '/docente/comunicados',
+      icone: 'noticia',
+      descricao: 'Recebidos e escritos por você',
+    },
+    {
       rotulo: 'Relatórios',
       caminho: '/docente/relatorios',
       icone: 'relatorio',

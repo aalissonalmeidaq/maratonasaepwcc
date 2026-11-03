@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { RepositorioAtividades } from '@/modules/atividades';
+import type { RepositorioComunicados } from '@/modules/comunicados';
 import type { RepositorioDuplas } from '@/modules/duplas';
 import type { RepositorioEncontros } from '@/modules/encontros';
 import type { RepositorioOrganizacao } from '@/modules/organizacao';
@@ -16,6 +17,7 @@ export interface Repositorios {
   atividades: RepositorioAtividades;
   resultado: RepositorioResultado;
   paineis: RepositorioPaineis;
+  comunicados: RepositorioComunicados;
 }
 
 export const ContextoRepositorios = createContext<Repositorios | null>(null);

@@ -218,7 +218,9 @@ export type TipoAviso =
   | 'ocorrencia_decidida'
   | 'ranking_publicado'
   | 'revisao_pedida'
-  | 'revisao_respondida';
+  | 'revisao_respondida'
+  | 'comunicado_publicado'
+  | 'comunicado_atualizado';
 
 export interface Aviso {
   id: string;

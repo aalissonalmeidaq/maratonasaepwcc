@@ -56,9 +56,12 @@ const AvisosPage = lazy(() =>
   import('./paginas/resultado').then((modulo) => ({ default: modulo.AvisosPage })),
 );
 const CoordenacaoComunicadosPage = lazy(() =>
-  import('./paginas/coordenacao').then((modulo) => ({
+  import('./paginas/comunicados').then((modulo) => ({
     default: modulo.CoordenacaoComunicadosPage,
   })),
+);
+const DocenteComunicadosPage = lazy(() =>
+  import('./paginas/comunicados').then((modulo) => ({ default: modulo.DocenteComunicadosPage })),
 );
 const CoordenacaoPremiacaoPage = lazy(() =>
   import('./paginas/coordenacao').then((modulo) => ({ default: modulo.CoordenacaoPremiacaoPage })),
@@ -167,6 +170,7 @@ export function AppRotas() {
               <Route path="avaliacoes" element={<DocenteAvaliacoesPage />} />
               <Route path="ocorrencias" element={<DocenteOcorrenciasPage />} />
               <Route path="pontos" element={<DocentePontosPage />} />
+              <Route path="comunicados" element={<DocenteComunicadosPage />} />
               <Route path="relatorios" element={<DocenteRelatoriosPage />} />
               <Route path="avisos" element={<AvisosPage />} />
             </Route>

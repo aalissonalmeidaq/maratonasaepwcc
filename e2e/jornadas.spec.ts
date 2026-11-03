@@ -426,3 +426,49 @@ test.describe('painéis e relatórios (spec 008, demonstração)', () => {
     await semRolagemHorizontal(page);
   });
 });
+
+test.describe('comunicados e regulamento (spec 009, demonstração)', () => {
+  test('aluna lê os comunicados fictícios e o resumo das regras da edição', async ({ page }) => {
+    await entrarComo(page, /ana exemplo/i);
+    await page.getByRole('link', { name: 'Regulamento e avisos' }).first().click();
+    await expect(page).toHaveURL(/\/aluno\/regulamento$/);
+    await expect(page.getByRole('article', { name: 'Boas-vindas à demonstração' })).toBeVisible();
+    await expect(page.getByText('Dados fictícios').first()).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Pontuação por encontro' })).toContainText(
+      'Acertos ÷ total × 30.',
+    );
+    await expect(
+      page.getByText('Resumo em validação: o regulamento oficial aprovado prevalece.'),
+    ).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+
+  test('docente vê o item Comunicados, os recebidos e a escrita desabilitada', async ({ page }) => {
+    await entrarComo(page, /lúcia exemplo/i);
+    await page.getByRole('link', { name: 'Comunicados', exact: true }).first().click();
+    await expect(page).toHaveURL(/\/docente\/comunicados$/);
+    await expect(page.getByRole('region', { name: 'Recebidos' })).toContainText(
+      'Regulamento em validação',
+    );
+    await expect(page.getByRole('region', { name: 'Escritos por mim' })).toContainText(
+      'Nenhum comunicado escrito ainda.',
+    );
+    await expect(page.getByRole('button', { name: 'Novo comunicado' })).toBeDisabled();
+    await semRolagemHorizontal(page);
+  });
+
+  test('coordenação abre Comunicados e regulamento com a escrita desabilitada', async ({
+    page,
+  }) => {
+    await entrarComo(page, /coordenação \(fictícia\)/i);
+    await page.getByRole('link', { name: 'Comunicados', exact: true }).first().click();
+    await expect(page).toHaveURL(/\/coordenacao\/comunicados$/);
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Comunicados e regulamento' }),
+    ).toBeVisible();
+    await expect(page.getByRole('article', { name: 'Regulamento em validação' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Novo comunicado' })).toBeDisabled();
+    await expect(page.getByText(/modo demonstração/i).first()).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+});

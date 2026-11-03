@@ -6,6 +6,8 @@ export interface Edicao {
   estado: 'rascunho' | 'ativa' | 'encerrada';
   quantidadeEncontros: number;
   regrasVersao: string;
+  /** JSON das regras gravadas na edição; lido sem presumir valores (spec 009, resumo do regulamento). */
+  regras: unknown;
 }
 
 export interface Curso {

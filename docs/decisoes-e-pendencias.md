@@ -235,6 +235,39 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - O E2E real dos painéis roda como projeto dependente (`paineis`), depois das outras jornadas,
   porque publica o ranking da Categoria B e lê o estado deixado por elas.
 
+## 6.7 Spec 009 — comunicados e regulamento (implementada em 2026-11-03)
+
+- Implementação: módulo `src/modules/comunicados`; migration `20261103120000_comunicados.sql`
+  com as tabelas `comunicados` e `comunicado_turmas` (RLS, auditoria, sem escrita direta) e as RPCs
+  `salvar_comunicado`, `apagar_rascunho`, `publicar_comunicado`, `corrigir_comunicado`,
+  `retirar_comunicado`, `marcar_comunicado_lido`, `comunicados_para_mim` e
+  `comunicados_que_gerencio`. A demonstração mostra os comunicados fictícios com escrita
+  desabilitada.
+- **Autoria (esclarecimento 1):** coordenação, docentes e mentores publicam. Docente e mentor só
+  para as turmas em que atuam, com pelo menos uma turma; a coordenação pode publicar para a edição
+  inteira. Sem etapa de aprovação (esclarecimento 2): a coordenação vê, corrige e retira qualquer
+  comunicado da edição. Quem deixa de atuar numa turma não corrige mais os comunicados dela.
+- **Público por perfil e turma:** todos (estudantes, docentes e mentores), estudantes ou equipe
+  docente, opcionalmente limitado a turmas, avaliado na leitura. Público por equipe ou por pessoa
+  fica fora. **[validar]**
+- **Apoio e analista** não leem comunicados neste incremento, porque o PRD não define o que
+  recebem.
+- **Avisos e selo "Novo":** publicação e cada correção geram avisos na tabela `avisos` (tipos
+  `comunicado_publicado` e `comunicado_atualizado`); a retirada não avisa. O "Novo" deriva do aviso
+  não lido, sem tabela de leituras: quem entra no público depois da publicação vê o comunicado sem
+  o selo e sem aviso retroativo. O aviso leva à página de comunicados do perfil.
+  Na retirada, os avisos pendentes do comunicado passam a lidos, para o contador não apontar para
+  algo que o público já não vê; os avisos ficam no histórico, sem ser apagados.
+- **Correção e retirada:** só de publicados, com justificativa de pelo menos 10 caracteres (a regra
+  de `app.exigir_justificativa`, já usada no projeto), registrada na auditoria com a versão
+  anterior. O público não muda depois de publicado; publicado não é apagado, só retirado.
+- **Limites:** título de 1 a 200 caracteres e texto de 1 a 5.000, sem marcação (exibido como texto
+  puro). **[validar]**
+- **Regulamento:** o resumo passa a ler `edicoes.regras` e `regras_versao` da edição, sem números
+  fixos na tela; valor ausente aparece como "a definir". O documento oficial do regulamento
+  continua ausente e não é publicado por esta spec.
+- **Edição encerrada:** comunicados só podem ser lidos.
+
 ## 6.1 Spec 005 — busca e paginação
 
 - Busca e paginação são feitas no navegador sobre os registros que a RLS já entregou (volume
