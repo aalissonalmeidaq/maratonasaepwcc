@@ -86,9 +86,21 @@ $$;
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id)
 select pg_temp.u(u), pg_temp.e(), p::public.papel,
        case when t is null then null else pg_temp.t(t) end
-from (values ('0a', 'coordenacao', null), ('0b', 'docente', 'a'), ('0c', 'mentor', 'a'),
-             ('0d', 'docente', 'b'), ('0e', 'docente', 'a'), ('0e', 'mentor', 'a'), ('09', 'apoio', null),
+from (values ('0a', 'coordenacao', null), ('0b', 'docente', 'a'),
+             ('0d', 'docente', 'b'), ('0e', 'docente', 'a'), ('09', 'apoio', null),
              ('a1', 'aluno', 'a'), ('a2', 'aluno', 'a'), ('b1', 'aluno', 'b')) as v (u, p, t);
+-- Spec 010: mentor é vinculado ao curso. Para manter as asserções por turma desta spec, o
+-- vínculo ao curso fica inativo e só a linha derivada da turma do mentor fica ativa (fixture).
+select set_config('app.sincronizando_mentores', 'on', true);
+insert into public.atribuicoes (usuario_id, edicao_id, papel, curso_id, ativo)
+select pg_temp.u('0c'), pg_temp.e(), 'mentor', curso_id, false from public.turmas where id = pg_temp.t('a');
+update public.atribuicoes set ativo = true
+where usuario_id = pg_temp.u('0c') and papel = 'mentor' and turma_id = pg_temp.t('a');
+insert into public.atribuicoes (usuario_id, edicao_id, papel, curso_id, ativo)
+select pg_temp.u('0e'), pg_temp.e(), 'mentor', curso_id, false from public.turmas where id = pg_temp.t('a');
+update public.atribuicoes set ativo = true
+where usuario_id = pg_temp.u('0e') and papel = 'mentor' and turma_id = pg_temp.t('a');
+select set_config('app.sincronizando_mentores', '', true);
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id) values
   (pg_temp.u('0f'), pg_temp.g(), 'coordenacao', null);
 update public.edicoes set estado = 'encerrada' where id = pg_temp.g();
@@ -344,9 +356,12 @@ select throws_ok($$ select public.comunicados_que_gerencio(pg_temp.e()) $$, '425
 reset role;
 
 -- Edição encerrada (FR-012).
+-- Spec 010: a edição encerrada recusa escrita; a fixture reabre só durante a gravação.
+update public.edicoes set estado = 'ativa' where id = pg_temp.g();
 insert into public.comunicados (id, edicao_id, autor_id, autor_papel, titulo, texto, publico, chave_envio)
 values ('c1000000-0000-0000-0010-0000000000f1', pg_temp.g(), pg_temp.u('0f'), 'coordenacao', 'Da G', 'Texto.',
         'todos', gen_random_uuid());
+update public.edicoes set estado = 'encerrada' where id = pg_temp.g();
 set local role authenticated;
 select pg_temp.como(pg_temp.u('0f'));
 select throws_ok($$ select public.salvar_comunicado(gen_random_uuid(), null, pg_temp.g(), 'T', 'X.', 'todos', '{}') $$,
@@ -515,8 +530,11 @@ select is(pg_temp.contar('avisos', format($f$lido_em is null and referencia ->> 
   'FR-005: a retirada encerra os avisos pendentes do comunicado (o contador não aponta para o que sumiu)');
 
 -- Edição encerrada (FR-012).
+-- Spec 010: a edição encerrada recusa escrita; a fixture reabre só durante a gravação.
+update public.edicoes set estado = 'ativa' where id = pg_temp.g();
 update public.comunicados set estado = 'publicado', publicado_em = now()
 where id = 'c1000000-0000-0000-0010-0000000000f1';
+update public.edicoes set estado = 'encerrada' where id = pg_temp.g();
 set local role authenticated;
 select pg_temp.como(pg_temp.u('0f'));
 select throws_ok($$ select public.corrigir_comunicado('c1000000-0000-0000-0010-0000000000f1', 'T', 'Outro.', 'Justificativa válida.') $$,

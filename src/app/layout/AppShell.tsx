@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router';
-import { ROTULO_PAPEL, type Area } from '@/modules/acesso';
+import { ROTULO_PAPEL, papeisDaArea, type Area } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
 import { ContadorConvites } from '@/modules/duplas';
 import { BotaoInstalar } from '@/shared/pwa';
 import { Brand, Button, Icon, MarcaSenai, PadraoGrafico, cx } from '@/shared/ui';
 import { ContadorAvisos } from '@/modules/resultado';
-import { useConvitesPendentes, useMeusAvisos } from '../dados/consultas';
+import { SeletorEdicao, edicaoPadrao } from '@/modules/organizacao';
+import { useConvitesPendentes, useEdicoesVisiveis, useMeusAvisos } from '../dados/consultas';
+import { useEdicaoEmUso } from '../dados/edicaoEmUsoContexto';
 import { MENUS, ROTULO_AREA } from '../navegacao';
 
 function obterIniciais(nome?: string): string {
@@ -89,6 +91,28 @@ function Menu({
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Edição em uso, entre as edições em que a pessoa tem papel nesta área (spec 010, US7). */
+function SeletorDaArea({ area }: { area: Area }) {
+  const { escolhidaId, escolher } = useEdicaoEmUso();
+  const edicoes = useEdicoesVisiveis().data ?? [];
+  const papeis = papeisDaArea(area);
+  const daArea = edicoes.filter(
+    (e) => !e.meusPapeis || e.meusPapeis.some((p) => papeis.includes(p)),
+  );
+  const atual = daArea.find((e) => e.id === escolhidaId)?.id ?? null;
+  const padrao = edicaoPadrao(daArea)?.id;
+  // A edição escolhida em outra área não vale aqui: passa a valer a padrão desta área.
+  useEffect(() => {
+    if (!atual && padrao) escolher(padrao);
+  }, [atual, padrao, escolher]);
+  if (daArea.length < 2 && daArea[0]?.estado !== 'rascunho') return null;
+  return (
+    <div className="border-b border-border bg-surface px-4 py-3 sm:px-6">
+      <SeletorEdicao edicoes={daArea} escolhidaId={atual} onEscolher={escolher} />
+    </div>
   );
 }
 
@@ -508,6 +532,7 @@ export function AppShell({ area }: { area: Area }) {
               </div>
             </div>
           </header>
+          <SeletorDaArea area={area} />
 
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
           <main

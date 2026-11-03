@@ -11,6 +11,12 @@ import { LimiteCarregamento } from './layout/LimiteCarregamento';
 import { AguardandoPermissaoPage, EntradaPage, NaoEncontradaPage } from './paginas/comum';
 
 const AppShell = lazy(() => import('./layout/AreaAutenticada'));
+const CoordenacaoCadastroPage = lazy(() =>
+  import('./paginas/edicoes').then((modulo) => ({ default: modulo.CoordenacaoCadastroPage })),
+);
+const CoordenacaoEdicoesPage = lazy(() =>
+  import('./paginas/edicoes').then((modulo) => ({ default: modulo.CoordenacaoEdicoesPage })),
+);
 const AlunoInicioPage = lazy(() =>
   import('./paginas/aluno').then((modulo) => ({ default: modulo.AlunoInicioPage })),
 );
@@ -179,6 +185,8 @@ export function AppRotas() {
           <Route element={<RotaProtegida area="coordenacao" />}>
             <Route path="/coordenacao" element={<AppShell area="coordenacao" />}>
               <Route index element={<CoordenacaoInicioPage />} />
+              <Route path="edicoes" element={<CoordenacaoEdicoesPage />} />
+              <Route path="cadastro" element={<CoordenacaoCadastroPage />} />
               <Route path="organizacao" element={<CoordenacaoOrganizacaoPage />} />
               <Route path="turmas/:turmaId" element={<CoordenacaoPainelTurmaPage />} />
               <Route path="duplas" element={<CoordenacaoDuplasPage />} />

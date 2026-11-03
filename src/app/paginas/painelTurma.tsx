@@ -2,10 +2,18 @@ import type { ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useAuth } from '@/modules/auth';
 import { PainelTurma, type DadosPainelTurma } from '@/modules/painel-turma';
-import type { Edicao, Turma } from '@/modules/organizacao';
-import { EmptyState, PageHeader, SelectField } from '@/shared/ui';
+import { GestaoDaTurma, type Edicao, type Turma } from '@/modules/organizacao';
+import { Card, EmptyState, PageHeader, SelectField } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
-import { usePainelTurma, useTurmas } from '../dados/consultas';
+import {
+  useBloqueioDeEscrita,
+  useGravar,
+  usePainelTurma,
+  useSituacaoDeAcesso,
+  useTurmas,
+  useVinculos,
+} from '../dados/consultas';
+import { useRepositorios } from '../dados/useRepositorios';
 import { ComEdicao } from './ComEdicao';
 
 const hoje = () => new Date().toLocaleDateString('sv-SE');
@@ -77,21 +85,67 @@ function PainelDaTurma({
   );
 }
 
+/** Enturmação da turma pela coordenação (spec 010, US3); o servidor confere a permissão. */
+function AlunosEDocentes({ edicao, turma }: { edicao: Edicao; turma: Turma }) {
+  const r = useRepositorios();
+  const gravar = useGravar();
+  const bloqueio = useBloqueioDeEscrita();
+  const vinculos = useVinculos(edicao.id);
+  const acessos = useSituacaoDeAcesso(edicao.id).data ?? [];
+  return (
+    <Card id="alunos-e-docentes" titulo="Alunos e docentes" icone="usuarios" className="mt-6">
+      <Consulta consulta={vinculos}>
+        {(lista) => (
+          <GestaoDaTurma
+            turma={turma}
+            vinculos={lista}
+            acessos={acessos}
+            podeGerir={edicao.estado !== 'encerrada'}
+            bloqueio={bloqueio}
+            onBuscar={(busca) => r.organizacao.pessoasParaVincular(edicao.id, busca)}
+            onVincular={(usuarioId, papel) =>
+              gravar(() =>
+                r.organizacao.vincular({
+                  usuarioId,
+                  edicaoId: edicao.id,
+                  papel,
+                  turmaId: turma.id,
+                }),
+              )()
+            }
+            onDesvincular={(id) => gravar(() => r.organizacao.definirVinculoAtivo(id, false))()}
+            onCriarConta={(d) =>
+              gravar(() => r.organizacao.criarConta({ ...d, edicaoId: edicao.id }))()
+            }
+            onImportar={(turmaId, linhas) =>
+              gravar(() => r.organizacao.importarAlunos({ edicaoId: edicao.id, turmaId, linhas }))()
+            }
+          />
+        )}
+      </Consulta>
+    </Card>
+  );
+}
+
 /** Docente/mentor e coordenação: painel de uma turma da rota. */
 function PainelDeGestao({ edicao, area }: { edicao: Edicao; area: 'docente' | 'coordenacao' }) {
   const { turmaId = '' } = useParams();
   const turmas = useTurmas(edicao.id);
   const base = area === 'docente' ? '/docente/turmas' : '/coordenacao/turmas';
+  const turma = turmas.data?.find((t) => t.id === turmaId);
   return (
-    <PainelDaTurma
-      key={turmaId}
-      edicao={edicao}
-      turmaId={turmaId}
-      cabecalho={<SeletorDeTurma turmas={turmas.data ?? []} atual={turmaId} base={base} />}
-      links={() => ({
-        linkAlterarEquipes: area === 'docente' ? '/docente/turmas' : '/coordenacao/duplas',
-      })}
-    />
+    <>
+      <PainelDaTurma
+        key={turmaId}
+        edicao={edicao}
+        turmaId={turmaId}
+        cabecalho={<SeletorDeTurma turmas={turmas.data ?? []} atual={turmaId} base={base} />}
+        links={() => ({
+          linkAlterarEquipes: area === 'docente' ? '/docente/turmas' : '/coordenacao/duplas',
+        })}
+      />
+      {area === 'coordenacao' && turma && <AlunosEDocentes edicao={edicao} turma={turma} />}
+    </>
   );
 }
 

@@ -87,12 +87,15 @@ export function FormTurma({
   onCancelar,
   bloqueio,
   cursoBloqueado = false,
+  motivoCursoBloqueado = 'Esta turma já tem duplas; o curso não pode ser alterado.',
 }: {
   cursos: Curso[];
   /** Turma em edição; sem ela, o formulário cadastra uma nova. */
   inicial?: Turma;
   /** A turma tem dupla ativa: o servidor recusa a troca de curso (spec 002, FR-001). */
   cursoBloqueado?: boolean;
+  /** Explicação mostrada com o curso bloqueado. */
+  motivoCursoBloqueado?: string;
   onSalvar: (d: {
     id?: string;
     cursoId: string;
@@ -143,9 +146,7 @@ export function FormTurma({
         onChange={(e) => setCursoId(e.target.value)}
         erro={erro.cursoId}
         disabled={cursoBloqueado}
-        dica={
-          cursoBloqueado ? 'Esta turma já tem duplas; o curso não pode ser alterado.' : undefined
-        }
+        dica={cursoBloqueado ? motivoCursoBloqueado : undefined}
       />
       <TextField
         ref={campoNome}
@@ -174,15 +175,10 @@ export function FormTurma({
   );
 }
 
-const PAPEIS_VINCULAVEIS: Papel[] = [
-  'aluno',
-  'docente',
-  'mentor',
-  'apoio',
-  'analista',
-  'coordenacao',
-];
-const EXIGE_TURMA: Papel[] = ['aluno', 'docente', 'mentor'];
+// Mentor fica fora: o vínculo dele é ao curso, em "Mentores por curso" (spec 010).
+const PAPEIS_VINCULAVEIS: Papel[] = ['aluno', 'docente', 'apoio', 'analista', 'coordenacao'];
+// Mentor é vinculado ao curso, não à turma (spec 010, FR-008).
+const EXIGE_TURMA: Papel[] = ['aluno', 'docente'];
 
 export function FormVinculo({
   pessoas,
@@ -260,23 +256,35 @@ const PAPEIS_DE_CONTA: PapelDeConta[] = ['aluno', 'docente', 'mentor', 'apoio', 
 /** Criação de conta (US6). A senha provisória sai da tela assim que o servidor confirma. */
 export function FormConta({
   turmas,
+  cursos,
+  turmaInicial,
   onCriar,
   bloqueio,
 }: {
   turmas: Turma[];
+  /** Cursos da edição, para criar conta de mentor (vinculado ao curso, spec 010). */
+  cursos?: Curso[];
+  /** Turma já escolhida (tela de uma turma, spec 010). */
+  turmaInicial?: string;
   onCriar: (d: {
     nome: string;
     email: string;
     papel: PapelDeConta;
     turmaId: string | null;
+    cursoId: string | null;
   }) => Promise<{ conviteEnviado: boolean }>;
   bloqueio?: string;
 }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [papel, setPapel] = useState<PapelDeConta>('aluno');
-  const [turmaId, setTurmaId] = useState('');
-  const [erros, setErros] = useState<Partial<Record<'nome' | 'email' | 'turma', string>>>({});
+  const [turmaId, setTurmaId] = useState(turmaInicial ?? '');
+  const [cursoId, setCursoId] = useState('');
+  const [erros, setErros] = useState<Partial<Record<'nome' | 'email' | 'turma' | 'curso', string>>>(
+    {},
+  );
+  const ehMentor = papel === 'mentor';
+  const papeis = PAPEIS_DE_CONTA.filter((p) => p !== 'mentor' || (cursos?.length ?? 0) > 0);
   const { estado, enviando, enviar } = useEnvio();
   const precisaTurma = EXIGE_TURMA.includes(papel);
 
@@ -288,6 +296,7 @@ export function FormConta({
         email: 'Informe um e-mail válido.',
       }),
       ...(precisaTurma && !turmaId && { turma: 'Selecione a turma.' }),
+      ...(ehMentor && !cursoId && { curso: 'Selecione o curso do mentor.' }),
     };
     setErros(e);
     if (Object.keys(e).length) return;
@@ -299,6 +308,7 @@ export function FormConta({
           email: destino,
           papel,
           turmaId: precisaTurma ? turmaId : null,
+          cursoId: ehMentor ? cursoId : null,
         }),
       ({ conviteEnviado }) =>
         conviteEnviado
@@ -333,19 +343,31 @@ export function FormConta({
       />
       <SelectField
         rotulo="Papel"
-        opcoes={PAPEIS_DE_CONTA.map((p) => ({ valor: p, rotulo: ROTULO_PAPEL[p] }))}
+        opcoes={papeis.map((p) => ({ valor: p, rotulo: ROTULO_PAPEL[p] }))}
         value={papel}
         onChange={(e) => setPapel(e.target.value as PapelDeConta)}
       />
-      <SelectField
-        rotulo="Turma"
-        placeholder={precisaTurma ? 'Selecione' : 'Sem turma'}
-        opcoes={turmas.map((t) => ({ valor: t.id, rotulo: t.nome }))}
-        value={turmaId}
-        disabled={!precisaTurma}
-        onChange={(e) => setTurmaId(e.target.value)}
-        erro={erros.turma}
-      />
+      {ehMentor ? (
+        <SelectField
+          rotulo="Curso"
+          placeholder="Selecione"
+          dica="O mentor atua em todas as turmas do curso nesta edição."
+          opcoes={(cursos ?? []).map((c) => ({ valor: c.id, rotulo: c.nome }))}
+          value={cursoId}
+          onChange={(e) => setCursoId(e.target.value)}
+          erro={erros.curso}
+        />
+      ) : (
+        <SelectField
+          rotulo="Turma"
+          placeholder={precisaTurma ? 'Selecione' : 'Sem turma'}
+          opcoes={turmas.map((t) => ({ valor: t.id, rotulo: t.nome }))}
+          value={turmaId}
+          disabled={!precisaTurma}
+          onChange={(e) => setTurmaId(e.target.value)}
+          erro={erros.turma}
+        />
+      )}
       <Rodape
         bloqueio={bloqueio}
         estado={estado}

@@ -93,11 +93,19 @@ $$;
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id)
 select pg_temp.u(u), pg_temp.e(), p::public.papel,
        case when t is null then null else pg_temp.t(t) end
-from (values ('0a', 'coordenacao', null), ('0b', 'docente', 'a'), ('0c', 'mentor', 'a'),
+from (values ('0a', 'coordenacao', null), ('0b', 'docente', 'a'),
              ('0d', 'docente', 'b'),
              ('a1', 'aluno', 'a'), ('a2', 'aluno', 'a'), ('a3', 'aluno', 'a'), ('a4', 'aluno', 'a'),
              ('a5', 'aluno', 'a'), ('b1', 'aluno', 'b'), ('b2', 'aluno', 'b'),
              ('c1', 'aluno', 'c'), ('c2', 'aluno', 'c'), ('c3', 'aluno', 'c'), ('c4', 'aluno', 'c')) as v (u, p, t);
+-- Spec 010: mentor é vinculado ao curso. Para manter as asserções por turma desta spec, o
+-- vínculo ao curso fica inativo e só a linha derivada da turma do mentor fica ativa (fixture).
+select set_config('app.sincronizando_mentores', 'on', true);
+insert into public.atribuicoes (usuario_id, edicao_id, papel, curso_id, ativo)
+select pg_temp.u('0c'), pg_temp.e(), 'mentor', curso_id, false from public.turmas where id = pg_temp.t('a');
+update public.atribuicoes set ativo = true
+where usuario_id = pg_temp.u('0c') and papel = 'mentor' and turma_id = pg_temp.t('a');
+select set_config('app.sincronizando_mentores', '', true);
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id) values
   (pg_temp.u('0f'), pg_temp.g(), 'coordenacao', null),
   (pg_temp.u('0d'), pg_temp.g(), 'docente', pg_temp.t('e')),

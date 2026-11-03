@@ -81,8 +81,8 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   reenvio e importação CSV (ADR 0009). Rotas `/primeiro-acesso`, `/esqueci-senha` e
   `/redefinir-senha` e o link "Esqueci minha senha" na entrada também concluídos. **Pendente:**
   provedor de e-mail da produção e SMTP do Auth **[validar]**.
-- Criação de edições: sem política de INSERT para `authenticated` (somente administração do
-  banco) até a spec de organização definir o papel administrador.
+- Criação de edições: resolvida na spec 010 (seção 6.8); só a primeira edição de uma instalação
+  continua criada pela administração do banco.
 - Ícones PWA gerados a partir de `maratona-simbolo.svg` com fundo branco no maskable. **[validar]**
 - Contraste foi verificado apenas por inspeção dos tokens; auditoria axe no navegador real e
   testes com leitor de tela ficam para o Incremento 5.
@@ -234,6 +234,39 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   da publicação provisória no prazo. Na edição encerrada o painel não pede ações.
 - O E2E real dos painéis roda como projeto dependente (`paineis`), depois das outras jornadas,
   porque publica o ranking da Categoria B e lê o estado deixado por elas.
+
+## 6.8 Spec 010 — gestão de edições, turmas e vínculos (implementada em 2026-11-03)
+
+- Implementação: migration `20261104120000_gestao_edicoes.sql`, módulo `src/modules/organizacao`
+  (edições, cadastro, vínculo de turmas, gestão por turma, mentores por curso, coordenação e
+  seletor de edição) e páginas `/coordenacao/edicoes` e `/coordenacao/cadastro`.
+- **Quem cria edições:** quem tem atribuição ativa de coordenação em qualquer edição; a criadora
+  sai como coordenação da nova. Não há papel administrador; a primeira edição de uma instalação
+  continua criada pela administração do banco. As regras vêm do piloto ou de outra edição
+  coordenada e não mudam nesta spec.
+- **Cadastro permanente:** cursos e turmas são da unidade; `cursos` e `turmas` passaram a ser o curso
+  e a turma **na edição**. Correções do cadastro chegam sozinhas só às edições em preparação; na
+  edição ativa, por "Atualizar a partir do cadastro". Instalação de uma só unidade. **[validar]**
+- **Gestão por turma:** só a coordenação cadastra, importa e vincula alunos e docentes na turma.
+  A busca de pessoas traz só contas que participam ou participaram de edições que a pessoa
+  coordena, sem e-mail. **[validar]** se é preciso buscar qualquer conta.
+- **Mentor por curso:** o vínculo ao curso gera linhas por turma (derivadas), mantidas por gatilho;
+  vínculo direto de mentor a turma é recusado. Na migração, cada mentor por turma passou a ser
+  vinculado ao curso e atua também nas outras turmas dele. **[validar]**
+- **Encerramento:** lista ocorrências sem decisão, revisões abertas e categorias sem ranking, sem
+  impedir; a justificativa e a lista ficam na edição e na auditoria. Edição encerrada recusa
+  escrita em todas as tabelas dela (gatilho central); avisos e exportações continuam. Edição
+  encerrada não é reaberta. **[validar]**
+- **Coordenação:** a edição mantém ao menos uma coordenação ativa; ninguém altera a própria.
+- **Várias edições ativas:** o seletor no topo aparece com duas ou mais edições da área; a escolha
+  fica no dispositivo (só o id). Edição em preparação aparece com o selo "Em preparação".
+- **Regras para a spec 011 (decididas, não implementadas):** versões das regras com justificativa;
+  só valores mudam; cada encontro usa a versão vigente no seu início; rótulo sugerido e editável;
+  cada turma herda as regras da edição e pode ajustar valores próprios. Com ajustes por turma,
+  equipes da mesma categoria podem ter máximos diferentes no ranking. **[validar]**
+- Testes das specs anteriores ajustados sem perder asserções: fixtures de mentor por turma passam
+  pelo vínculo ao curso (só a derivada da turma ativa); fixtures em edição encerrada reabrem a
+  edição durante a gravação; criação de cursos e turmas passou às RPCs do cadastro.
 
 ## 6.7 Spec 009 — comunicados e regulamento (implementada em 2026-11-03)
 

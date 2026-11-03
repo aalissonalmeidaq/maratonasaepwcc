@@ -30,7 +30,9 @@ from (values
   ('a0000000-0000-0000-0000-000000000013'::uuid, 'heitor@exemplo.invalid', 'Heitor Exemplo'),
   ('a0000000-0000-0000-0000-000000000014'::uuid, 'lia@exemplo.invalid', 'Lia Exemplo'),
   ('a0000000-0000-0000-0000-000000000015'::uuid, 'mateus@exemplo.invalid', 'Mateus Exemplo'),
-  ('a0000000-0000-0000-0000-000000000016'::uuid, 'nina@exemplo.invalid', 'Nina Exemplo')
+  ('a0000000-0000-0000-0000-000000000016'::uuid, 'nina@exemplo.invalid', 'Nina Exemplo'),
+  -- Mentor vinculado ao curso A (spec 010): atua em todas as turmas do curso.
+  ('a0000000-0000-0000-0000-000000000017'::uuid, 'mentor@exemplo.invalid', 'Marcos Exemplo (mentor)')
 ) as u (id, email, nome);
 
 insert into auth.identities (id, user_id, provider_id, identity_data, provider, created_at, updated_at, last_sign_in_at)
@@ -80,6 +82,11 @@ from (values
   ('a0000000-0000-0000-0000-000000000008', 'aluno', 'd0000000-0000-0000-0000-000000000002'),
   ('a0000000-0000-0000-0000-000000000009', 'aluno', 'd0000000-0000-0000-0000-000000000002')
 ) as v (u, p, t);
+
+-- Spec 010: o mentor é vinculado ao curso; as linhas por turma vêm do gatilho.
+insert into public.atribuicoes (usuario_id, edicao_id, papel, curso_id) values
+  ('a0000000-0000-0000-0000-000000000017', 'b0000000-0000-0000-0000-000000000001', 'mentor',
+   'c0000000-0000-0000-0000-000000000001');
 
 insert into public.ambientes (id, edicao_id, nome, observacoes) values
   ('e0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Laboratório 1 (exemplo)', 'Ambiente fictício'),

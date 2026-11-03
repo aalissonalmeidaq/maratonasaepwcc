@@ -98,12 +98,14 @@ test('encontros: edição completa não oferece novo encontro (US4)', async ({ p
 
 test('curso com nome repetido: servidor recusa com mensagem clara (US1)', async ({ page }) => {
   await entrar(page, 'coordenacao@exemplo.invalid');
-  await page.goto('/coordenacao/organizacao');
-  await page.getByLabel('Nome do curso').fill('Curso Técnico Exemplo A');
-  await page.getByLabel('Categoria do ranking').fill('Categoria A (exemplo)');
-  await page.getByRole('button', { name: 'Adicionar curso' }).click();
+  // Spec 010: cursos e turmas ficam no cadastro permanente.
+  await page.goto('/coordenacao/cadastro');
+  const novo = page.getByRole('region', { name: 'Novo curso' });
+  await novo.getByLabel('Nome do curso').fill('Curso Técnico Exemplo A');
+  await novo.getByLabel('Categoria do ranking').fill('Categoria A (exemplo)');
+  await novo.getByRole('button', { name: 'Adicionar curso' }).click();
   await expect(
-    page.getByRole('alert').filter({ hasText: 'Já existe um curso com esse nome nesta edição.' }),
+    page.getByRole('alert').filter({ hasText: 'Já existe um curso com esse nome no cadastro.' }),
   ).toBeVisible();
 });
 
@@ -140,48 +142,38 @@ test('coordenação edita curso e o novo nome vem do servidor após recarregar (
   const original = `Curso E2E ${sufixo}`;
   const editado = `Curso E2E editado ${sufixo}`;
   await entrar(page, 'coordenacao@exemplo.invalid');
-  await page.goto('/coordenacao/organizacao');
-  const cursos = page.locator('#cursos');
-  await cursos.getByLabel('Nome do curso').fill(original);
-  await cursos.getByLabel('Categoria do ranking').fill('Categoria E2E');
-  await cursos.getByRole('button', { name: 'Adicionar curso' }).click();
-  await expect(cursos.getByRole('status').filter({ hasText: 'Curso salvo.' })).toBeVisible();
+  await page.goto('/coordenacao/cadastro');
+  const novo = page.getByRole('region', { name: 'Novo curso' });
+  await novo.getByLabel('Nome do curso').fill(original);
+  await novo.getByLabel('Categoria do ranking').fill('Categoria E2E');
+  await novo.getByRole('button', { name: 'Adicionar curso' }).click();
+  await expect(novo.getByRole('status').filter({ hasText: 'Curso salvo.' })).toBeVisible();
 
-  await cursos.getByRole('searchbox', { name: 'Buscar em Cursos da edição' }).fill(original);
-  await cursos.getByRole('button', { name: `Editar o curso ${original}` }).click();
-  await expect(cursos.getByRole('heading', { name: `Editar curso “${original}”` })).toBeVisible();
-  await expect(cursos.getByLabel('Nome do curso')).toBeFocused();
-  await cursos.getByLabel('Nome do curso').fill(editado);
-  await cursos.getByRole('button', { name: 'Salvar alterações' }).click();
-  await expect(cursos.getByRole('status').filter({ hasText: 'Curso atualizado.' })).toBeVisible();
-  await cursos.getByRole('button', { name: 'Concluir' }).click();
-  await expect(cursos.getByRole('heading', { name: 'Novo curso' })).toBeVisible();
+  await page.getByRole('button', { name: `Editar o curso ${original}` }).click();
+  const edicao = page.getByRole('region', { name: `Editar curso “${original}”` });
+  await expect(edicao.getByLabel('Nome do curso')).toBeFocused();
+  await edicao.getByLabel('Nome do curso').fill(editado);
+  await edicao.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(edicao.getByRole('status').filter({ hasText: 'Curso atualizado.' })).toBeVisible();
 
   await page.reload();
-  await page
-    .locator('#cursos')
-    .getByRole('searchbox', { name: 'Buscar em Cursos da edição' })
-    .fill(`${sufixo}`);
-  await expect(page.getByRole('cell', { name: editado, exact: true })).toBeVisible();
-  await expect(page.getByRole('cell', { name: original, exact: true })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: editado, exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: original, exact: true })).toHaveCount(0);
 });
 
-test('turma com duplas: curso bloqueado; nome editável e foco devolvido (FR-001)', async ({
+test('turma do cadastro: curso bloqueado; nome editável e foco devolvido (FR-001)', async ({
   page,
 }) => {
   await entrar(page, 'coordenacao@exemplo.invalid');
-  await page.goto('/coordenacao/organizacao');
-  const turmas = page.locator('#turmas');
-  await turmas.getByRole('button', { name: 'Editar a turma 3º ano A (fictícia)' }).click();
-  const curso = turmas.getByLabel('Curso', { exact: true });
-  await expect(curso).toBeDisabled();
+  await page.goto('/coordenacao/cadastro');
+  await page.getByRole('button', { name: 'Editar a turma 3º ano A (fictícia)' }).click();
+  const edicao = page.getByRole('region', { name: 'Editar turma “3º ano A (fictícia)”' });
+  await expect(edicao.getByLabel('Curso', { exact: true })).toBeDisabled();
+  await expect(edicao.getByText('O curso de uma turma do cadastro não muda')).toBeVisible();
+  await expect(edicao.getByLabel('Nome da turma')).toBeFocused();
+  await edicao.getByRole('button', { name: 'Cancelar' }).click();
   await expect(
-    turmas.getByText('Esta turma já tem duplas; o curso não pode ser alterado.'),
-  ).toBeVisible();
-  await expect(turmas.getByLabel('Nome da turma')).toBeFocused();
-  await turmas.getByRole('button', { name: 'Cancelar' }).click();
-  await expect(
-    turmas.getByRole('button', { name: 'Editar a turma 3º ano A (fictícia)' }),
+    page.getByRole('button', { name: 'Editar a turma 3º ano A (fictícia)' }),
   ).toBeFocused();
 });
 

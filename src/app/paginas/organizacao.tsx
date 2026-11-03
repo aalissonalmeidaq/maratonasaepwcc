@@ -19,9 +19,10 @@ import {
 } from '@/modules/encontros';
 import {
   FormConta,
-  FormCurso,
-  FormTurma,
   FormVinculo,
+  MentoresDoCurso,
+  VincularTurmas,
+  type CursoDoCadastro,
   ImportarAlunos,
   AcoesDeAcesso,
   SituacaoDeAcessoBadge,
@@ -48,6 +49,7 @@ import { Consulta } from '../dados/Consulta';
 import {
   useAmbientes,
   useBloqueioDeEscrita,
+  useCadastro,
   useColegas,
   useConvites,
   useCursos,
@@ -148,6 +150,74 @@ function TituloDoFormulario({ children }: { children: string }) {
 // Coordenação — organização (US1, US2)
 // ===========================================================================
 
+/** Diferenças de nome ou categoria entre o cadastro e a edição (só para edição ativa, R4). */
+function correcoesDoCadastro(cadastro: CursoDoCadastro[], cursos: Curso[], turmas: Turma[]) {
+  const lista: string[] = [];
+  for (const c of cursos) {
+    const k = cadastro.find((x) => x.id === c.cadastroCursoId);
+    if (k && (k.nome !== c.nome || k.categoria !== c.categoria))
+      lista.push(`Curso “${c.nome}” (${c.categoria}) → “${k.nome}” (${k.categoria})`);
+  }
+  const turmasDoCadastro = cadastro.flatMap((k) => k.turmas);
+  for (const t of turmas) {
+    const k = turmasDoCadastro.find((x) => x.id === t.cadastroTurmaId);
+    if (k && k.nome !== t.nome) lista.push(`Turma “${t.nome}” → “${k.nome}”`);
+  }
+  return lista;
+}
+
+/** Turmas do cadastro vinculadas à edição (spec 010, US2). */
+function TurmasDaEdicao({ edicao }: { edicao: Edicao }) {
+  const r = useRepositorios();
+  const gravar = useGravar();
+  const bloqueio = useBloqueioDeEscrita();
+  const cadastro = useCadastro();
+  const cursos = useCursos(edicao.id).data ?? [];
+  const turmas = useTurmas(edicao.id);
+  const vinculos = useVinculos(edicao.id).data ?? [];
+  const contagens: Record<string, { alunos: number; docentes: number }> = {};
+  for (const v of vinculos) {
+    if (!v.ativo || !v.turmaId || (v.papel !== 'aluno' && v.papel !== 'docente')) continue;
+    const n = (contagens[v.turmaId] ??= { alunos: 0, docentes: 0 });
+    if (v.papel === 'aluno') n.alunos += 1;
+    else n.docentes += 1;
+  }
+  if (edicao.estado === 'encerrada')
+    return (
+      <Consulta consulta={turmas}>
+        {(lista) => (
+          <ul className="flex flex-col gap-1">
+            {lista.map((t) => (
+              <li key={t.id}>{t.nome}</li>
+            ))}
+          </ul>
+        )}
+      </Consulta>
+    );
+  return (
+    <Consulta consulta={cadastro}>
+      {(itens) => (
+        <Consulta consulta={turmas}>
+          {(lista) => (
+            <VincularTurmas
+              cadastro={itens}
+              turmasDaEdicao={lista}
+              contagens={contagens}
+              correcoesPendentes={
+                edicao.estado === 'ativa' ? correcoesDoCadastro(itens, cursos, lista) : []
+              }
+              onAtualizar={gravar(() => r.organizacao.atualizarDoCadastro(edicao.id))}
+              onVincular={(ids) => gravar(() => r.organizacao.vincularTurmas(edicao.id, ids))()}
+              onDesvincular={(id) => gravar(() => r.organizacao.desvincularTurma(id))()}
+              bloqueio={bloqueio}
+            />
+          )}
+        </Consulta>
+      )}
+    </Consulta>
+  );
+}
+
 function Organizacao({ edicao }: { edicao: Edicao }) {
   const r = useRepositorios();
   const gravar = useGravar();
@@ -158,142 +228,38 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
   const acessos = useSituacaoDeAcesso(edicao.id);
   const situacaoDe = (usuarioId: string) => acessos.data?.find((s) => s.usuarioId === usuarioId);
   const pessoas = usePessoas();
-  const duplas = useDuplas(edicao.id);
-  const [cursoEmEdicao, setCursoEmEdicao] = useState<Curso | null>(null);
-  const [turmaEmEdicao, setTurmaEmEdicao] = useState<Turma | null>(null);
 
   return (
     <>
       <PageHeader icone="gestao" titulo="Organização da edição" descricao={edicao.nome} />
       <NavegacaoSecoes
         secoes={[
-          { id: 'cursos', rotulo: 'Cursos', icone: 'educacao' },
           { id: 'turmas', rotulo: 'Turmas', icone: 'turma' },
+          { id: 'mentores', rotulo: 'Mentores', icone: 'professor' },
           { id: 'vinculos', rotulo: 'Pessoas e vínculos', icone: 'usuarios' },
           { id: 'criar-conta', rotulo: 'Criar conta', icone: 'editarUsuario' },
           { id: 'importar-alunos', rotulo: 'Importar alunos', icone: 'importar' },
         ]}
       />
       <div className="grid gap-6">
-        <Card id="cursos" icone="educacao" titulo="Cursos e categorias">
-          <Consulta consulta={cursos}>
-            {(lista) => (
-              <ResponsiveTable
-                legenda="Cursos da edição"
-                chave={(c) => c.id}
-                linhas={lista}
-                vazio="Nenhum curso cadastrado."
-                colunas={[
-                  { id: 'nome', titulo: 'Curso', valor: (c) => c.nome },
-                  { id: 'cat', titulo: 'Categoria', valor: (c) => c.categoria },
-                  {
-                    id: 'acoes',
-                    titulo: 'Ações',
-                    buscavel: false,
-                    compacta: true,
-                    valor: (c) => (
-                      <div className="flex flex-wrap gap-1">
-                        <BotaoEditar
-                          id={c.id}
-                          rotulo={`o curso ${c.nome}`}
-                          onEditar={() => setCursoEmEdicao(c)}
-                        />
-                        <BotaoRemover
-                          rotulo={`o curso ${c.nome}`}
-                          descricao="Turmas do curso também serão removidas. A operação fica registrada na auditoria."
-                          bloqueio={bloqueio}
-                          remover={gravar(() => r.organizacao.removerCurso(c.id))}
-                        />
-                      </div>
-                    ),
-                  },
-                ]}
-              />
-            )}
-          </Consulta>
-          <div className="mt-4 border-t border-border pt-4">
-            <TituloDoFormulario>
-              {cursoEmEdicao ? `Editar curso “${cursoEmEdicao.nome}”` : 'Novo curso'}
-            </TituloDoFormulario>
-            <FormCurso
-              key={cursoEmEdicao?.id ?? 'novo'}
-              inicial={cursoEmEdicao ?? undefined}
-              bloqueio={bloqueio}
-              onSalvar={(d) =>
-                gravar(() => r.organizacao.salvarCurso({ ...d, edicaoId: edicao.id }))()
-              }
-              onCancelar={() => {
-                if (cursoEmEdicao) devolverFoco(cursoEmEdicao.id);
-                setCursoEmEdicao(null);
-              }}
-            />
-          </div>
+        <Card id="turmas" icone="turma" titulo="Turmas da edição">
+          <TurmasDaEdicao edicao={edicao} />
         </Card>
 
-        <Card id="turmas" icone="turma" titulo="Turmas">
-          <Consulta consulta={turmas}>
-            {(lista) => (
-              <ResponsiveTable
-                legenda="Turmas da edição"
-                chave={(t) => t.id}
-                linhas={lista}
-                vazio="Nenhuma turma cadastrada."
-                colunas={[
-                  { id: 'nome', titulo: 'Turma', valor: (t) => t.nome },
-                  {
-                    id: 'curso',
-                    titulo: 'Curso',
-                    valor: (t) => cursos.data?.find((c) => c.id === t.cursoId)?.nome ?? '—',
-                  },
-                  { id: 'ano', titulo: 'Ano letivo', valor: (t) => t.anoLetivo ?? '—' },
-                  {
-                    id: 'acoes',
-                    titulo: 'Ações',
-                    buscavel: false,
-                    compacta: true,
-                    valor: (t) => (
-                      <div className="flex flex-wrap gap-1">
-                        <Link to={`/coordenacao/turmas/${t.id}`} className={estiloLink}>
-                          Painel<span className="sr-only"> da turma {t.nome}</span>
-                        </Link>
-                        <BotaoEditar
-                          id={t.id}
-                          rotulo={`a turma ${t.nome}`}
-                          onEditar={() => setTurmaEmEdicao(t)}
-                        />
-                        <BotaoRemover
-                          rotulo={`a turma ${t.nome}`}
-                          descricao="Vínculos da turma também serão removidos. Turmas com duplas não podem ser removidas."
-                          bloqueio={bloqueio}
-                          remover={gravar(() => r.organizacao.removerTurma(t.id))}
-                        />
-                      </div>
-                    ),
-                  },
-                ]}
-              />
-            )}
-          </Consulta>
-          <div className="mt-4 border-t border-border pt-4">
-            <TituloDoFormulario>
-              {turmaEmEdicao ? `Editar turma “${turmaEmEdicao.nome}”` : 'Nova turma'}
-            </TituloDoFormulario>
-            <FormTurma
-              key={turmaEmEdicao?.id ?? 'nova'}
-              inicial={turmaEmEdicao ?? undefined}
-              cursoBloqueado={
-                turmaEmEdicao !== null &&
-                (duplas.data ?? []).some((d) => d.turmaId === turmaEmEdicao.id && d.ativa)
-              }
-              cursos={cursos.data ?? []}
-              bloqueio={bloqueio}
-              onSalvar={(d) => gravar(() => r.organizacao.salvarTurma(d))()}
-              onCancelar={() => {
-                if (turmaEmEdicao) devolverFoco(turmaEmEdicao.id);
-                setTurmaEmEdicao(null);
-              }}
-            />
-          </div>
+        <Card id="mentores" icone="professor" titulo="Mentores por curso">
+          <MentoresDoCurso
+            cursos={cursos.data ?? []}
+            turmas={turmas.data ?? []}
+            vinculos={vinculos.data ?? []}
+            bloqueio={bloqueio}
+            onBuscar={(busca) => r.organizacao.pessoasParaVincular(edicao.id, busca)}
+            onVincular={(cursoId, usuarioId) =>
+              gravar(() => r.organizacao.vincularMentorAoCurso(cursoId, usuarioId))()
+            }
+            onDesvincular={(cursoId, usuarioId) =>
+              gravar(() => r.organizacao.desvincularMentorDoCurso(cursoId, usuarioId))()
+            }
+          />
         </Card>
 
         <Card id="vinculos" icone="usuarios" titulo="Pessoas e vínculos">
@@ -302,7 +268,8 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
               <ResponsiveTable
                 legenda="Vínculos da edição"
                 chave={(v) => v.id}
-                linhas={lista}
+                // Linhas de mentor por turma vêm do vínculo ao curso e não se alteram aqui.
+                linhas={lista.filter((v) => !v.derivado)}
                 vazio="Nenhum vínculo registrado."
                 colunas={[
                   { id: 'nome', titulo: 'Pessoa', valor: (v) => v.nome },
@@ -380,6 +347,7 @@ function Organizacao({ edicao }: { edicao: Edicao }) {
         <Card id="criar-conta" icone="editarUsuario" titulo="Criar conta">
           <FormConta
             turmas={turmas.data ?? []}
+            cursos={cursos.data ?? []}
             bloqueio={bloqueio}
             onCriar={(d) => gravar(() => r.organizacao.criarConta({ ...d, edicaoId: edicao.id }))()}
           />

@@ -66,12 +66,19 @@ $$;
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id)
 select pg_temp.u(u), '10000000-0000-0000-0005-000000000001', p::public.papel,
        case when t is null then null else pg_temp.t(t) end
-from (values ('0a', 'coordenacao', null), ('0b', 'docente', 'a'), ('0b', 'docente', 'b'),
-             ('0c', 'mentor', 'b'), ('0d', 'docente', 'c'),
+from (values ('0a', 'coordenacao', null), ('0b', 'docente', 'a'), ('0b', 'docente', 'b'), ('0d', 'docente', 'c'),
              ('a1', 'aluno', 'a'), ('a2', 'aluno', 'a'), ('a3', 'aluno', 'a'), ('a4', 'aluno', 'a'),
              ('b1', 'aluno', 'b'), ('b2', 'aluno', 'b'), ('b3', 'aluno', 'b'), ('b4', 'aluno', 'b'),
              ('b5', 'aluno', 'b'), ('b6', 'aluno', 'b'), ('b7', 'aluno', 'b'), ('c1', 'aluno', 'c'), ('c2', 'aluno', 'c'),
              ('c3', 'aluno', 'c'), ('c4', 'aluno', 'c'), ('c5', 'aluno', 'c')) as v (u, p, t);
+-- Spec 010: mentor é vinculado ao curso. Para manter as asserções por turma desta spec, o
+-- vínculo ao curso fica inativo e só a linha derivada da turma do mentor fica ativa (fixture).
+select set_config('app.sincronizando_mentores', 'on', true);
+insert into public.atribuicoes (usuario_id, edicao_id, papel, curso_id, ativo)
+select pg_temp.u('0c'), '10000000-0000-0000-0005-000000000001', 'mentor', curso_id, false from public.turmas where id = pg_temp.t('b');
+update public.atribuicoes set ativo = true
+where usuario_id = pg_temp.u('0c') and papel = 'mentor' and turma_id = pg_temp.t('b');
+select set_config('app.sincronizando_mentores', '', true);
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id)
 select pg_temp.u(u), '10000000-0000-0000-0005-000000000002', p::public.papel, pg_temp.t('d')
 from (values ('0e', 'docente'), ('d1', 'aluno'), ('d2', 'aluno'), ('d3', 'aluno')) as v (u, p);

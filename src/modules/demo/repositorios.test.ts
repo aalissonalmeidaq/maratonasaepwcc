@@ -46,9 +46,9 @@ describe('repositórios de demonstração', () => {
 
   it('não grava nada: toda escrita é recusada com explicação', async () => {
     const r = como('u-coord');
-    await expect(
-      r.organizacao.salvarCurso({ edicaoId: 'ed-demo', nome: 'X', categoria: 'Y' }),
-    ).rejects.toThrow(/modo demonstração/i);
+    await expect(r.organizacao.salvarCursoDoCadastro(null, 'X', 'Y')).rejects.toThrow(
+      /modo demonstração/i,
+    );
     await expect(r.duplas.enviarConvite({ turmaId: 't-a', convidados: ['e02'] })).rejects.toThrow(
       /modo demonstração/i,
     );

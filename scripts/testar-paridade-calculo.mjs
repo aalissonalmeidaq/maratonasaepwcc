@@ -19,9 +19,13 @@ const casosRanking = JSON.parse(readFileSync(new URL('casos-ranking.json', raiz)
 
 function psql(sql) {
   return new Promise((resolve) => {
-    const p = spawn('docker', ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-At', '-q', '-v', 'ON_ERROR_STOP=1'], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
+    const p = spawn(
+      'docker',
+      ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-At', '-q', '-v', 'ON_ERROR_STOP=1'],
+      {
+        stdio: ['pipe', 'pipe', 'pipe'],
+      },
+    );
     let saida = '';
     let erro = '';
     p.stdout.on('data', (d) => (saida += d));
@@ -36,7 +40,8 @@ const literal = (v) => `'${JSON.stringify(v).replaceAll("'", "''")}'::jsonb`;
 /** Igualdade estrutural com tolerância numérica de arredondamento (duas casas). */
 function iguais(a, b) {
   if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) < 1e-9;
-  if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((x, i) => iguais(x, b[i]));
+  if (Array.isArray(a) && Array.isArray(b))
+    return a.length === b.length && a.every((x, i) => iguais(x, b[i]));
   if (a && b && typeof a === 'object' && typeof b === 'object') {
     const ka = Object.keys(a).sort();
     const kb = Object.keys(b).sort();
@@ -56,19 +61,37 @@ const regras = JSON.parse(regrasPiloto.saida);
 
 const falhas = [];
 for (const caso of casosEncontro) {
-  const r = await psql(`select app.calcular_encontro(${literal(caso.lancamentos)}, ${literal(regras)});`);
+  const r = await psql(
+    `select app.calcular_encontro(${literal(caso.lancamentos)}, ${literal(regras)});`,
+  );
   const obtido = r.codigo === 0 ? JSON.parse(r.saida) : { erro: r.erro };
-  if (!iguais(obtido, caso.esperado)) falhas.push({ caso: caso.nome, esperado: caso.esperado, obtido });
+  if (!iguais(obtido, caso.esperado))
+    falhas.push({ caso: caso.nome, esperado: caso.esperado, obtido });
 }
 for (const caso of casosRanking) {
   const r = await psql(`select app.classificar(${literal(caso.equipes)});`);
   const obtido =
     r.codigo === 0
-      ? JSON.parse(r.saida).map(({ duplaId, posicao, compartilhada }) => ({ duplaId, posicao, compartilhada }))
+      ? JSON.parse(r.saida).map(({ duplaId, posicao, compartilhada }) => ({
+          duplaId,
+          posicao,
+          compartilhada,
+        }))
       : { erro: r.erro };
-  if (!iguais(obtido, caso.esperado)) falhas.push({ caso: caso.nome, esperado: caso.esperado, obtido });
+  if (!iguais(obtido, caso.esperado))
+    falhas.push({ caso: caso.nome, esperado: caso.esperado, obtido });
 }
 
-const total = casosEncontro.length + casosRanking.length;
+// Spec 010: as regras do piloto usadas na criação de edições são as mesmas do seed.
+const piloto = await psql('select app.regras_piloto();');
+const regrasDaFuncao = piloto.codigo === 0 ? JSON.parse(piloto.saida) : { erro: piloto.erro };
+if (!iguais(regrasDaFuncao, regras))
+  falhas.push({
+    caso: 'app.regras_piloto() igual às regras do seed',
+    esperado: regras,
+    obtido: regrasDaFuncao,
+  });
+
+const total = casosEncontro.length + casosRanking.length + 1;
 console.log(JSON.stringify({ casos: total, divergencias: falhas.length, falhas }, null, 2));
 process.exitCode = falhas.length === 0 ? 0 : 1;

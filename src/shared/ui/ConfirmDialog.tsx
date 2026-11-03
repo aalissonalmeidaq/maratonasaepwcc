@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Alert } from './Alert';
 import { Button } from './Button';
@@ -15,6 +15,8 @@ interface ConfirmDialogProps {
   erro?: string;
   onConfirmar: () => void;
   onCancelar: () => void;
+  /** Conteúdo extra entre a descrição e os botões (ex.: campo de justificativa). */
+  children?: ReactNode;
 }
 
 /**
@@ -32,6 +34,7 @@ export function ConfirmDialog({
   erro,
   onConfirmar,
   onCancelar,
+  children,
 }: ConfirmDialogProps) {
   const id = useId();
   const caixa = useRef<HTMLDivElement>(null);
@@ -53,7 +56,9 @@ export function ConfirmDialog({
         return;
       }
       if (e.key !== 'Tab' || !caixa.current) return;
-      const focaveis = caixa.current.querySelectorAll<HTMLElement>('button:not([disabled])');
+      const focaveis = caixa.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [href]',
+      );
       const primeiro = focaveis[0];
       const ultimo = focaveis[focaveis.length - 1];
       if (e.shiftKey && document.activeElement === primeiro) {
@@ -86,6 +91,7 @@ export function ConfirmDialog({
         <p id={`${id}-descricao`} className="mt-2 text-text-secondary">
           {descricao}
         </p>
+        {children && <div className="mt-4">{children}</div>}
         {erro && (
           <div className="mt-4">
             <Alert tom="erro" titulo={erro} anunciar />
