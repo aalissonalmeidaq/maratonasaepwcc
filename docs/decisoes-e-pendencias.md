@@ -256,6 +256,8 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   `comunicado_publicado` e `comunicado_atualizado`); a retirada não avisa. O "Novo" deriva do aviso
   não lido, sem tabela de leituras: quem entra no público depois da publicação vê o comunicado sem
   o selo e sem aviso retroativo. O aviso leva à página de comunicados do perfil.
+  Na retirada, os avisos pendentes do comunicado passam a lidos, para o contador não apontar para
+  algo que o público já não vê; os avisos ficam no histórico, sem ser apagados.
 - **Correção e retirada:** só de publicados, com justificativa de pelo menos 10 caracteres (a regra
   de `app.exigir_justificativa`, já usada no projeto), registrada na auditoria com a versão
   anterior. O público não muda depois de publicado; publicado não é apagado, só retirado.

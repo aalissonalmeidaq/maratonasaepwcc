@@ -51,7 +51,7 @@
 | Portão                                             | Resultado                                                   |
 | -------------------------------------------------- | ----------------------------------------------------------- |
 | `npm run verify`                                   | tipos, lint e build ok; 83 arquivos de teste, 655 testes    |
-| `npm run test:db`                                  | 10 arquivos, 928 asserções (119 novas em `010_comunicados`) |
+| `npm run test:db`                                  | 10 arquivos, 929 asserções (120 novas em `010_comunicados`) |
 | `npm run test:e2e`                                 | 61 passaram, 1 pulado (como antes)                          |
 | `npm run test:e2e:supabase`                        | 60/60 (2 jornadas novas em `comunicados.spec.ts`)           |
 | `node scripts/testar-concorrencia-comunicados.mjs` | aprovado: 1 aviso por estudante na publicação e na correção |

@@ -413,6 +413,10 @@ begin
   update public.comunicados
   set estado = 'retirado', retirado_em = now(), justificativa_retirada = btrim(p_justificativa)
   where id = p_id;
+  -- O retirado some para o público: os avisos pendentes dele deixam de contar como não lidos.
+  update public.avisos set lido_em = now()
+  where lido_em is null and tipo in ('comunicado_publicado', 'comunicado_atualizado')
+    and referencia ->> 'comunicadoId' = p_id::text;
 end;
 $$;
 

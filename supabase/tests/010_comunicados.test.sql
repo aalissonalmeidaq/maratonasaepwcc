@@ -510,6 +510,9 @@ select ok(not (public.comunicados_para_mim(pg_temp.e()) @> jsonb_build_array(jso
   'US3: o público não vê mais o comunicado retirado');
 reset role;
 select is(pg_temp.contar('avisos'), pg_temp.lido('av_antes')::int, 'FR-004: a retirada não gera aviso');
+select is(pg_temp.contar('avisos', format($f$lido_em is null and referencia ->> 'comunicadoId' = %L$f$,
+                                          pg_temp.lido('c_doc'))), 0,
+  'FR-005: a retirada encerra os avisos pendentes do comunicado (o contador não aponta para o que sumiu)');
 
 -- Edição encerrada (FR-012).
 update public.comunicados set estado = 'publicado', publicado_em = now()
