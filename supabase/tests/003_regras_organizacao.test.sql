@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(12);
+select plan(13);
 
 -- ---------------------------------------------------------------------------
 -- Cenário fictício: edição E (4 encontros), cursos C1 e C2, turmas T1 (com dupla) e T2 (sem).
@@ -52,7 +52,13 @@ select pg_temp.como(pg_temp.u('0a'));
 
 -- ===========================================================================
 -- FR-001 — curso da turma com dupla ativa
+-- Spec 010: a coordenação não altera mais turmas por escrita direta; a regra do gatilho continua
+-- testada no banco (como superusuário).
 -- ===========================================================================
+select throws_ok(
+  $$ update public.turmas set nome = 'T1 direta' where id = '30000000-0000-0000-0003-000000000001' $$,
+  '42501', null, 'spec 010: coordenação não altera turma por escrita direta');
+reset role;
 select throws_ok(
   $$ update public.turmas set curso_id = '20000000-0000-0000-0003-000000000002'
      where id = '30000000-0000-0000-0003-000000000001' $$,
@@ -78,6 +84,8 @@ select lives_ok(
   $$ update public.turmas set curso_id = '20000000-0000-0000-0003-000000000002'
      where id = '30000000-0000-0000-0003-000000000001' $$,
   'FR-001: com a dupla desfeita, o curso pode mudar');
+set local role authenticated;
+select pg_temp.como(pg_temp.u('0a'));
 
 -- ===========================================================================
 -- FR-012 — ambientes

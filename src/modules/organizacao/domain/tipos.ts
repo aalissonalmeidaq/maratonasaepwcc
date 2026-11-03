@@ -1,13 +1,19 @@
 import type { Papel } from '@/modules/acesso';
+import type { CursoDoCadastro, PessoaParaVincular } from './cadastro';
+import type { EdicaoGerida, EntradaEdicao, PendenciasDaEdicao } from './edicoes';
 
 export interface Edicao {
   id: string;
   nome: string;
   estado: 'rascunho' | 'ativa' | 'encerrada';
+  inicio: string | null;
+  fim: string | null;
   quantidadeEncontros: number;
   regrasVersao: string;
   /** JSON das regras gravadas na edição; lido sem presumir valores (spec 009, resumo do regulamento). */
   regras: unknown;
+  /** Papéis ativos da pessoa nesta edição, para o seletor por área (spec 010). */
+  meusPapeis?: Papel[];
 }
 
 export interface Curso {
@@ -15,6 +21,8 @@ export interface Curso {
   edicaoId: string;
   nome: string;
   categoria: string;
+  /** Item do cadastro permanente de que este curso na edição é a participação (spec 010). */
+  cadastroCursoId?: string;
 }
 
 export interface Turma {
@@ -22,6 +30,8 @@ export interface Turma {
   cursoId: string;
   nome: string;
   anoLetivo: number | null;
+  /** Item do cadastro permanente de que esta turma na edição é a participação (spec 010). */
+  cadastroTurmaId?: string;
 }
 
 export interface Vinculo {
@@ -30,6 +40,10 @@ export interface Vinculo {
   nome: string;
   papel: Papel;
   turmaId: string | null;
+  /** Curso na edição do vínculo de mentor (spec 010); nulo para os outros papéis. */
+  cursoId?: string | null;
+  /** Vínculo de mentor por turma gerado a partir do vínculo ao curso; não se altera direto. */
+  derivado?: boolean;
   ativo: boolean;
 }
 
@@ -39,6 +53,8 @@ export interface NovaConta {
   email: string;
   papel: Exclude<Papel, 'coordenacao'>;
   turmaId: string | null;
+  /** Curso na edição, obrigatório para mentor (spec 010). */
+  cursoId?: string | null;
 }
 
 /** Situação do primeiro acesso de uma conta (visível só para a coordenação). */
@@ -67,10 +83,6 @@ export interface RepositorioOrganizacao {
   cursos(edicaoId: string): Promise<Curso[]>;
   /** Turmas visíveis para a pessoa atual (a RLS filtra no servidor). */
   turmas(edicaoId: string): Promise<Turma[]>;
-  salvarCurso(dados: Omit<Curso, 'id'> & { id?: string }): Promise<void>;
-  removerCurso(id: string): Promise<void>;
-  salvarTurma(dados: Omit<Turma, 'id'> & { id?: string }): Promise<void>;
-  removerTurma(id: string): Promise<void>;
   vinculos(edicaoId: string): Promise<Vinculo[]>;
   pessoas(): Promise<Pessoa[]>;
   vincular(dados: {
@@ -95,10 +107,36 @@ export interface RepositorioOrganizacao {
     usuarioId: string;
     novoEmail?: string;
   }): Promise<{ conviteEnviado: boolean }>;
-}
 
-/** Escolhe a edição em uso: ativa, depois rascunho, depois a mais recente encerrada. */
-export function edicaoAtual(edicoes: Edicao[]): Edicao | null {
-  const ordem = { ativa: 0, rascunho: 1, encerrada: 2 } as const;
-  return [...edicoes].sort((a, b) => ordem[a.estado] - ordem[b.estado])[0] ?? null;
+  // Spec 010 — edições, cadastro permanente e vínculos (contracts/rpc.md).
+  edicoesQueCoordeno(): Promise<EdicaoGerida[]>;
+  criarEdicao(chave: string, e: EntradaEdicao, baseEdicaoId: string | null): Promise<string>;
+  alterarEdicao(id: string, e: EntradaEdicao): Promise<void>;
+  apagarEdicao(id: string): Promise<void>;
+  ativarEdicao(id: string): Promise<{ ativadaEm: string }>;
+  pendenciasDaEdicao(id: string): Promise<PendenciasDaEdicao>;
+  encerrarEdicao(
+    id: string,
+    justificativa: string,
+  ): Promise<{ encerradaEm: string; pendencias: PendenciasDaEdicao }>;
+  cadastro(): Promise<CursoDoCadastro[]>;
+  salvarCursoDoCadastro(id: string | null, nome: string, categoria: string): Promise<string>;
+  salvarTurmaDoCadastro(
+    id: string | null,
+    cursoId: string,
+    nome: string,
+    anoLetivo: number | null,
+  ): Promise<string>;
+  apagarDoCadastro(tipo: 'curso' | 'turma', id: string): Promise<void>;
+  atualizarDoCadastro(edicaoId: string): Promise<{ cursos: number; turmas: number }>;
+  vincularTurmas(
+    edicaoId: string,
+    cadastroTurmaIds: string[],
+  ): Promise<{ turmaId: string; cadastroTurmaId: string }[]>;
+  desvincularTurma(turmaId: string): Promise<void>;
+  pessoasParaVincular(edicaoId: string, busca: string): Promise<PessoaParaVincular[]>;
+  vincularMentorAoCurso(cursoId: string, usuarioId: string): Promise<void>;
+  desvincularMentorDoCurso(cursoId: string, usuarioId: string): Promise<void>;
+  atribuirCoordenacao(edicaoId: string, usuarioId: string): Promise<void>;
+  desativarCoordenacao(edicaoId: string, usuarioId: string): Promise<void>;
 }

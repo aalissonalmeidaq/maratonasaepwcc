@@ -8,6 +8,7 @@ import type { RepositorioOrganizacao } from '@/modules/organizacao';
 import type { RepositorioPainelTurma } from '@/modules/painel-turma';
 import { criarAtividadesDemo } from './atividades';
 import { criarComunicadosDemo } from './comunicados';
+import { criarEdicoesDemo, edicoesDemo } from './edicoes';
 import { criarPaineisDemo } from './paineis';
 import { criarResultadoDemo } from './resultado';
 import { rankingPorCategoria } from './consultas';
@@ -35,21 +36,15 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
 
   const organizacao: RepositorioOrganizacao = {
     async edicoes() {
-      return [
-        {
-          id: edicao.id,
-          nome: edicao.nome,
-          estado: 'ativa',
-          quantidadeEncontros: edicao.regras.quantidadeEncontros,
-          regrasVersao: edicao.regras.versao,
-          regras: edicao.regras,
-        },
-      ];
+      return edicoesDemo(coordena(), eu()?.papeis ?? []);
     },
-    async cursos() {
+    // Cursos e turmas fictícios pertencem só à edição ativa; a em preparação começa vazia.
+    async cursos(edicaoId) {
+      if (edicaoId !== edicao.id) return [];
       return cursos.map((c) => ({ ...c, edicaoId: edicao.id }));
     },
-    async turmas() {
+    async turmas(edicaoId) {
+      if (edicaoId !== edicao.id) return [];
       return turmas
         .filter((t) => turmasVisiveis().includes(t.id))
         .map((t) => ({ id: t.id, cursoId: t.cursoId, nome: t.nome, anoLetivo: null }));
@@ -72,10 +67,6 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     async pessoas() {
       return coordena() ? pessoas.map((p) => ({ id: p.id, nome: p.nome })) : [];
     },
-    salvarCurso: recusar,
-    removerCurso: recusar,
-    salvarTurma: recusar,
-    removerTurma: recusar,
     vincular: recusar,
     definirVinculoAtivo: recusar,
     criarConta: recusar,
@@ -91,6 +82,7 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     },
     reenviarConvite: recusar,
     importarAlunos: recusar,
+    ...criarEdicoesDemo(coordena),
   };
 
   const repositorioDuplas: RepositorioDuplas = {

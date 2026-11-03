@@ -78,9 +78,9 @@ select is_empty(
      where usuario_id = '00000000-0000-0000-0000-00000000000c' returning id $$,
   'aluno não consegue alterar o próprio papel');
 
-select is_empty(
+select throws_ok(
   $$ update public.turmas set nome = 'invadida' returning id $$,
-  'aluno não altera turmas');
+  '42501', null, 'aluno não altera turmas');
 
 select throws_ok(
   $$ delete from public.auditoria $$,

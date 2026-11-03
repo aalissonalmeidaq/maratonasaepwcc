@@ -38,6 +38,7 @@ describe('FormConta (US6, FR-011)', () => {
       email: 'nova@exemplo.invalid',
       papel: 'aluno',
       turmaId: 't1',
+      cursoId: null,
     });
     expect(await screen.findByRole('status')).toHaveTextContent(
       'Conta criada. Enviamos o convite para nova@exemplo.invalid.',
@@ -62,5 +63,34 @@ describe('FormConta (US6, FR-011)', () => {
     await preencher();
     expect(await screen.findByRole('alert')).toHaveTextContent('Já existe uma conta');
     expect(screen.getByLabelText('E-mail')).toHaveValue('Nova@Exemplo.invalid');
+  });
+
+  it('mentor escolhe o curso, não a turma (spec 010, FR-008)', async () => {
+    const user = userEvent.setup();
+    const onCriar = vi.fn().mockResolvedValue({ conviteEnviado: true });
+    render(
+      <FormConta
+        turmas={turmas}
+        cursos={[{ id: 'c1', edicaoId: 'e', nome: 'Informática', categoria: 'A' }]}
+        onCriar={onCriar}
+      />,
+    );
+    await user.type(screen.getByLabelText('Nome completo'), 'Mentor Novo');
+    await user.type(screen.getByLabelText('E-mail'), 'mentor@exemplo.invalid');
+    await user.selectOptions(screen.getByLabelText('Papel'), 'mentor');
+    expect(screen.queryByLabelText('Turma')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Criar conta' }));
+    expect(await screen.findByText('Selecione o curso do mentor.')).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText('Curso'), 'c1');
+    await user.click(screen.getByRole('button', { name: 'Criar conta' }));
+    expect(onCriar).toHaveBeenCalledWith(
+      expect.objectContaining({ papel: 'mentor', turmaId: null, cursoId: 'c1' }),
+    );
+  });
+
+  it('sem cursos (tela da turma), não oferece mentor', () => {
+    render(<FormConta turmas={turmas} turmaInicial="t1" onCriar={vi.fn()} />);
+    expect(screen.queryByRole('option', { name: 'Mentor' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Turma')).toHaveValue('t1');
   });
 });

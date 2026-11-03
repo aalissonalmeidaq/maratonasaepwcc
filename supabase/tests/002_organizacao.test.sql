@@ -2,7 +2,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(35);
+select plan(36);
 
 -- ---------------------------------------------------------------------------
 -- Cenário fictício: edição E1 (4 encontros), curso C1, turmas T1 e T2.
@@ -45,18 +45,22 @@ set local role authenticated;
 -- ===========================================================================
 select pg_temp.como(pg_temp.u('0a'));
 
+-- Spec 010: cursos e turmas nascem no cadastro permanente e entram na edição pelo vínculo.
+select set_config('teste.curso', public.salvar_curso_do_cadastro(null, 'Curso novo', 'Cat B')::text, true);
 select lives_ok(
-  $$ insert into public.cursos (edicao_id, nome, categoria)
-     values ('10000000-0000-0000-0002-000000000001', 'Curso novo', 'Cat B') $$,
+  $$ select public.vincular_turmas('10000000-0000-0000-0002-000000000001',
+       array[public.salvar_turma_do_cadastro(null, current_setting('teste.curso')::uuid, 'Turma nova', null)]) $$,
   'US1: coordenação cria curso');
 select throws_ok(
-  $$ insert into public.cursos (edicao_id, nome, categoria)
-     values ('10000000-0000-0000-0002-000000000001', 'Curso novo', 'Cat B') $$,
-  '23505', null, 'US1: curso com nome repetido na edição é recusado');
-select lives_ok(
-  $$ insert into public.turmas (curso_id, nome)
-     select id, 'Turma nova' from public.cursos where nome = 'Curso novo' $$,
+  $$ select public.salvar_curso_do_cadastro(null, 'Curso novo', 'Cat B') $$,
+  '23514', null, 'US1: curso com nome repetido na edição é recusado');
+select ok(
+  exists (select 1 from public.turmas where nome = 'Turma nova'),
   'US1: coordenação cria turma');
+select throws_ok(
+  $$ insert into public.cursos (edicao_id, nome, categoria)
+     values ('10000000-0000-0000-0002-000000000001', 'Curso direto', 'Cat B') $$,
+  '42501', null, 'US1: curso não é criado por escrita direta (spec 010)');
 select ok(
   exists (select 1 from public.auditoria where tabela = 'cursos' and acao = 'INSERT'
           and autor_id = pg_temp.u('0a')),
@@ -64,8 +68,7 @@ select ok(
 
 select pg_temp.como(pg_temp.u('0b'));
 select throws_ok(
-  $$ insert into public.cursos (edicao_id, nome, categoria)
-     values ('10000000-0000-0000-0002-000000000001', 'Curso da docente', 'Cat') $$,
+  $$ select public.salvar_curso_do_cadastro(null, 'Curso da docente', 'Cat') $$,
   '42501', null, 'US1: docente não cria curso');
 
 -- ===========================================================================

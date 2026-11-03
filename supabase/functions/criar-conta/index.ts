@@ -12,40 +12,9 @@ import '@supabase/functions-js/edge-runtime.d.ts';
 import { withSupabase } from '@supabase/server';
 import { coordenaAEdicao } from '../_shared/autorizacao.ts';
 import { enviarConvite } from '../_shared/enviar-convite.ts';
-
-const PAPEIS = ['aluno', 'docente', 'mentor', 'apoio', 'analista'] as const;
-const EXIGE_TURMA = ['aluno', 'docente', 'mentor'];
-
-interface Pedido {
-  edicaoId: string;
-  nome: string;
-  email: string;
-  papel: (typeof PAPEIS)[number];
-  turmaId: string | null;
-}
+import { linhaDeAtribuicao, validarPedidoDeConta } from '../_shared/pedido-de-conta.ts';
 
 const erro = (status: number, mensagem: string) => Response.json({ erro: mensagem }, { status });
-
-function validar(corpo: unknown): Pedido | string {
-  if (typeof corpo !== 'object' || corpo === null) return 'Corpo da requisição inválido.';
-  const c = corpo as Record<string, unknown>;
-  if ('senhaProvisoria' in c) return 'Campo não aceito: senhaProvisoria.';
-  const texto = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
-  const pedido: Pedido = {
-    edicaoId: texto(c.edicaoId),
-    nome: texto(c.nome),
-    email: texto(c.email).toLowerCase(),
-    papel: texto(c.papel) as Pedido['papel'],
-    turmaId: texto(c.turmaId) || null,
-  };
-  if (!/^[0-9a-f-]{36}$/i.test(pedido.edicaoId)) return 'Edição inválida.';
-  if (pedido.nome.length < 2 || pedido.nome.length > 160)
-    return 'Informe o nome (2 a 160 caracteres).';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pedido.email)) return 'Informe um e-mail válido.';
-  if (!PAPEIS.includes(pedido.papel)) return 'Papel inválido.';
-  if (EXIGE_TURMA.includes(pedido.papel) && !pedido.turmaId) return 'Selecione a turma.';
-  return pedido;
-}
 
 export default {
   fetch: withSupabase({ auth: 'user' }, async (req, ctx) => {
@@ -53,7 +22,7 @@ export default {
     const quemChama = ctx.userClaims?.id;
     if (!quemChama) return erro(401, 'Autenticação necessária.');
 
-    const pedido = validar(await req.json().catch(() => null));
+    const pedido = validarPedidoDeConta(await req.json().catch(() => null));
     if (typeof pedido === 'string') return erro(400, pedido);
 
     // 1. Autorização com a visão (RLS) de quem chama.
@@ -76,12 +45,10 @@ export default {
     }
 
     // 3. Atribuição gravada como a coordenação (RLS + auditoria). Em falha, desfaz a conta.
-    const { error: erroAtribuicao } = await ctx.supabase.from('atribuicoes').insert({
-      usuario_id: criado.user.id,
-      edicao_id: pedido.edicaoId,
-      papel: pedido.papel,
-      turma_id: EXIGE_TURMA.includes(pedido.papel) ? pedido.turmaId : null,
-    });
+    //    Mentor: vínculo ao curso; as linhas por turma vêm do gatilho (spec 010).
+    const { error: erroAtribuicao } = await ctx.supabase
+      .from('atribuicoes')
+      .insert(linhaDeAtribuicao(pedido, criado.user.id));
     if (erroAtribuicao) {
       await ctx.supabaseAdmin.auth.admin.deleteUser(criado.user.id);
       return erro(400, 'Não foi possível vincular a conta à turma. Nada foi criado.');

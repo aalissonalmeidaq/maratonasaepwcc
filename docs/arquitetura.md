@@ -42,7 +42,7 @@ valem para os dois lados.
 | --- | ----------------------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
 | 1   | Autenticação e usuários             | `modules/auth`                            | Adaptadores Supabase (real) e demonstração, sessão, rotas protegidas |
 | 2   | Perfis, permissões e vínculos       | `modules/acesso` + tabela `atribuicoes`   | Papéis, áreas, RLS e testes pgTAP                                    |
-| 3   | Edições, cursos e turmas            | `modules/organizacao` + tabelas           | Cursos, turmas, vínculos e contas com Supabase (spec 002)            |
+| 3   | Edições, cursos e turmas            | `modules/organizacao` + tabelas           | Edições pelo app, cadastro permanente, turmas e mentores (spec 010)  |
 | 4   | Equipes (duplas e trios)            | `modules/duplas`                          | Convites, trio, nome e gestão por RPC; histórico (specs 002 e 003)   |
 | 5   | Encontros e ambientes               | `modules/encontros`                       | Cadastro com validação no servidor (spec 002)                        |
 | 6   | Questões preparatórias              | `modules/atividades`                      | Listas, gabarito protegido e submissão única por RPC (spec 006)      |

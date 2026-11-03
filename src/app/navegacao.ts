@@ -133,10 +133,22 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       descricao: 'Visão geral da edição',
     },
     {
+      rotulo: 'Edições',
+      caminho: '/coordenacao/edicoes',
+      icone: 'gestao',
+      descricao: 'Criar, ativar e encerrar edições',
+    },
+    {
+      rotulo: 'Cursos e turmas',
+      caminho: '/coordenacao/cadastro',
+      icone: 'educacao',
+      descricao: 'Cadastro permanente da unidade',
+    },
+    {
       rotulo: 'Organização',
       caminho: '/coordenacao/organizacao',
       icone: 'turma',
-      descricao: 'Cursos, turmas e contas',
+      descricao: 'Turmas da edição, mentores e contas',
     },
     {
       rotulo: 'Equipes',

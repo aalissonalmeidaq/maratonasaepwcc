@@ -219,7 +219,7 @@ test('convite abre a rota pública de primeiro acesso', async ({ page }) => {
 
 test('edição devolve foco ao botão visível', async ({ page }) => {
   await entrarComo(page, /coordenação/i);
-  await page.goto('/coordenacao/organizacao');
+  await page.goto('/coordenacao/cadastro');
   const editar = page.getByRole('button', { name: /Editar o curso/ }).first();
   await editar.click();
   const campo = page.getByLabel('Nome do curso', { exact: true });
@@ -469,6 +469,47 @@ test.describe('comunicados e regulamento (spec 009, demonstração)', () => {
     await expect(page.getByRole('article', { name: 'Regulamento em validação' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Novo comunicado' })).toBeDisabled();
     await expect(page.getByText(/modo demonstração/i).first()).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+});
+
+test.describe('gestão de edições (spec 010, demonstração)', () => {
+  test('coordenação vê as edições, o cadastro e a escrita desabilitada', async ({ page }) => {
+    await entrarComo(page, /coordenação/i);
+    await page.goto('/coordenacao/edicoes');
+    await expect(page.getByRole('heading', { name: 'Edições', level: 1 })).toBeVisible();
+    await expect(page.getByText('Em preparação', { exact: true }).first()).toBeVisible();
+    await page.getByRole('button', { name: 'Nova edição' }).click();
+    await expect(page.getByRole('button', { name: 'Criar edição' })).toBeDisabled();
+    await page.goto('/coordenacao/cadastro');
+    await expect(page.getByRole('heading', { name: 'Cursos e turmas', level: 1 })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Curso Técnico Exemplo A' })).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+
+  test('seletor troca a edição em até 2 interações (SC-007)', async ({ page }) => {
+    await entrarComo(page, /coordenação/i);
+    await page.goto('/coordenacao/organizacao');
+    const seletor = page.getByLabel('Edição em uso');
+    await expect(seletor).toBeVisible();
+    // Interação 1: escolher a outra edição no seletor nativo.
+    await seletor.selectOption({
+      label: 'Maratona SAEP — próxima edição (fictícia) — Em preparação',
+    });
+    await expect(page.getByText('Nenhuma turma vinculada a esta edição.')).toBeVisible();
+    await expect(page.getByText('Em preparação', { exact: true }).first()).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+
+  test('gestão da turma aparece no painel da turma para a coordenação', async ({ page }) => {
+    await entrarComo(page, /coordenação/i);
+    await page.goto('/coordenacao/organizacao');
+    await page.getByRole('link', { name: /Gerir turma 3º ano A/ }).click();
+    const gestao = page.getByRole('region', { name: 'Alunos e docentes' });
+    await expect(gestao).toBeVisible();
+    await expect(gestao.getByRole('region', { name: 'Alunos', exact: true })).toContainText(
+      'Ana Exemplo',
+    );
     await semRolagemHorizontal(page);
   });
 });

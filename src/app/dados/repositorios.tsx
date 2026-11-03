@@ -11,6 +11,7 @@ import { criarRepositorioPainelTurmaSupabase } from '@/modules/painel-turma';
 import { criarRepositorioPaineisSupabase } from '@/modules/relatorios';
 import { criarRepositorioResultadoSupabase } from '@/modules/resultado';
 import { obterSupabase } from '@/shared/lib/supabase';
+import { ProvedorEdicaoEmUso } from './EdicaoEmUso';
 import { ContextoRepositorios, type Repositorios } from './useRepositorios';
 
 function criarRepositoriosSupabase(): Repositorios {
@@ -59,7 +60,9 @@ export function ProvedorDeDados({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={cliente}>
       <LimparCacheAoTrocarUsuario usuarioId={usuarioId} />
-      <ContextoRepositorios.Provider value={repositorios}>{children}</ContextoRepositorios.Provider>
+      <ContextoRepositorios.Provider value={repositorios}>
+        <ProvedorEdicaoEmUso usuarioId={usuarioId}>{children}</ProvedorEdicaoEmUso>
+      </ContextoRepositorios.Provider>
     </QueryClientProvider>
   );
 }

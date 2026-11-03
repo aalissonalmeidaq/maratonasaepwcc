@@ -97,11 +97,19 @@ $$;
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id)
 select pg_temp.u(u), pg_temp.e(), p::public.papel,
        case when t is null then null else pg_temp.t(t) end
-from (values ('0a', 'coordenacao', null), ('0b', 'docente', 'a'), ('0c', 'mentor', 'a'),
+from (values ('0a', 'coordenacao', null), ('0b', 'docente', 'a'),
              ('0d', 'docente', 'b'),
              ('a1', 'aluno', 'a'), ('a2', 'aluno', 'a'), ('a3', 'aluno', 'a'), ('a4', 'aluno', 'a'),
              ('a5', 'aluno', 'a'), ('b1', 'aluno', 'b'), ('b2', 'aluno', 'b'),
              ('c1', 'aluno', 'c'), ('c2', 'aluno', 'c')) as v (u, p, t);
+-- Spec 010: mentor é vinculado ao curso. Para manter as asserções por turma desta spec, o
+-- vínculo ao curso fica inativo e só a linha derivada da turma do mentor fica ativa (fixture).
+select set_config('app.sincronizando_mentores', 'on', true);
+insert into public.atribuicoes (usuario_id, edicao_id, papel, curso_id, ativo)
+select pg_temp.u('0c'), pg_temp.e(), 'mentor', curso_id, false from public.turmas where id = pg_temp.t('a');
+update public.atribuicoes set ativo = true
+where usuario_id = pg_temp.u('0c') and papel = 'mentor' and turma_id = pg_temp.t('a');
+select set_config('app.sincronizando_mentores', '', true);
 insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id) values
   (pg_temp.u('0e'), '10000000-0000-0000-0008-000000000002', 'coordenacao', null),
   (pg_temp.u('0f'), '10000000-0000-0000-0008-000000000003', 'coordenacao', null),
@@ -983,11 +991,14 @@ select lives_ok($$ select pg_temp.pedir('b0000000-0000-0000-0008-000000000006', 
 
 -- U1: edição encerrada recusa o pedido e mantém a leitura.
 reset role;
+-- Spec 010: a edição encerrada recusa escrita; a fixture reabre só durante a gravação.
+update public.edicoes set estado = 'ativa' where id = '10000000-0000-0000-0008-000000000003';
 insert into public.ocorrencias (id, edicao_id, encontro_id, dupla_id, tipo, fato, fato_chave, evidencia, estado,
                                 prazo_manifestacao, justificativa_decisao, decidido_em, chave_envio, autor_id)
 values ('c0000000-0000-0000-0008-0000000000f1', '10000000-0000-0000-0008-000000000003',
         '50000000-0000-0000-0008-0000000000f1', pg_temp.d('f1'), 'reincidencia', 'Fato fictício descrito com detalhes.',
         'f', 'Relato.', 'confirmada', now(), 'Decisão fictícia registrada.', now(), gen_random_uuid(), pg_temp.u('0f'));
+update public.edicoes set estado = 'encerrada' where id = '10000000-0000-0000-0008-000000000003';
 set local role authenticated;
 select pg_temp.como(pg_temp.u('f1'));
 select throws_ok($$ select pg_temp.pedir('b0000000-0000-0000-0008-0000000000f1', 'ocorrencia', 'c0000000-0000-0000-0008-0000000000f1') $$,

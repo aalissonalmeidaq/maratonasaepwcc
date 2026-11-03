@@ -80,7 +80,8 @@ test('aluna vê "Minha turma" só com dados coletivos', async ({ page }) => {
 test('coordenação abre o painel de qualquer turma pela Organização', async ({ page }) => {
   await entrar(page, 'coordenacao@exemplo.invalid');
   await page.goto('/coordenacao/organizacao');
-  await page.getByRole('link', { name: 'Painel da turma 3º ano B (fictícia)' }).click();
+  // Spec 010: a turma vinculada leva ao painel pelo link "Gerir turma".
+  await page.getByRole('link', { name: 'Gerir turma 3º ano B (fictícia)' }).click();
   await expect(page.getByRole('heading', { level: 1, name: '3º ano B (fictícia)' })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Equipes da turma', exact: true })).toContainText(
     'Dupla Faísca',

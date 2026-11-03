@@ -23,15 +23,18 @@ const contar = (n: number, singular: string, plural: string) =>
 /** Importação de alunos por CSV: prévia no navegador, gravação e relatório do servidor. */
 export function ImportarAlunos({
   turmas,
+  turmaInicial,
   bloqueio,
   onImportar,
 }: {
   turmas: Turma[];
+  /** Turma já escolhida (tela de uma turma, spec 010). */
+  turmaInicial?: string;
   bloqueio?: string;
   onImportar: (turmaId: string, linhas: LinhaDeImportacao[]) => Promise<ResultadoDaImportacao>;
 }) {
   const idArquivo = useId();
-  const [turmaId, setTurmaId] = useState('');
+  const [turmaId, setTurmaId] = useState(turmaInicial ?? '');
   const [erroTurma, setErroTurma] = useState<string>();
   const [leitura, setLeitura] = useState<ResultadoDaLeitura | null>(null);
   const [relatorio, setRelatorio] = useState<ResultadoDaImportacao | null>(null);

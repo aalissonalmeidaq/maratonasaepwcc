@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/modules/auth';
 import { convitesRecebidosPendentes } from '@/modules/duplas';
-import { edicaoAtual } from '@/modules/organizacao';
+import { resolverEdicaoEmUso, useEdicaoEmUso } from './edicaoEmUsoContexto';
 import { useOnline } from '@/shared/pwa';
 import { useRepositorios } from './useRepositorios';
 
@@ -11,12 +11,22 @@ function useChave() {
   return (...partes: (string | undefined)[]) => ['u', sessao?.usuarioId ?? 'anonimo', ...partes];
 }
 
+/** Edições visíveis para a pessoa (a RLS filtra no servidor). */
+export function useEdicoesVisiveis() {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({ queryKey: chave('edicoes'), queryFn: () => r.organizacao.edicoes() });
+}
+
+/** Edição em uso: a escolhida no seletor, se ainda visível; senão, a padrão (spec 010, US7). */
 export function useEdicaoAtual() {
   const r = useRepositorios();
   const chave = useChave();
+  const { escolhidaId } = useEdicaoEmUso();
   return useQuery({
     queryKey: chave('edicoes'),
-    queryFn: async () => edicaoAtual(await r.organizacao.edicoes()),
+    queryFn: () => r.organizacao.edicoes(),
+    select: (lista) => resolverEdicaoEmUso(lista, escolhidaId),
   });
 }
 
@@ -317,3 +327,26 @@ export function useComunicadosQueGerencio(edicaoId?: string) {
     r.comunicados.comunicadosQueGerencio(edicaoId as string),
   );
 }
+
+// Spec 010 — edições que a pessoa coordena, cadastro permanente e pendências do encerramento.
+export function useEdicoesQueCoordeno() {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('edicoes-que-coordeno'),
+    queryFn: () => r.organizacao.edicoesQueCoordeno(),
+  });
+}
+
+export function useCadastro() {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({ queryKey: chave('cadastro'), queryFn: () => r.organizacao.cadastro() });
+}
+
+export const usePendenciasDaEdicao = (edicaoId?: string) => {
+  const r = useRepositorios();
+  return useDaEdicao('pendencias-da-edicao', edicaoId, (id) =>
+    r.organizacao.pendenciasDaEdicao(id),
+  );
+};
