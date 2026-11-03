@@ -2,14 +2,11 @@ import {
   acumularEncontros,
   calcularEncontro,
   classificar,
-  maximoDaEdicao,
   type PontuacaoDoEncontro,
   type PosicaoNoRanking,
 } from '@/modules/pontuacao';
 import {
-  comunicados,
   cursos,
-  desafios,
   duplas,
   edicao,
   encontros,
@@ -63,76 +60,6 @@ export function rankingPorCategoria(): RankingDaCategoria[] {
         .map((d) => ({ duplaId: d.id, nome: d.nome, totais: pontuacaoDaDupla(d).totais })),
     ),
   }));
-}
-
-export function painelAluno(usuarioId: string) {
-  const estudante = pessoa(usuarioId);
-  const dupla = duplas.find((d) => d.integrantes.includes(usuarioId));
-  if (!estudante || !dupla) return null;
-  const colegaId = dupla.integrantes.find((i) => i !== usuarioId);
-  const turma = turmas.find((t) => t.id === dupla.turmaId);
-  const curso = cursoDaTurma(dupla.turmaId);
-  const { porEncontro, totais } = pontuacaoDaDupla(dupla);
-  const proximo = proximoEncontro();
-  const ranking = rankingPorCategoria().find((r) => r.categoria === curso?.categoria);
-  return {
-    estudante: { id: estudante.id, nome: estudante.nome },
-    colega: colegaId ? { id: colegaId, nome: pessoa(colegaId)?.nome ?? '—' } : null,
-    dupla,
-    turma,
-    curso,
-    proximoEncontro: proximo,
-    proximoDesafio:
-      [...desafios]
-        .filter((d) => new Date(d.prazo).getTime() >= Date.now())
-        .sort((a, b) => new Date(a.prazo).getTime() - new Date(b.prazo).getTime())[0] ?? null,
-    desafios,
-    porEncontro,
-    totais,
-    maximo: maximoDaEdicao(edicao.regras),
-    ranking,
-    minhaPosicao: ranking?.posicoes.find((p) => p.duplaId === dupla.id) ?? null,
-    comunicados,
-  };
-}
-
-export function painelDocente(usuarioId: string) {
-  const docente = pessoa(usuarioId);
-  const turmasVinculadas = turmas.filter((t) => docente?.turmas.includes(t.id));
-  const duplasVinculadas = duplas.filter((d) => docente?.turmas.includes(d.turmaId));
-  const ultimoEncontro = [...encontros].reverse().find((e) => e.data < hojeISO());
-  const entregasAAvaliar = duplasVinculadas.flatMap((d) =>
-    encontros.flatMap((e) => {
-      const l = lancamentos[d.id]?.[e.id];
-      if (!l) return [];
-      const pendentes = [
-        l.entrega.situacao === 'pendente' && 'Entrega',
-        l.apresentacao.situacao === 'pendente' && 'Apresentação',
-        !l.participacao && 'Participação',
-      ].filter((x): x is string => Boolean(x));
-      return pendentes.length ? [{ dupla: d, encontro: e, pendentes }] : [];
-    }),
-  );
-  return {
-    docente,
-    turmas: turmasVinculadas.map((t) => ({ ...t, curso: cursoDaTurma(t.id) })),
-    duplas: duplasVinculadas.map((d) => ({
-      ...d,
-      nomesIntegrantes: d.integrantes.map((i) => pessoa(i)?.nome ?? '—'),
-    })),
-    proximoEncontro: proximoEncontro(),
-    ultimoEncontro,
-    presencaUltimoEncontro: ultimoEncontro
-      ? duplasVinculadas.flatMap((d) =>
-          (lancamentos[d.id]?.[ultimoEncontro.id]?.presencas ?? []).map((p) => ({
-            estudante: pessoa(p.estudanteId)?.nome ?? '—',
-            dupla: d.nome,
-            presente: p.presente,
-          })),
-        )
-      : [],
-    entregasAAvaliar,
-  };
 }
 
 export function painelCoordenacao() {

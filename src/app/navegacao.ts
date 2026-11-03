@@ -112,6 +112,12 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       icone: 'ocorrencia',
       descricao: 'Registros e evidências',
     },
+    {
+      rotulo: 'Relatórios',
+      caminho: '/docente/relatorios',
+      icone: 'relatorio',
+      descricao: 'Exportação CSV das turmas',
+    },
   ],
   coordenacao: [
     {
@@ -190,7 +196,7 @@ export const MENUS: Record<Area, ItemMenu[]> = {
       rotulo: 'Relatórios',
       caminho: '/coordenacao/relatorios',
       icone: 'relatorio',
-      descricao: 'Indicadores e exportação',
+      descricao: 'Exportação CSV da edição',
     },
   ],
 };
