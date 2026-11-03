@@ -9,7 +9,7 @@ Fonte: PRD v1.0, Documento de Visão v1.0, Design System v1.0 e instruções do 
 | RF03        | Cadastrar/importar alunos e contas           | **Feito**: conta criada por Edge Function; importação CSV pendente                 | `supabase/functions/criar-conta`                  |
 | RF04        | Duplas e alterações justificadas             | **Feito**: equipes por convite, trio, nome e gestão com histórico (HU01, spec 003) | `modules/duplas`, migrations 002 e 003            |
 | RF05        | Encontros, horários, ambientes               | **Feito**: encontros e ambientes configuráveis                                     | `modules/encontros`, migration 002                |
-| RF06        | Regulamento e comunicados                    | Resumo das regras a partir da configuração                                         | `AlunoRegulamentoPage`                            |
+| RF06        | Regulamento e comunicados                    | **Feito (spec 009)**: comunicados por público e resumo das regras da edição        | `modules/comunicados`, `publicar_comunicado`      |
 | RF07–RF08   | Questões e submissão única                   | **Feito (spec 006)**: listas, gabarito só após o prazo, submissão única por equipe | `modules/atividades`, migration 006               |
 | RF09–RF10   | Desafio e envio com comprovante do servidor  | **Feito (spec 006)**: desafios, entrega no Storage privado e comprovante           | `modules/atividades`, bucket `entregas`           |
 | RF11        | Presença e participação                      | **Feito (spec 006)**: presença em lote e participação, correções justificadas      | `modules/atividades`                              |

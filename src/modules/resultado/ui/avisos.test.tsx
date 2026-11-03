@@ -84,6 +84,32 @@ describe('ListaAvisos (FR-026)', () => {
     expect(screen.getByText(/Sem conexão/)).toBeInTheDocument();
   });
 
+  it('aviso com caminho vira link para ler o conteúdo (spec 009, FR-004)', async () => {
+    const comunicado: Aviso = {
+      id: 'a3',
+      tipo: 'comunicado_publicado',
+      titulo: 'Mudança de sala',
+      referencia: { comunicadoId: 'c1' },
+      criadoEm: '2026-11-02T15:00:00Z',
+      lidoEm: null,
+    };
+    const { container } = render(
+      <MemoryRouter>
+        <ListaAvisos
+          avisos={[comunicado, ...avisos]}
+          onMarcar={vi.fn()}
+          caminhoDoAviso={(a) => (a.tipo.startsWith('comunicado_') ? '/aluno/regulamento' : null)}
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('link', { name: 'Ler: Mudança de sala' })).toHaveAttribute(
+      'href',
+      '/aluno/regulamento',
+    );
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+    expect(await violacoesA11y(container)).toEqual([]);
+  });
+
   it('sem avisos: estado vazio', () => {
     render(<ListaAvisos avisos={[]} onMarcar={vi.fn()} />);
     expect(screen.getByText('Nenhum aviso por enquanto.')).toBeInTheDocument();

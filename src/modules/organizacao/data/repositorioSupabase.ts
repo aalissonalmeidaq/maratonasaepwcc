@@ -20,6 +20,7 @@ export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): Reposit
           (e.regras as { quantidadeEncontros?: number })?.quantidadeEncontros ?? 0,
         ),
         regrasVersao: e.regras_versao,
+        regras: e.regras,
       }));
     },
     async cursos(edicaoId) {

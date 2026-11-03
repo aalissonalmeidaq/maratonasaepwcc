@@ -301,3 +301,19 @@ export function usePainelDaCoordenacao(edicaoId?: string) {
     r.paineis.painelDaCoordenacao(edicaoId as string),
   );
 }
+
+// ---------------------------------------------------------------------------
+// Comunicados (spec 009): o público é checado no servidor.
+// ---------------------------------------------------------------------------
+export function useComunicadosParaMim(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('comunicados-para-mim', [edicaoId], Boolean(edicaoId), () =>
+    r.comunicados.comunicadosParaMim(edicaoId as string),
+  );
+}
+export function useComunicadosQueGerencio(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('comunicados-geridos', [edicaoId], Boolean(edicaoId), () =>
+    r.comunicados.comunicadosQueGerencio(edicaoId as string),
+  );
+}

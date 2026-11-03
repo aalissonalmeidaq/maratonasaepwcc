@@ -7,6 +7,7 @@ import type { Encontro, RepositorioEncontros } from '@/modules/encontros';
 import type { RepositorioOrganizacao } from '@/modules/organizacao';
 import type { RepositorioPainelTurma } from '@/modules/painel-turma';
 import { criarAtividadesDemo } from './atividades';
+import { criarComunicadosDemo } from './comunicados';
 import { criarPaineisDemo } from './paineis';
 import { criarResultadoDemo } from './resultado';
 import { rankingPorCategoria } from './consultas';
@@ -41,6 +42,7 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
           estado: 'ativa',
           quantidadeEncontros: edicao.regras.quantidadeEncontros,
           regrasVersao: edicao.regras.versao,
+          regras: edicao.regras,
         },
       ];
     },
@@ -264,5 +266,6 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     atividades: criarAtividadesDemo(usuarioAtual),
     resultado,
     paineis: criarPaineisDemo(usuarioAtual, resultado),
+    comunicados: criarComunicadosDemo(usuarioAtual),
   };
 }

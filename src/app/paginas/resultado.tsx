@@ -21,7 +21,7 @@ import {
   type Ocorrencia,
 } from '@/modules/resultado';
 import type { Edicao, Turma } from '@/modules/organizacao';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { Alert, Card, EmptyState, PageHeader, SelectField } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
 import {
@@ -482,7 +482,15 @@ export function CoordenacaoOcorrenciasPage() {
 // Avisos no aplicativo (FR-026), todos os perfis
 // ===========================================================================
 
+// Onde cada perfil lê os comunicados (spec 009); os demais avisos não têm link.
+const CAMINHO_DOS_COMUNICADOS: Record<string, string> = {
+  aluno: '/aluno/regulamento',
+  docente: '/docente/comunicados',
+  coordenacao: '/coordenacao/comunicados',
+};
+
 export function AvisosPage() {
+  const area = useLocation().pathname.split('/')[1] ?? '';
   const r = useRepositorios();
   const gravar = useGravar();
   const bloqueio = useBloqueioDeEscrita();
@@ -499,6 +507,9 @@ export function AvisosPage() {
             avisos={avisos.itens}
             bloqueio={bloqueio}
             onMarcar={(ids) => gravar(() => r.resultado.marcarAvisosLidos(ids))()}
+            caminhoDoAviso={(a) =>
+              a.tipo.startsWith('comunicado_') ? (CAMINHO_DOS_COMUNICADOS[area] ?? null) : null
+            }
           />
         )}
       </Consulta>
