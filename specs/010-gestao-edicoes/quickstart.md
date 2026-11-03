@@ -69,7 +69,7 @@ Esperado:
 | Portão                                      | Resultado                                               |
 | ------------------------------------------- | ------------------------------------------------------- |
 | `npm run verify`                            | 97 arquivos, 701 testes, lint sem avisos, build ok      |
-| `npm run test:db`                           | 11 arquivos, 1096 asserções (165 em `011_edicoes`)      |
+| `npm run test:db`                           | 11 arquivos, 1101 asserções (170 em `011_edicoes`)      |
 | `npm run test:e2e`                          | 67 passaram, 1 pulado                                   |
 | `npm run test:e2e:supabase`                 | 61/61 (inclui `edicoes.spec.ts`)                        |
 | Scripts de concorrência (5, inclui edições) | todos aprovados                                         |
@@ -100,3 +100,7 @@ Esperado:
 - E2E reais de organização e do painel da turma ajustados ao cadastro e ao link "Gerir turma".
 - Na primeira rodada completa do E2E real, o primeiro teste de `atividades` estourou o tempo com o
   servidor ainda frio; na repetição desde o reset, 61/61.
+- Revisão do PR #13: o vínculo de mentor passou a exigir curso da mesma edição (antes, uma
+  coordenação conseguia gravar o curso de outra edição e travar o vínculo de turmas dela); a
+  remoção do vínculo ao curso apaga as derivadas em cascata; a busca de pessoas não oferece a
+  própria pessoa. Cada correção tem asserção pgTAP.

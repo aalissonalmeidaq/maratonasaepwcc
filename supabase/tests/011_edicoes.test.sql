@@ -594,6 +594,42 @@ select throws_ok(format($f$ delete from public.atribuicoes where usuario_id = %L
                         pg_temp.u('b1'), pg_temp.ed('e')),
   '23514', 'A edição precisa de pelo menos uma coordenação ativa.', 'FR-014: a última coordenação ativa não é apagada');
 
+-- ===========================================================================
+-- Revisão do PR #13 — vínculo de mentor coerente com a edição; remoção em cascata das derivadas
+-- ===========================================================================
+insert into auth.users (id, email, raw_user_meta_data, aud, role) values
+  ('00000000-0000-0000-0011-0000000000f2', 'ef2@exemplo.invalid', '{"nome": "Mentor f2"}', 'authenticated', 'authenticated');
+insert into public.edicoes (id, nome, estado, regras, regras_versao) values
+  ('10000000-0000-0000-0011-0000000000b0', 'Edição H', 'rascunho', '{"versao":"teste","quantidadeEncontros":4}', 'teste');
+insert into public.atribuicoes (usuario_id, edicao_id, papel) values
+  (pg_temp.u('c2'), pg_temp.ed('b'), 'coordenacao');
+insert into public.cursos (id, edicao_id, nome, categoria) values
+  ('20000000-0000-0000-0011-0000000000b0', pg_temp.ed('b'), 'Curso L', 'Categoria L');
+
+set local role authenticated;
+select pg_temp.como(pg_temp.u('b1'));
+select throws_ok(format($f$ insert into public.atribuicoes (usuario_id, edicao_id, papel, curso_id) values (%L, %L, 'mentor', %L) $f$,
+                        pg_temp.u('f2'), pg_temp.ed('e'), '20000000-0000-0000-0011-0000000000b0'),
+  '23514', 'O curso informado não pertence à edição da atribuição.',
+  'revisão: vínculo de mentor com curso de outra edição é recusado');
+reset role;
+
+-- Remover o vínculo ao curso apaga as derivadas em cascata (sem a proteção barrar).
+set local role authenticated;
+select pg_temp.como(pg_temp.u('b1'));
+select lives_ok(format($f$ select public.vincular_mentor_ao_curso(%L, %L) $f$, pg_temp.curso_na(pg_temp.ed('e'), 'Curso K'), pg_temp.u('f2')),
+  'mentor f2 vinculado ao curso K de E');
+select lives_ok(format($f$ delete from public.atribuicoes where usuario_id = %L and curso_id is not null $f$, pg_temp.u('f2')),
+  'revisão: a coordenação remove o vínculo ao curso');
+reset role;
+select is(pg_temp.contar('atribuicoes', format('usuario_id = %L', pg_temp.u('f2'))), 0,
+  'revisão: as linhas derivadas saem junto com o vínculo ao curso');
+set local role authenticated;
+select pg_temp.como(pg_temp.u('b1'));
+select ok(not (public.pessoas_para_vincular(pg_temp.ed('e'), 'Pessoa') @> jsonb_build_array(jsonb_build_object('usuarioId', pg_temp.u('b1')))),
+  'revisão: a busca não oferece a própria pessoa');
+reset role;
+
 -- @@secoes
 
 select * from finish();

@@ -555,7 +555,7 @@ begin
       select distinct p.id, p.nome
       from public.perfis p
       join public.atribuicoes a on a.usuario_id = p.id
-      where p.ativo and app.e_coordenacao(a.edicao_id)
+      where p.ativo and app.e_coordenacao(a.edicao_id) and p.id <> (select auth.uid())
         and p.nome ilike '%' || coalesce(btrim(p_busca), '') || '%'
       order by p.nome
       limit 20
@@ -597,7 +597,9 @@ create function app.proteger_derivadas()
 returns trigger language plpgsql security definer set search_path = '' as $$
 begin
   if coalesce(new.origem_id, old.origem_id) is not null
-     and coalesce(current_setting('app.sincronizando_mentores', true), '') <> 'on' then
+     and coalesce(current_setting('app.sincronizando_mentores', true), '') <> 'on'
+     -- Remoção em cascata do vínculo ao curso: a derivada sai junto.
+     and not (tg_op = 'DELETE' and not exists (select 1 from public.atribuicoes where id = old.origem_id)) then
     raise exception 'Este vínculo vem do curso; altere o vínculo do mentor ao curso.' using errcode = '42501';
   end if;
   return coalesce(new, old);
@@ -890,3 +892,24 @@ $$;
 
 revoke all on function public.atribuir_coordenacao(uuid, uuid), public.desativar_coordenacao(uuid, uuid) from public, anon;
 grant execute on function public.atribuir_coordenacao(uuid, uuid), public.desativar_coordenacao(uuid, uuid) to authenticated;
+
+-- ===========================================================================
+-- Revisão do PR #13
+-- ===========================================================================
+
+-- O curso do vínculo de mentor, como a turma, precisa ser da mesma edição da atribuição.
+create or replace function app.validar_atribuicao()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if new.turma_id is not null and app.edicao_da_turma(new.turma_id) is distinct from new.edicao_id then
+    raise exception 'A turma informada não pertence à edição da atribuição.'
+      using errcode = '23514';
+  end if;
+  if new.curso_id is not null
+     and (select edicao_id from public.cursos where id = new.curso_id) is distinct from new.edicao_id then
+    raise exception 'O curso informado não pertence à edição da atribuição.'
+      using errcode = '23514';
+  end if;
+  return new;
+end;
+$$;
