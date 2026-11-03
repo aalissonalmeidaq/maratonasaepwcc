@@ -1,7 +1,8 @@
+import { Link } from 'react-router';
 import { formatarDataHora } from '@/shared/lib/formatacao';
-import { BannerDestaque, Card, StatCard, StatusBadge } from '@/shared/ui';
+import { BannerDestaque, Card, ProgressBar, StatusBadge, cx } from '@/shared/ui';
 import type { CategoriaDoPainel, PainelDaCoordenacao } from '../domain/tipos';
-import { LinkDoPainel, SeloFicticio } from './comum';
+import { AcaoDoBanner, FaixaDeIndicadores, Indicador, SeloFicticio } from './comum';
 import { plural } from './texto';
 
 function Categoria({ c }: { c: CategoriaDoPainel }) {
@@ -25,12 +26,32 @@ function Categoria({ c }: { c: CategoriaDoPainel }) {
   ];
   return (
     <Card icone="ranking" titulo={c.categoria}>
-      <ul className="flex flex-col">
+      {/* Linhas com contador: o que pede atenção (valor acima de zero) se destaca dos zeros. */}
+      <ul className="-mx-2 flex flex-col">
         {itens.map((i) => (
           <li key={i.rotulo}>
-            <LinkDoPainel para={i.para}>
-              {i.rotulo}: {i.valor}
-            </LinkDoPainel>
+            <Link
+              to={i.para}
+              aria-label={`${i.rotulo}: ${i.valor}`}
+              className="group flex min-h-11 items-center justify-between gap-3 rounded-md px-2 transition-colors hover:bg-surface-muted"
+            >
+              <span
+                className={cx(
+                  'font-medium underline-offset-4 group-hover:underline',
+                  i.valor > 0 ? 'text-link' : 'text-text-secondary',
+                )}
+              >
+                {i.rotulo}
+              </span>
+              <span
+                className={cx(
+                  'min-w-8 rounded-full px-2.5 py-0.5 text-center text-sm font-bold tabular-nums',
+                  i.valor > 0 ? 'bg-yellow-500 text-navy-950' : 'bg-gray-100 text-text-secondary',
+                )}
+              >
+                {i.valor}
+              </span>
+            </Link>
           </li>
         ))}
       </ul>
@@ -62,6 +83,10 @@ export function PainelCoordenacao({
   ficticio?: boolean;
 }) {
   const i = p.indicadores;
+  const totalDa = (c: CategoriaDoPainel) =>
+    c.componentesPendentes + c.provasPendentes + c.ocorrenciasSemDecisao + c.revisoesAbertas;
+  const pendencias = p.categorias.reduce((soma, c) => soma + totalDa(c), 0);
+  const comPendencia = p.categorias.filter((c) => totalDa(c) > 0).length;
   return (
     <>
       <BannerDestaque
@@ -72,35 +97,48 @@ export function PainelCoordenacao({
             {ficticio && <SeloFicticio />}
           </span>
         }
+        acao={
+          <AcaoDoBanner para="/coordenacao/relatorios" icone="relatorio">
+            Relatórios
+          </AcaoDoBanner>
+        }
       />
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          icone="turma"
-          rotulo="Cursos e turmas"
-          valor={`${i.cursos} / ${i.turmas}`}
-          complemento="cursos / turmas"
-        />
-        <StatCard
-          icone="dupla"
-          acento="ciano"
-          rotulo="Equipes ativas"
-          valor={i.equipes}
-          complemento={plural(i.estudantes, 'estudante ativo', 'estudantes ativos')}
-        />
-        <StatCard
+      <FaixaDeIndicadores>
+        <Indicador titulo="Cursos e turmas" icone="turma" valor={`${i.cursos} / ${i.turmas}`}>
+          cursos / turmas
+        </Indicador>
+        <Indicador titulo="Equipes ativas" icone="dupla" acento="ciano" valor={String(i.equipes)}>
+          {plural(i.estudantes, 'estudante ativo', 'estudantes ativos')}
+        </Indicador>
+        <Indicador
+          titulo="Encontros realizados"
           icone="calendario"
           acento="roxo"
-          rotulo="Encontros realizados"
           valor={`${i.encontrosRealizados} de ${i.encontrosTotal}`}
-          complemento="sem contar os cancelados"
-        />
-        <StatCard
-          icone="relatorio"
-          acento="amarelo"
-          rotulo="Exportação CSV"
-          valor={<LinkDoPainel para="/coordenacao/relatorios">Relatórios</LinkDoPainel>}
-        />
-      </div>
+        >
+          <ProgressBar
+            valor={i.encontrosRealizados}
+            maximo={i.encontrosTotal}
+            rotulo="Encontros realizados"
+          />
+          <p className="mt-2">sem contar os cancelados</p>
+        </Indicador>
+        <Indicador
+          titulo="Pendências abertas"
+          icone="checklist"
+          acento={pendencias > 0 ? 'coral' : 'ciano'}
+          valor={String(pendencias)}
+        >
+          {pendencias > 0 ? (
+            <StatusBadge
+              estado="pendente"
+              rotulo={`Em ${plural(comPendencia, 'categoria', 'categorias')}`}
+            />
+          ) : (
+            <StatusBadge estado="concluido" rotulo="Tudo em dia" />
+          )}
+        </Indicador>
+      </FaixaDeIndicadores>
       <h2 className="mb-3 font-display text-xl font-semibold">
         Pendências dos encontros realizados
       </h2>

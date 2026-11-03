@@ -6,13 +6,15 @@ interface BannerDestaqueProps {
   descricao?: ReactNode;
   /** Conteúdo complementar à direita (ex.: progresso). */
   lateral?: ReactNode;
+  /** Ação secundária da página, à direita, sem moldura (ex.: link para relatórios). */
+  acao?: ReactNode;
 }
 
 /**
  * "Composição de destaque" (prancha 08): fundo azul-marinho com recortes diagonais da marca
  * no canto, título da página em destaque. O padrão é decorativo.
  */
-export function BannerDestaque({ titulo, descricao, lateral }: BannerDestaqueProps) {
+export function BannerDestaque({ titulo, descricao, lateral, acao }: BannerDestaqueProps) {
   return (
     <header className="relative isolate mb-6 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#0B2D6B,#062457_55%,#04193F)] px-5 py-6 text-white shadow-md sm:px-8 sm:py-8">
       <PadraoGrafico
@@ -30,6 +32,7 @@ export function BannerDestaque({ titulo, descricao, lateral }: BannerDestaquePro
             {lateral}
           </div>
         )}
+        {acao && <div className="shrink-0">{acao}</div>}
       </div>
     </header>
   );

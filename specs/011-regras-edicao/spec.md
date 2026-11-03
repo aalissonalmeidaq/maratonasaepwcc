@@ -219,8 +219,9 @@ turma com "definido para a sua turma"; como coordenação, ver o histórico.
 ### User Story 6 - Menu organizado em categorias (Priority: P2)
 
 O menu de cada área passa a mostrar os itens agrupados em categorias com título, na barra lateral
-e no menu do celular, para a pessoa achar as funções mais rápido. Os atalhos da tela inicial seguem
-os mesmos grupos. Nenhuma função muda de endereço nem de permissão.
+e no menu do celular, para a pessoa achar as funções mais rápido. Nenhuma função muda de endereço
+nem de permissão. A tela inicial de cada área é um painel de indicadores, não repete o menu como
+atalhos (revisão pedida pelo usuário em 2026-11-03).
 
 Categorias por área (os itens existentes, sem itens novos):
 
@@ -248,8 +249,8 @@ categorias com títulos, a ordem dos itens e o item atual destacado; navegar só
    grupo com o seu título, e o item da página atual é indicado.
 3. **Given** a navegação por teclado, **When** a pessoa usa Tab, **Then** passa pelos itens na ordem
    das categorias, sem armadilhas de foco.
-4. **Given** a tela inicial da área, **When** mostra os atalhos, **Then** eles seguem os mesmos
-   grupos e a mesma ordem do menu.
+4. **Given** a tela inicial da área, **When** é aberta, **Then** mostra no topo os indicadores
+   principais do perfil e, abaixo, o que pede ação, sem repetir os itens do menu como atalhos.
 5. **Given** o celular a partir de 360 px, **When** o menu é aberto, **Then** as categorias aparecem
    sem rolagem horizontal.
 
@@ -317,8 +318,9 @@ categorias com títulos, a ordem dos itens e o item atual destacado; navegar só
 - **FR-017**: O menu de cada área MUST agrupar os itens nas categorias da User Story 6, com título
   visível e anunciado como grupo para leitores de tela; "Início" MUST ficar no topo, fora das
   categorias; endereços e permissões MUST NOT mudar.
-- **FR-018**: Os atalhos da tela inicial de cada área MUST seguir os mesmos grupos e a mesma ordem
-  do menu.
+- **FR-018** _(revisado em 2026-11-03)_: A tela inicial de cada área MUST funcionar como painel de
+  indicadores (KPIs) com os números do servidor, cada um com o link para a página de origem quando
+  houver, e MUST NOT repetir os itens do menu como atalhos. A navegação fica no menu.
 
 ### Key Entities _(include if feature involves data)_
 

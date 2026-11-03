@@ -23,10 +23,7 @@ test('docente abre o painel da turma em duas interações; indicadores batem com
   page,
 }) => {
   await entrar(page, 'docente@exemplo.invalid');
-  await page
-    .getByRole('navigation', { name: 'Acesso rápido' })
-    .getByRole('link', { name: 'Minhas turmas' })
-    .click();
+  // O painel inicial lista as turmas com o link direto para o painel de cada uma.
   await page
     .getByRole('link', { name: /Abrir painel da turma/ })
     .first()
@@ -64,10 +61,9 @@ test('docente não vê o painel de turma não vinculada (recusa do servidor)', a
 
 test('aluna vê "Minha turma" só com dados coletivos', async ({ page }) => {
   await entrar(page, 'aluna@exemplo.invalid');
-  await page
-    .getByRole('navigation', { name: 'Acesso rápido' })
-    .getByRole('link', { name: 'Minha turma' })
-    .click();
+  const menu = page.getByRole('navigation', { name: 'Área do aluno' }).filter({ visible: true });
+  await menu.getByRole('button', { name: /Minha participação/ }).click();
+  await menu.getByRole('link', { name: 'Minha turma', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: '3º ano A (fictícia)' })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Equipes da turma', exact: true })).toContainText(
     'Dupla Órbita',

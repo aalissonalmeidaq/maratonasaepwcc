@@ -311,8 +311,18 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - **Regulamento:** quem tem uma turma só (estudante, docente de uma turma) vê as regras da turma, com
   "definido para a sua turma" e a pontuação máxima; coordenação e docentes de várias turmas veem as
   da edição.
-- **Menu:** categorias por área (US6), sem mudar endereços nem permissões; os atalhos da tela inicial
-  seguem os mesmos grupos.
+- **Menu:** categorias por área (US6), sem mudar endereços nem permissões.
+- **Tela inicial como painel (revisão do FR-018, pedida pelo usuário):** o "Acesso rápido" sai das
+  telas iniciais; a navegação fica só no menu. Cada perfil abre com uma faixa de indicadores
+  calculados dos dados que o servidor já entrega (nada novo no banco): aluno — pontos (prévia),
+  posição, próximo encontro e próximo prazo; docente — turmas, equipes com pendência, pendências
+  de registro (por tipo) e próximo encontro; coordenação — cursos e turmas, equipes ativas,
+  encontros realizados (com barra de progresso) e pendências abertas (soma das categorias).
+  Abaixo, o que pede ação: ações pendentes, avisos e convites (aluno); pendências por turma, com
+  link direto para o painel da turma (docente, mantém o SC-001 da spec 004 em uma interação);
+  pendências por categoria com contador destacado quando acima de zero (coordenação).
+  "Relatórios" fica como ação no banner. A saudação usa o primeiro nome, sem tratamento
+  ("Olá, Lúcia!"), e o selo "Dados fictícios" ganhou versão legível sobre o banner escuro.
 - **Menu recolhível (ajuste visual pedido no incremento):** cada categoria tem ícone e é um botão
   que recolhe e expande os itens; começa recolhida, exceto a categoria da página atual, e abrir uma
   fecha a anterior (só uma aberta por vez). Recolhida, a categoria mostra o contador dos itens

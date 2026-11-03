@@ -1,22 +1,33 @@
-import { formatarDataHora, formatarPontos } from '@/shared/lib/formatacao';
+import type { ReactNode } from 'react';
+import { formatarData, formatarDataHora, formatarPontos } from '@/shared/lib/formatacao';
 import { BannerDestaque, Card, StatusBadge } from '@/shared/ui';
 import type { PainelDoAluno } from '../domain/tipos';
-import { LinkDoPainel, SeloFicticio, TextoEncontro } from './comum';
+import {
+  FaixaDeIndicadores,
+  Indicador,
+  IndicadorEncontro,
+  LinkDoPainel,
+  SeloFicticio,
+} from './comum';
+import { nomeDeSaudacao } from './texto';
 
 /**
- * Painel inicial do aluno (US1): resumo da própria equipe com os números do servidor. A prévia
- * não é o resultado oficial; a posição é a da última publicação da categoria.
+ * Painel inicial do aluno (US1): indicadores da própria equipe com os números do servidor e, abaixo,
+ * o que pede resposta. A prévia não é o resultado oficial; a posição é a da última publicação.
  */
 export function PainelAluno({
   painel: p,
   nome,
   ficticio = false,
+  extra,
 }: {
   painel: PainelDoAluno;
   nome: string;
   ficticio?: boolean;
+  /** Cartões a mais ao lado das ações (ex.: convites de equipe). */
+  extra?: ReactNode;
 }) {
-  const primeiroNome = nome.split(' ')[0] || nome;
+  const primeiroNome = nomeDeSaudacao(nome) || nome;
   return (
     <>
       <BannerDestaque
@@ -37,68 +48,94 @@ export function PainelAluno({
           <LinkDoPainel para="/aluno/dupla">Formar equipe</LinkDoPainel>
         </Card>
       )}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <FaixaDeIndicadores>
         {p.previa && (
-          <Card icone="pontuacao" titulo="Pontos">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="font-display text-2xl font-bold tabular-nums">
-                {formatarPontos(p.previa.total)} pontos
-              </p>
-              <StatusBadge estado="parcial" rotulo="Prévia — não oficial" />
-            </div>
+          <Indicador
+            titulo="Pontos"
+            icone="pontuacao"
+            valor={`${formatarPontos(p.previa.total)} pontos`}
+            link={<LinkDoPainel para="/aluno/pontuacao">Ver pontuação</LinkDoPainel>}
+          >
+            <StatusBadge estado="parcial" rotulo="Prévia — não oficial" />
             {p.previa.pendente && (
-              <p className="mt-1 text-sm text-text-secondary">
-                Há lançamentos pendentes: os pontos podem mudar.
-              </p>
+              <p className="mt-1">Há lançamentos pendentes: os pontos podem mudar.</p>
             )}
-            <LinkDoPainel para="/aluno/pontuacao">Ver pontuação</LinkDoPainel>
-          </Card>
+          </Indicador>
         )}
         {p.equipe && (
-          <Card icone="ranking" titulo="Posição">
-            {p.ranking ? (
+          <Indicador
+            titulo="Posição"
+            icone="ranking"
+            acento="amarelo"
+            valor={
+              p.ranking ? (
+                p.ranking.posicao ? (
+                  `${p.ranking.posicao}º lugar${p.ranking.compartilhada ? ' (empatada)' : ''}`
+                ) : (
+                  <span className="text-lg">Equipe fora desta publicação</span>
+                )
+              ) : (
+                <span className="text-lg">Ranking ainda não publicado</span>
+              )
+            }
+            link={<LinkDoPainel para="/aluno/ranking">Ver ranking</LinkDoPainel>}
+          >
+            {p.ranking && (
               <>
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-display text-2xl font-bold tabular-nums">
-                    {p.ranking.posicao
-                      ? `${p.ranking.posicao}º lugar${p.ranking.compartilhada ? ' (empatada)' : ''}`
-                      : 'Equipe fora desta publicação'}
-                  </p>
-                  <StatusBadge estado={p.ranking.estado} />
-                </div>
-                <p className="mt-1 text-sm text-text-secondary">
+                <StatusBadge estado={p.ranking.estado} />
+                <p className="mt-1">
                   Versão {p.ranking.versao}, publicada em {formatarDataHora(p.ranking.publicadoEm)}
                 </p>
               </>
-            ) : (
-              <p>Ranking ainda não publicado</p>
             )}
-            <LinkDoPainel para="/aluno/ranking">Ver ranking</LinkDoPainel>
-          </Card>
+          </Indicador>
         )}
-        <Card icone="calendario" titulo="Próximo encontro">
-          <TextoEncontro encontro={p.proximoEncontro} />
-          <LinkDoPainel para="/aluno/encontros">Ver encontros</LinkDoPainel>
-        </Card>
-        <Card icone="tarefa" titulo="Próximo prazo">
-          {p.proximoPrazo ? (
+        <IndicadorEncontro
+          encontro={p.proximoEncontro}
+          link={<LinkDoPainel para="/aluno/encontros">Ver encontros</LinkDoPainel>}
+        />
+        <Indicador
+          titulo="Próximo prazo"
+          icone="tarefa"
+          acento="ciano"
+          valor={
+            p.proximoPrazo ? (
+              formatarData(p.proximoPrazo.prazo)
+            ) : (
+              <span className="text-lg">Nenhum prazo aberto.</span>
+            )
+          }
+          link={<LinkDoPainel para="/aluno/desafios">Ver desafios e listas</LinkDoPainel>}
+        >
+          {p.proximoPrazo && (
             <>
-              <p className="text-lg font-semibold">{p.proximoPrazo.titulo}</p>
-              <p className="mt-1 text-sm text-text-secondary">
-                {p.proximoPrazo.tipo === 'lista' ? 'Lista de questões' : 'Desafio'} · prazo{' '}
+              <p className="font-semibold text-text">{p.proximoPrazo.titulo}</p>
+              <p>
+                {p.proximoPrazo.tipo === 'lista' ? 'Lista de questões' : 'Desafio'} · até{' '}
                 {formatarDataHora(p.proximoPrazo.prazo)}
               </p>
             </>
-          ) : (
-            <p>Nenhum prazo aberto.</p>
           )}
-          <LinkDoPainel para="/aluno/desafios">Ver desafios e listas</LinkDoPainel>
-        </Card>
-        <Card icone="tarefa" titulo="Ações pendentes">
+        </Indicador>
+      </FaixaDeIndicadores>
+
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
+        <Card
+          icone="aviso"
+          titulo="Ações pendentes"
+          acao={
+            p.acoes.length > 0 && (
+              <StatusBadge estado="pendente" rotulo={`${p.acoes.length} para responder`} />
+            )
+          }
+        >
           {p.acoes.length ? (
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col divide-y divide-border">
               {p.acoes.map((a) => (
-                <li key={`${a.tipo}-${a.titulo}`}>
+                <li
+                  key={`${a.tipo}-${a.titulo}`}
+                  className="flex flex-wrap items-center justify-between gap-x-4 py-1"
+                >
                   <LinkDoPainel para={a.caminho}>{a.titulo}</LinkDoPainel>
                   <p className="text-sm text-text-secondary">Prazo: {formatarDataHora(a.prazo)}</p>
                 </li>
@@ -108,14 +145,17 @@ export function PainelAluno({
             <p>Nenhuma ação pendente.</p>
           )}
         </Card>
-        <Card icone="notificacoes" titulo="Avisos">
-          <p>
-            {p.avisosNaoLidos === 0
-              ? 'Nenhum aviso não lido'
-              : `${p.avisosNaoLidos} ${p.avisosNaoLidos === 1 ? 'aviso não lido' : 'avisos não lidos'}`}
-          </p>
-          <LinkDoPainel para="/aluno/avisos">Ver avisos</LinkDoPainel>
-        </Card>
+        <div className="grid grid-cols-1 gap-4">
+          <Card icone="notificacoes" titulo="Avisos">
+            <p>
+              {p.avisosNaoLidos === 0
+                ? 'Nenhum aviso não lido'
+                : `${p.avisosNaoLidos} ${p.avisosNaoLidos === 1 ? 'aviso não lido' : 'avisos não lidos'}`}
+            </p>
+            <LinkDoPainel para="/aluno/avisos">Ver avisos</LinkDoPainel>
+          </Card>
+          {extra}
+        </div>
       </div>
     </>
   );

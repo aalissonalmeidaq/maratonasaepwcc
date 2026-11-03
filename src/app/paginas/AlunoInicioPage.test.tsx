@@ -49,6 +49,8 @@ describe('Painel inicial do aluno', () => {
       '/aluno/dupla',
     );
     expect(screen.queryByText('Dados fictícios')).not.toBeInTheDocument();
+    // A tela inicial é um painel de indicadores; a navegação fica no menu.
+    expect(screen.queryByRole('navigation', { name: 'Acesso rápido' })).not.toBeInTheDocument();
     expect(container).not.toHaveTextContent(/Supabase|170,5|Ana Exemplo|indisponíveis/);
   });
 });

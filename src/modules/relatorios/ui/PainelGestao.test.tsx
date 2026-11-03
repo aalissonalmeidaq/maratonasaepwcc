@@ -56,7 +56,28 @@ const renderizar = (p: PainelDaGestao, ficticio = false) =>
 describe('PainelGestao (US2, FR-003, FR-005)', () => {
   it('por turma: equipes com pendência e a lista de pendências com links de ação', async () => {
     const { container } = renderizar(painel);
-    expect(screen.getByRole('heading', { level: 1, name: 'Olá, Lúcia' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Olá, Lúcia!' })).toBeInTheDocument();
+    // Indicadores do topo, somados das turmas em que a pessoa atua.
+    const indicadores = screen.getByRole('region', { name: 'Indicadores' });
+    expect(
+      within(within(indicadores).getByRole('region', { name: 'Turmas' })).getByText('2'),
+    ).toBeInTheDocument();
+    expect(
+      within(within(indicadores).getByRole('region', { name: 'Equipes com pendência' })).getByText(
+        '2 de 6',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(within(indicadores).getByRole('region', { name: 'Pendências de registro' })).getByText(
+        '2',
+      ),
+    ).toBeInTheDocument();
+    // Cada turma leva direto ao painel dela (SC-001 da spec 004, sem passar por atalhos).
+    expect(
+      within(screen.getByRole('region', { name: '3º ano A' })).getByRole('link', {
+        name: 'Abrir painel da turma 3º ano A',
+      }),
+    ).toHaveAttribute('href', '/docente/turmas/t-a');
     expect(
       within(screen.getByRole('region', { name: 'Próximo encontro' })).getByText(
         '2. Desafio prático',

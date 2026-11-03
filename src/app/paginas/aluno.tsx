@@ -4,7 +4,6 @@ import { PainelAluno } from '@/modules/relatorios';
 import { Card, PageHeader } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
 import { useConvitesPendentes, usePainelDoAluno } from '../dados/consultas';
-import { Atalhos } from '../layout/Atalhos';
 import { ComEdicao } from './ComEdicao';
 import { ComunicadosRecebidos } from './comunicados';
 import { RegulamentoVigente } from './RegulamentoVigente';
@@ -13,7 +12,7 @@ import { RegulamentoVigente } from './RegulamentoVigente';
 function CardConvitesEquipe() {
   const pendentes = useConvitesPendentes(true);
   return (
-    <Card icone="dupla" titulo="Convites de equipe" className="mt-4">
+    <Card icone="dupla" titulo="Convites de equipe">
       <p>
         {pendentes === 0
           ? 'Nenhum convite pendente.'
@@ -34,10 +33,12 @@ function PainelDaEdicao({ edicaoId }: { edicaoId: string }) {
   return (
     <Consulta consulta={usePainelDoAluno(edicaoId)}>
       {(painel) => (
-        <>
-          <PainelAluno painel={painel} nome={sessao?.nome ?? ''} ficticio={sessao?.demo} />
-          <CardConvitesEquipe />
-        </>
+        <PainelAluno
+          painel={painel}
+          nome={sessao?.nome ?? ''}
+          ficticio={sessao?.demo}
+          extra={<CardConvitesEquipe />}
+        />
       )}
     </Consulta>
   );
@@ -48,9 +49,6 @@ export function AlunoInicioPage() {
   return (
     <>
       <ComEdicao>{(edicao) => <PainelDaEdicao edicaoId={edicao.id} />}</ComEdicao>
-      <section aria-label="Acessos do aluno" className="mt-6">
-        <Atalhos area="aluno" compacto />
-      </section>
     </>
   );
 }

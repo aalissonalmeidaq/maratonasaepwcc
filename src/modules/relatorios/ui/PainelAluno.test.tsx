@@ -74,6 +74,12 @@ describe('PainelAluno (US1, FR-002, FR-006)', () => {
     });
     expect(acao).toHaveAttribute('href', '/aluno/ocorrencias');
     expect(within(cartao('Avisos')).getByText('1 aviso não lido')).toBeInTheDocument();
+    // Dashboard: os indicadores principais ficam juntos no topo, com o valor em destaque.
+    const indicadores = screen.getByRole('region', { name: 'Indicadores' });
+    for (const nome of ['Pontos', 'Posição', 'Próximo encontro', 'Próximo prazo']) {
+      expect(within(indicadores).getByRole('region', { name: nome })).toBeInTheDocument();
+    }
+    expect(within(cartao('Próximo encontro')).getByText('09 de nov.')).toBeInTheDocument();
     expect(screen.queryByText('Dados fictícios')).not.toBeInTheDocument();
     expect(container).not.toHaveTextContent(/nota/i);
     expect(await violacoesA11y(container)).toEqual([]);
