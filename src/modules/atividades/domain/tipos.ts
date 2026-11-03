@@ -68,6 +68,8 @@ export interface Prorrogacao {
 
 /** Desafio como a equipe o vê (FR-002, FR-005, FR-015). */
 export interface DesafioDaEquipe extends Desafio {
+  /** Regras do encontro do desafio para a turma (spec 011); sem elas, as da turma. */
+  regras?: RegrasDaEdicao;
   /** Equipe ativa do aluno, ou `null` (não pode enviar). */
   duplaId: string | null;
   prazoEfetivo: string;
@@ -185,6 +187,8 @@ export interface RegistroDePresenca {
 }
 
 export interface EquipeParaAvaliar extends EquipeResumo {
+  /** Regras do encontro do desafio para a turma da equipe (spec 011). */
+  regras?: RegrasDaEdicao;
   ultimaEntrega: EntregaVersao | null;
   versoes: EntregaVersao[];
   avaliacao: AvaliacaoRegistrada | null;
@@ -233,6 +237,8 @@ export interface EncontroDaEquipe {
   numero: number;
   titulo: string;
   avaliacaoObjetiva: 'questoes' | 'prova_oficial';
+  /** Regras vigentes no início do encontro para a turma (spec 011). */
+  regras?: RegrasDaEdicao;
   presencas: { estudanteId: string; presente: boolean }[];
   participacao: Notas | null;
   desafios: AvaliacaoDoDesafio[];

@@ -76,4 +76,20 @@ describe('PreviaPontos (US3, FR-019, FR-019a)', () => {
     render(<PreviaPontos equipes={[]} modo="turma" />);
     expect(screen.getByText('Nenhuma equipe com pontos nesta turma.')).toBeInTheDocument();
   });
+  it('com a pontuação máxima da turma: "X de N pontos" (spec 011, FR-009)', () => {
+    const { rerender } = render(
+      <PreviaPontos
+        equipes={[{ ...equipe('e1', 'Equipe Órbita', 91), maximo: 304 }]}
+        modo="equipe"
+      />,
+    );
+    expect(screen.getByText('91 de 304 pontos até agora')).toBeInTheDocument();
+    rerender(
+      <PreviaPontos
+        equipes={[{ ...equipe('e1', 'Equipe Órbita', 91), maximo: 304 }]}
+        modo="turma"
+      />,
+    );
+    expect(screen.getByText('91 de 304 pontos')).toBeInTheDocument();
+  });
 });

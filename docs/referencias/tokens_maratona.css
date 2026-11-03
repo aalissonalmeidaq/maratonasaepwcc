@@ -64,7 +64,7 @@
   --shadow-sm: 0 1px 3px rgb(6 36 87 / 10%);
   --shadow-md: 0 4px 14px rgb(6 36 87 / 12%);
   --focus-ring: 0 0 0 3px #FFFFFF, 0 0 0 5px var(--color-focus);
-  --sidebar-width: 16rem;
+  --sidebar-width: 17.5rem;
   --topbar-height: 4.5rem;
   --content-max: 90rem;
   --control-min-height: 2.75rem;

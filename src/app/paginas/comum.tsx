@@ -46,7 +46,7 @@ function FormularioEntrada() {
   return (
     <form
       noValidate
-      className="flex flex-col gap-5"
+      className="flex flex-col gap-4 sm:gap-5"
       onSubmit={handleSubmit(async (dados) => {
         setErro(null);
         try {
@@ -77,22 +77,25 @@ function FormularioEntrada() {
           erro={errors.senha?.message}
           {...register('senha')}
         />
-        <Button
-          variante="terciario"
-          icone="monitoramento"
-          aria-pressed={senhaVisivel}
-          aria-controls="senha-entrada"
-          onClick={() => setSenhaVisivel((v) => !v)}
-          className="self-end"
-        >
-          {senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'}
-        </Button>
-        <Link
-          to="/esqueci-senha"
-          className="inline-flex min-h-11 items-center self-start font-semibold text-link underline-offset-4 hover:underline"
-        >
-          Esqueci minha senha
-        </Link>
+        {/* Ações da senha na mesma linha (quebram se faltar largura). */}
+        <div className="flex flex-wrap items-center justify-between gap-x-3">
+          <Button
+            variante="terciario"
+            icone="monitoramento"
+            aria-pressed={senhaVisivel}
+            aria-controls="senha-entrada"
+            onClick={() => setSenhaVisivel((v) => !v)}
+            className="-ml-2 px-2!"
+          >
+            {senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'}
+          </Button>
+          <Link
+            to="/esqueci-senha"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-link underline-offset-4 hover:underline"
+          >
+            Esqueci minha senha
+          </Link>
+        </div>
       </div>
       {erro && <Alert tom="erro" titulo={erro} anunciar />}
       <Button type="submit" icone="entrar" carregando={isSubmitting} larguraTotal>
@@ -128,7 +131,7 @@ function EntradaDemo() {
           anunciar
         />
       )}
-      <ul aria-label="Perfis de demonstração" className="flex flex-col gap-3">
+      <ul aria-label="Perfis de demonstração" className="flex flex-col gap-2 sm:gap-3">
         {contasDemo.map((c) => {
           const perfil = PERFIL_DEMO[c.papeis[0] ?? 'aluno'] ?? PERFIL_DEMO.aluno!;
           return (
@@ -206,7 +209,7 @@ export function EntradaPage() {
   if (sessao) return <Navigate to={CAMINHO_DO_DESTINO[areaInicial(sessao.papeis)]} replace />;
 
   return (
-    <div className="grid min-h-dvh grid-cols-1 bg-bg lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+    <div className="grid flex-1 grid-cols-1 bg-bg lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
       {/* Painel da marca (telas largas) */}
       <section
         aria-label="Sobre a Maratona de Competências SAEP"
@@ -243,7 +246,7 @@ export function EntradaPage() {
         <header
           className={cx(
             'relative isolate overflow-hidden bg-navy-900 px-6 lg:hidden',
-            modo === 'demo' ? 'py-4' : 'pt-8 pb-10',
+            modo === 'demo' ? 'py-3 sm:py-4' : 'py-4 sm:pt-8 sm:pb-10',
           )}
         >
           <FaixasDaMarca className="-right-24 -bottom-40 scale-75 opacity-80" />
@@ -251,7 +254,7 @@ export function EntradaPage() {
             variante="textoBranco"
             className={cx(
               'relative z-10 mx-auto w-full',
-              modo === 'demo' ? 'max-w-56' : 'max-w-sm',
+              modo === 'demo' ? 'max-w-44 sm:max-w-56' : 'max-w-56 sm:max-w-sm',
             )}
           />
         </header>
@@ -260,23 +263,24 @@ export function EntradaPage() {
           aria-labelledby="titulo-entrada"
           className={cx(
             'flex flex-1 items-center justify-center px-4 sm:px-8',
-            modo === 'demo' ? 'py-5' : 'py-10',
+            modo === 'demo' ? 'py-4 sm:py-5' : 'py-6 sm:py-10',
           )}
         >
           <div className="w-full min-w-0 max-w-md wrap-anywhere">
             <div
               className={cx(
-                'rounded-lg border border-border bg-surface shadow-md sm:p-8',
-                modo === 'demo' ? 'p-4' : 'p-6',
+                // No celular o conteúdo fica direto na página (sem moldura): ganha largura e
+                // altura para caber sem rolagem.
+                'sm:rounded-lg sm:border sm:border-border sm:bg-surface sm:p-8 sm:shadow-md',
               )}
             >
               <h1
                 id="titulo-entrada"
-                className="font-display text-2xl font-bold text-text sm:text-3xl"
+                className="font-display text-xl font-bold text-text sm:text-3xl"
               >
                 {modo === 'demo' ? 'Explore a Maratona' : 'Acesse sua conta'}
               </h1>
-              <p className="mt-1 mb-6 text-text-secondary">
+              <p className="mt-1 mb-4 text-sm text-text-secondary sm:mb-6 sm:text-base">
                 {modo === 'demo'
                   ? 'Escolha um perfil fictício. Não é necessário informar e-mail ou senha.'
                   : 'Acesse sua área para acompanhar as atividades da Maratona.'}
@@ -291,7 +295,7 @@ export function EntradaPage() {
               )}
             </div>
             {modo !== 'demo' && (
-              <div className="mt-6 text-sm text-text-secondary">
+              <div className="mt-4 text-sm text-text-secondary sm:mt-6">
                 <details>
                   <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md font-semibold text-link underline-offset-4 hover:underline [&::-webkit-details-marker]:hidden">
                     <Icon nome="ajuda" tamanho="sm" className="shrink-0" />
@@ -311,8 +315,8 @@ export function EntradaPage() {
                 </details>
               </div>
             )}
-            <div className="mt-8 flex justify-center lg:hidden">
-              <MarcaSenai fundo="claro" className="w-28" />
+            <div className="mt-5 flex justify-center sm:mt-8 lg:hidden">
+              <MarcaSenai fundo="claro" className="w-24 sm:w-28" />
             </div>
           </div>
         </main>

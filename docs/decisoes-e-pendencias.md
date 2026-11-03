@@ -25,6 +25,10 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   arquivos como estão (não alteramos a marca). **[validar]**
 - Tokens têm `--color-coral-500 #FF5866` e os SVGs `#FC4B55` (diferença pequena). Sem ação.
 
+- **Largura da barra lateral (2026-11-03, spec 011):** `--sidebar-width` passou de 16rem para
+  17.5rem no arquivo de tokens, no tema e no `DESIGN.md`, para caber os títulos e ícones das
+  categorias do menu. Decisão do usuário. **[validar]** com o Design System.
+
 ## 2.1 Identidade visual — pranchas recebidas em 2026-10-29
 
 - O usuário indicou as pranchas (variações da marca, paleta, tipografia, universo fotográfico,
@@ -260,13 +264,73 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - **Coordenação:** a edição mantém ao menos uma coordenação ativa; ninguém altera a própria.
 - **Várias edições ativas:** o seletor no topo aparece com duas ou mais edições da área; a escolha
   fica no dispositivo (só o id). Edição em preparação aparece com o selo "Em preparação".
-- **Regras para a spec 011 (decididas, não implementadas):** versões das regras com justificativa;
-  só valores mudam; cada encontro usa a versão vigente no seu início; rótulo sugerido e editável;
-  cada turma herda as regras da edição e pode ajustar valores próprios. Com ajustes por turma,
-  equipes da mesma categoria podem ter máximos diferentes no ranking. **[validar]**
+- **Regras para a spec 011:** implementadas (seção 6.9), com a estrutura editável no lugar de "só
+  valores mudam". Com ajustes por turma, equipes da mesma categoria podem ter máximos diferentes;
+  o ranking por turma (spec 012) resolve a comparação.
 - Testes das specs anteriores ajustados sem perder asserções: fixtures de mentor por turma passam
   pelo vínculo ao curso (só a derivada da turma ativa); fixtures em edição encerrada reabrem a
   edição durante a gravação; criação de cursos e turmas passou às RPCs do cadastro.
+
+## 6.9 Spec 011 — regras da edição e das turmas (implementada em 2026-11-03)
+
+- Implementação: migration `20261105120000_regras_edicao.sql`; módulo `src/modules/pontuacao`
+  (domínio das regras, `FormRegras`, `FormAjustesTurma`, `HistoricoRegras`, `EncontrosDaTurma`,
+  `PontuacaoMaxima`); seções "Regras da edição" em `/coordenacao/edicoes` e "Regras da turma",
+  "Encontros da turma" e pontuação máxima no painel da turma; menu em categorias.
+- **Versões da edição:** cada gravação guarda uma versão nova com autor, justificativa e o horário a
+  partir do qual vale; a versão inicial vale desde sempre. `edicoes.regras` continua como cópia da
+  vigente. Rótulo sugerido (último número incrementado; sem número, `.1`), editável e único na
+  edição. Concorrência otimista pela versão carregada; reenvio idêntico não grava.
+- **Estrutura editável (substitui "só valores mudam" da spec 010):** critérios das rubricas, faixas de
+  atraso e tipos de penalidade podem ser criados, removidos e renomeados; o id do critério nasce do
+  nome e não muda ao renomear. A prova oficial segue o PRD (HU04) e não muda. Limites de proteção
+  contra erro de digitação: 20 critérios por rubrica, nomes de 80 caracteres, 0 a 4 casas
+  decimais, 1 a 20 encontros. **[validar]**
+- **Ajustes da turma:** cada ajuste guarda o conjunto completo de grupos definidos para a turma
+  (`{}` volta a herdar tudo); o restante vem da edição, inclusive mudanças posteriores. Coordenação
+  ajusta qualquer grupo; o mentor do curso, só presença, participação, questões, entrega e
+  apresentação; grupos fora do alcance de quem grava seguem como estão (o mentor não desfaz
+  penalidades ou prazos da coordenação). Com base desatualizada, a resposta é "recarregue" antes da
+  checagem de permissão.
+- **Regras de cada encontro:** valem a versão e o ajuste vigentes no início do encontro (data e
+  horário no fuso `America/Sao_Paulo`; sem horário, o início do dia). Encontro remarcado passa a
+  usar a versão do novo início. Cálculo oficial, avaliação, participação, entrega, ocorrências e
+  prazos usam as regras do encontro para a turma da equipe; avaliação já lançada continua válida e
+  com os nomes antigos. As leituras para o cálculo parcial devolvem as regras de cada encontro.
+- **Limite de atraso exibido do desafio** (desafio encerrado na lista): o maior entre as turmas do
+  desafio; o envio de cada equipe usa o da própria turma. **[validar]**
+- **Prazo de revisão do ranking publicado:** ainda pelas regras atuais da edição (o ranking por
+  turma é a spec 012).
+- **Encontros da turma:** guardam-se só as exclusões; encontro com presença, participação,
+  avaliação, respostas, prova oficial ou ocorrência da turma não sai; encontro fora da turma não
+  recebe lançamentos dela e sai dos totais, dos lançamentos e do painel da turma. O "próximo
+  encontro" do painel do aluno continua o da edição.
+- **Pontuação máxima da turma:** soma, nos encontros da turma, de presença + participação +
+  questões (ou prova oficial, conforme o encontro) + entrega + apresentação pelas regras de cada
+  encontro. **[validar]** encontros com avaliação objetiva diferente.
+- **Regulamento:** quem tem uma turma só (estudante, docente de uma turma) vê as regras da turma, com
+  "definido para a sua turma" e a pontuação máxima; coordenação e docentes de várias turmas veem as
+  da edição.
+- **Menu:** categorias por área (US6), sem mudar endereços nem permissões; os atalhos da tela inicial
+  seguem os mesmos grupos.
+- **Menu recolhível (ajuste visual pedido no incremento):** cada categoria tem ícone e é um botão
+  que recolhe e expande os itens; começa recolhida, exceto a categoria da página atual, e abrir uma
+  fecha a anterior (só uma aberta por vez). Recolhida, a categoria mostra o contador dos itens
+  (ex.: convites pendentes) e um ponto quando contém a página atual. A barra lateral passa de 16rem
+  para 17,5rem (token `--sidebar-width`, atualizado também na referência de tokens) e o menu do
+  celular de 15rem para 16rem (18rem no tablet), para caber ícone, título e seta sem cortar.
+  **[validar]** com a identidade visual.
+- **Barras de rolagem:** finas, trilho transparente e polegar na cor azul-marinho da marca (branco
+  translúcido nas áreas escuras do menu); a barra lateral rola quando a categoria aberta não cabe.
+- **Tela Entrar:** ocupa exatamente a altura da tela (o aviso de demonstração e o de sem conexão
+  passam a fazer parte dela) e, no celular, o conteúdo fica sem moldura e mais compacto, sem
+  rolagem de 360×640 a 1920×1080. Só rola quando a pessoa abre a ajuda, quando aparece um erro ou
+  com zoom de texto — nada é escondido para caber.
+- **Decisões para a spec 012 (não implementadas):** ranking por turma, apresentado dentro da turma;
+  o estudante vê só o da própria turma; substitui o ranking por categoria da spec 007.
+- Desvios do plano: `encontros_fora_da_turma` tem `id` (com `(turma_id, encontro_id)` único) para a
+  auditoria registrar a linha; `regras_da_turma` devolve também `encontrosBloqueados` (só para a
+  coordenação), usado na tela de encontros da turma.
 
 ## 6.7 Spec 009 — comunicados e regulamento (implementada em 2026-11-03)
 

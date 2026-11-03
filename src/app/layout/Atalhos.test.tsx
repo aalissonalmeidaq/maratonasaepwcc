@@ -16,7 +16,17 @@ describe('Atalhos do painel inicial', () => {
       );
       const nav = screen.getByRole('navigation', { name: 'Acesso rápido' });
       const links = within(nav).getAllByRole('link');
-      const esperados = MENUS[area].filter((i) => i.caminho !== `/${area}`);
+      const esperados = MENUS[area].grupos.flatMap((g) => g.itens);
+      // Atalhos agrupados nas categorias do menu (spec 011, US6).
+      for (const grupo of MENUS[area].grupos) {
+        expect(within(nav).getByRole('heading', { name: grupo.titulo })).toBeInTheDocument();
+        const lista = within(nav).getByRole('list', { name: grupo.titulo });
+        expect(
+          within(lista)
+            .getAllByRole('link')
+            .map((l) => l.getAttribute('href')),
+        ).toEqual(grupo.itens.map((i) => i.caminho));
+      }
       links.forEach((l, i) => {
         expect(l).toHaveAccessibleName(new RegExp(`^${esperados[i]!.rotulo}`));
         expect(l).toHaveTextContent(esperados[i]!.descricao);

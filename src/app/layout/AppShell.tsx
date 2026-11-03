@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { Outlet } from 'react-router';
 import { ROTULO_PAPEL, papeisDaArea, type Area } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
 import { ContadorConvites } from '@/modules/duplas';
@@ -9,7 +9,8 @@ import { ContadorAvisos } from '@/modules/resultado';
 import { SeletorEdicao, edicaoPadrao } from '@/modules/organizacao';
 import { useConvitesPendentes, useEdicoesVisiveis, useMeusAvisos } from '../dados/consultas';
 import { useEdicaoEmUso } from '../dados/edicaoEmUsoContexto';
-import { MENUS, ROTULO_AREA } from '../navegacao';
+import { ROTULO_AREA } from '../navegacao';
+import { Menu } from './Menu';
 
 function obterIniciais(nome?: string): string {
   if (!nome) return 'MS';
@@ -20,78 +21,6 @@ function obterIniciais(nome?: string): string {
   if (!primeira || !ultima) return limpo.slice(0, 2).toUpperCase();
   if (partes.length === 1) return primeira.slice(0, 2).toUpperCase();
   return `${primeira.charAt(0)}${ultima.charAt(0)}`.toUpperCase();
-}
-
-function Menu({
-  area,
-  variante = 'sidebar',
-  aberto = true,
-  emArrasto = false,
-  aoNavegar,
-  extras,
-}: {
-  area: Area;
-  variante?: 'sidebar' | 'drawer';
-  aberto?: boolean;
-  emArrasto?: boolean;
-  aoNavegar?: () => void;
-  /** Conteúdo extra por caminho do menu (ex.: contador de convites). */
-  extras?: Partial<Record<string, ReactNode>>;
-}) {
-  const ehDrawer = variante === 'drawer';
-  return (
-    <ul className={cx('flex flex-col', ehDrawer ? 'gap-1' : 'gap-1')}>
-      {MENUS[area].map((item, indice) => (
-        <li
-          key={item.caminho}
-          style={
-            ehDrawer
-              ? {
-                  transitionDuration: emArrasto ? '0ms' : undefined,
-                  transitionDelay: !emArrasto && aberto ? `${Math.min(indice * 45, 315)}ms` : '0ms',
-                }
-              : undefined
-          }
-          className={cx(
-            ehDrawer &&
-              'transition-[translate,scale,opacity] duration-600 ease-[cubic-bezier(0.32,0.72,0,1)]',
-            ehDrawer &&
-              (aberto || emArrasto ? 'translate-x-0 opacity-100' : '-translate-x-6 opacity-0'),
-          )}
-        >
-          <NavLink
-            to={item.caminho}
-            end
-            onClick={aoNavegar}
-            className={({ isActive }) =>
-              cx(
-                'flex items-center gap-3 text-sm transition-colors',
-                ehDrawer ? 'min-h-10 sm:min-h-10.5' : 'min-h-11',
-                'focus-visible:shadow-[0_0_0_3px_var(--color-cyan-500)] focus-visible:outline-none',
-                ehDrawer
-                  ? cx(
-                      '-ml-4 rounded-r-full pr-4 pl-5 sm:-ml-6 sm:pr-5 sm:pl-6',
-                      isActive
-                        ? 'bg-white font-semibold text-navy-900 shadow-sm'
-                        : 'font-medium text-white/85 hover:bg-white/10 hover:text-white',
-                    )
-                  : cx(
-                      'rounded-md px-3 font-medium',
-                      isActive
-                        ? 'bg-blue-700 text-white'
-                        : 'text-white/85 hover:bg-white/10 hover:text-white',
-                    ),
-              )
-            }
-          >
-            <Icon nome={item.icone} />
-            <span className="truncate">{item.rotulo}</span>
-            {extras?.[item.caminho]}
-          </NavLink>
-        </li>
-      ))}
-    </ul>
-  );
 }
 
 /** Edição em uso, entre as edições em que a pessoa tem papel nesta área (spec 010, US7). */
@@ -190,7 +119,7 @@ export function AppShell({ area }: { area: Area }) {
       inicioX: clientX,
       inicioY: clientY,
       larguraDrawer,
-      deslocamentoAbertoPx: ehTablet ? 296 : Math.min(window.innerWidth * 0.58, 248),
+      deslocamentoAbertoPx: ehTablet ? 320 : Math.min(window.innerWidth * 0.64, 272),
       escalaAberta: ehTablet ? 0.86 : 0.82,
       fracaoAtual: 0,
     };
@@ -382,7 +311,10 @@ export function AppShell({ area }: { area: Area }) {
       {/* Menu lateral (desktop) */}
       <aside className="fixed inset-y-0 left-0 z-(--z-header) hidden w-(--sidebar-width) flex-col overflow-hidden bg-navy-900 px-4 py-6 lg:flex">
         <Brand variante="textoBranco" className="mb-8 w-full" />
-        <nav aria-label={ROTULO_AREA[area]} className="flex-1">
+        <nav
+          aria-label={ROTULO_AREA[area]}
+          className="rolagem-escura -mx-2 min-h-0 flex-1 overflow-y-auto px-2"
+        >
           <Menu area={area} extras={extrasDoMenu} />
         </nav>
         <div className="relative z-10 mt-6">
@@ -404,7 +336,7 @@ export function AppShell({ area }: { area: Area }) {
         inert={!menuAberto}
         style={estiloDrawer}
         className={cx(
-          'absolute inset-y-0 left-0 z-(--z-header) flex w-[56%] max-w-60 flex-col justify-between overflow-y-auto px-4 pt-4 pb-12 sm:w-68 sm:max-w-68 sm:px-6 sm:pt-5 sm:pb-12 lg:hidden',
+          'rolagem-escura absolute inset-y-0 left-0 z-(--z-header) flex w-[64%] max-w-64 flex-col justify-between overflow-y-auto px-4 pt-4 pb-12 sm:w-72 sm:max-w-72 sm:px-6 sm:pt-5 sm:pb-12 lg:hidden',
           'transition-[translate,scale,transform,opacity] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[translate,scale,opacity]',
           menuAberto
             ? 'translate-x-0 scale-100 opacity-100'
@@ -465,7 +397,7 @@ export function AppShell({ area }: { area: Area }) {
           'transition-[translate,scale,transform,border-radius,box-shadow] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[translate,scale]',
           drawerAtivo && 'max-lg:z-(--z-overlay) max-lg:h-dvh',
           menuAberto
-            ? 'max-sm:translate-x-[min(58%,15.5rem)] max-sm:scale-[0.82] sm:max-lg:translate-x-74 sm:max-lg:scale-[0.86] max-lg:rounded-3xl max-lg:shadow-[0_24px_60px_rgb(4_27_66/55%)]'
+            ? 'max-sm:translate-x-[min(64%,17rem)] max-sm:scale-[0.82] sm:max-lg:translate-x-80 sm:max-lg:scale-[0.86] max-lg:rounded-3xl max-lg:shadow-[0_24px_60px_rgb(4_27_66/55%)]'
             : 'max-lg:translate-x-0 max-lg:scale-100 max-lg:rounded-none max-lg:shadow-none',
         )}
       >

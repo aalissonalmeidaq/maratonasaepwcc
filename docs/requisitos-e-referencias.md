@@ -5,17 +5,17 @@ Fonte: PRD v1.0, Documento de Visão v1.0, Design System v1.0 e instruções do 
 | Requisito   | Descrição resumida                           | Situação (após spec 002)                                                            | Onde                                              |
 | ----------- | -------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------- |
 | RF01        | Autenticar e restringir por perfil e vínculo | **Feito**: login, rotas por papel, RLS; vínculos por turma e mentor por curso (010) | `modules/auth`, `modules/acesso`, specs 001/010   |
-| RF02        | Edições, cursos, turmas, docentes            | **Feito (specs 002/010)**: edições pelo app, cadastro permanente, turmas na edição  | `modules/organizacao`, `criar_edicao`             |
+| RF02        | Edições, cursos, turmas, docentes            | **Feito (002/010/011)**: edições, cadastro, turmas; regras com versões e por turma  | `modules/organizacao`, `criar_edicao`             |
 | RF03        | Cadastrar/importar alunos e contas           | **Feito**: contas e importação CSV; gestão por turma (spec 010)                     | `supabase/functions/criar-conta`                  |
 | RF04        | Duplas e alterações justificadas             | **Feito**: equipes por convite, trio, nome e gestão com histórico (HU01, spec 003)  | `modules/duplas`, migrations 002 e 003            |
 | RF05        | Encontros, horários, ambientes               | **Feito**: encontros e ambientes configuráveis                                      | `modules/encontros`, migration 002                |
-| RF06        | Regulamento e comunicados                    | **Feito (spec 009)**: comunicados por público e resumo das regras da edição         | `modules/comunicados`, `publicar_comunicado`      |
+| RF06        | Regulamento e comunicados                    | **Feito (009/011)**: comunicados por público e resumo das regras da turma           | `modules/comunicados`, `publicar_comunicado`      |
 | RF07–RF08   | Questões e submissão única                   | **Feito (spec 006)**: listas, gabarito só após o prazo, submissão única por equipe  | `modules/atividades`, migration 006               |
 | RF09–RF10   | Desafio e envio com comprovante do servidor  | **Feito (spec 006)**: desafios, entrega no Storage privado e comprovante            | `modules/atividades`, bucket `entregas`           |
 | RF11        | Presença e participação                      | **Feito (spec 006)**: presença em lote e participação, correções justificadas       | `modules/atividades`                              |
 | RF12        | Rubricas e feedback                          | **Feito (spec 006)**: rubrica de entrega e apresentação com feedback                | `modules/atividades`                              |
 | RF13        | Prova oficial como registro                  | Registro pela coordenação, nota só para ela (spec 007)                              | `modules/resultado`, `registrar_resultados_prova` |
-| RF14        | Cálculo, descontos, desempate                | Cálculo oficial no servidor com paridade TS/SQL (spec 007)                          | `app.calcular_encontro`, `modules/pontuacao`      |
+| RF14        | Cálculo, descontos, desempate                | Cálculo oficial com paridade TS/SQL (007); regras do início de cada encontro (011)  | `app.calcular_encontro`, `modules/pontuacao`      |
 | RF15        | Ocorrências e recurso                        | Registro, manifestação, decisão e revisão em 24 h (spec 007)                        | `modules/resultado`                               |
 | RF16        | Ranking por estado sem notas individuais     | Publicação versionada e imutável por categoria (spec 007)                           | `publicar_ranking`, `TabelaRanking`               |
 | RF17        | Painéis e CSV                                | **Feito (spec 008)**: painéis por perfil com dados reais e 5 relatórios CSV         | `modules/relatorios`, `relatorio`                 |

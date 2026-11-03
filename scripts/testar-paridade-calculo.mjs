@@ -5,7 +5,8 @@
  * cada um a `app.calcular_encontro` e `app.classificar` no banco do Supabase LOCAL (container
  * `supabase_db_maratona`, como `postgres`) e compara com o esperado — o mesmo esperado que o
  * Vitest confere contra `calcularEncontro` e `classificar`. As regras "piloto" são lidas do
- * arquivo de regras do seed, idêntico a `REGRAS_PILOTO`.
+ * arquivo de regras do seed, idêntico a `REGRAS_PILOTO`. Casos com `ajustes` (spec 011: versão nova
+ * da edição ou ajuste de turma) usam `regras || ajustes`, a mesma combinação de `app.regras_vigentes`.
  *
  * Uso: `node scripts/testar-paridade-calculo.mjs` (Supabase local iniciado).
  */
@@ -51,7 +52,8 @@ function iguais(a, b) {
 }
 
 const regrasPiloto = await psql(
-  "select regras from public.edicoes where regras_versao like 'piloto-2026.0-a-confirmar%' order by criado_em limit 1;",
+  // Versão inicial (spec 011): a mesma mesmo depois de versões novas gravadas pelos E2E.
+  "select v.regras from public.versoes_regras v join public.edicoes e on e.id = v.edicao_id where v.vale_desde = '-infinity' and v.rotulo like 'piloto-2026.0-a-confirmar%' order by e.criado_em limit 1;",
 );
 if (regrasPiloto.codigo !== 0 || !regrasPiloto.saida) {
   console.error('Não foi possível ler as regras do piloto no seed local:', regrasPiloto.erro);
@@ -62,7 +64,7 @@ const regras = JSON.parse(regrasPiloto.saida);
 const falhas = [];
 for (const caso of casosEncontro) {
   const r = await psql(
-    `select app.calcular_encontro(${literal(caso.lancamentos)}, ${literal(regras)});`,
+    `select app.calcular_encontro(${literal(caso.lancamentos)}, ${literal(regras)} || ${literal(caso.ajustes ?? {})});`,
   );
   const obtido = r.codigo === 0 ? JSON.parse(r.saida) : { erro: r.erro };
   if (!iguais(obtido, caso.esperado))

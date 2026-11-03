@@ -7,16 +7,18 @@ const pontos = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits:
 const soma = (c: CriterioRubrica[]) => c.reduce((t, x) => t + x.maximo, 0);
 
 /**
- * Pontuação parcial da equipe num encontro (US5, FR-021): componentes calculados pelas regras da
- * edição; o que ainda não foi registrado aparece como "Aguardando registro", nunca como zero.
+ * Pontuação parcial da equipe num encontro (US5, FR-021): componentes calculados pelas regras do
+ * encontro (spec 011) ou, sem elas, pelas recebidas; o que ainda não foi registrado aparece como
+ * "Aguardando registro", nunca como zero.
  */
 export function PontuacaoDoEncontro({
   encontro,
-  regras,
+  regras: regrasRecebidas,
 }: {
   encontro: EncontroDaEquipe;
   regras: RegrasDaEdicao;
 }) {
+  const regras = encontro.regras ?? regrasRecebidas;
   const { pontuacao, aguardando } = calcularParcial(encontro, regras);
   const linhas: { id: ComponenteParcial; rotulo: string; valor: number; maximo: number }[] = [
     {

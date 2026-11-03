@@ -28,6 +28,54 @@
     outline-offset: 2px;
   }
 
+  /* Avisos globais (demonstração, sem conexão) ocupam parte da altura da tela em vez de
+     somar a ela: as páginas de tela cheia usam flex-1 e não geram rolagem extra. */
+  #root {
+    display: flex;
+    min-height: 100dvh;
+    flex-direction: column;
+  }
+
+  /* Barras de rolagem na paleta da aplicação: finas, trilho transparente e polegar azul-marinho
+     suave (escurece ao passar o mouse). Áreas escuras usam a utilidade rolagem-escura. */
+  * {
+    --rolagem-polegar: color-mix(in srgb, var(--color-navy-900) 30%, transparent);
+    --rolagem-polegar-ativo: color-mix(in srgb, var(--color-navy-900) 55%, transparent);
+  }
+
+  @supports (scrollbar-color: auto) {
+    * {
+      scrollbar-color: var(--rolagem-polegar) transparent;
+      scrollbar-width: thin;
+    }
+
+    *:hover {
+      scrollbar-color: var(--rolagem-polegar-ativo) transparent;
+    }
+  }
+
+  /* Safari ainda não aplica scrollbar-color. */
+  @supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar {
+      width: 0.625rem;
+      height: 0.625rem;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border: 0.1875rem solid transparent;
+      border-radius: 9999px;
+      background: var(--rolagem-polegar) padding-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--rolagem-polegar-ativo) padding-box;
+    }
+  }
+
   #conteudo:focus {
     outline: none;
   }
@@ -36,5 +84,15 @@
   body {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+}
+
+@utility rolagem-escura {
+  --rolagem-polegar: rgb(255 255 255 / 25%);
+  --rolagem-polegar-ativo: rgb(255 255 255 / 45%);
+
+  & * {
+    --rolagem-polegar: rgb(255 255 255 / 25%);
+    --rolagem-polegar-ativo: rgb(255 255 255 / 45%);
   }
 }

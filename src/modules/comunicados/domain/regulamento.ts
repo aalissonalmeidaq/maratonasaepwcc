@@ -7,6 +7,10 @@ export interface ItemRegulamento {
   rotulo: string;
   valor: string | null;
   fixo?: boolean;
+  /** Grupo de regras de onde vem o valor (spec 011). */
+  grupo?: string;
+  /** Valor definido para a turma, e não herdado da edição (spec 011, FR-014). */
+  daTurma?: boolean;
 }
 
 export interface ResumoRegulamento {
@@ -44,6 +48,11 @@ function criterios(v: unknown): Criterio[] | null {
 
 const soma = (c: Criterio[] | null) => (c ? c.reduce((t, x) => t + x.maximo, 0) : null);
 const fmt = (n: number) => n.toLocaleString('pt-BR');
+/** "Até N (critério máximo, ...)." com os critérios vigentes. */
+const rubrica = (c: Criterio[] | null) =>
+  c
+    ? `Até ${fmt(soma(c)!)} (${c.map((x) => `${x.rotulo.toLowerCase()} ${fmt(x.maximo)}`).join(', ')}).`
+    : null;
 
 function faixasDeAtraso(entrega: unknown, rubrica: Criterio[] | null): string | null {
   const faixas = em(entrega, 'faixasDeAtraso');
@@ -61,7 +70,14 @@ function faixasDeAtraso(entrega: unknown, rubrica: Criterio[] | null): string | 
   return `${partes.join('; ')}; acima de ${fmt(limite)} min: entrega não realizada, salvo exceção registrada.`;
 }
 
-export function resumoDoRegulamento(regras: unknown): ResumoRegulamento {
+/**
+ * Com `gruposAjustados` (regras vigentes da turma), os itens desses grupos saem marcados
+ * `daTurma`; com `maximo`, entra a pontuação máxima da turma.
+ */
+export function resumoDoRegulamento(
+  regras: unknown,
+  opcoes: { gruposAjustados?: readonly string[]; maximo?: number } = {},
+): ResumoRegulamento {
   const presenca = numero(em(regras, 'presenca', 'pontosPorIntegrante'));
   const presencaMax = numero(em(regras, 'presenca', 'maximoPorDupla'));
   const participacao = criterios(em(regras, 'participacao', 'criterios'));
@@ -87,7 +103,7 @@ export function resumoDoRegulamento(regras: unknown): ResumoRegulamento {
   const revisao = numero(em(regras, 'prazos', 'revisaoHoras'));
   const versao = em(regras, 'versao');
 
-  return {
+  const resumo: ResumoRegulamento = {
     versao: typeof versao === 'string' && versao.trim() ? versao : null,
     grupos: [
       {
@@ -95,6 +111,7 @@ export function resumoDoRegulamento(regras: unknown): ResumoRegulamento {
         itens: [
           {
             rotulo: 'Presença',
+            grupo: 'presenca',
             valor:
               presenca !== null && presencaMax !== null
                 ? `${fmt(presenca)} por integrante, até ${fmt(presencaMax)} por equipe.`
@@ -102,23 +119,23 @@ export function resumoDoRegulamento(regras: unknown): ResumoRegulamento {
           },
           {
             rotulo: 'Participação',
-            valor: participacao
-              ? `Até ${fmt(soma(participacao)!)} (${participacao
-                  .map((c) => `${c.rotulo.toLowerCase()} ${fmt(c.maximo)}`)
-                  .join(', ')}).`
-              : null,
+            grupo: 'participacao',
+            valor: rubrica(participacao),
           },
           {
             rotulo: 'Questões',
+            grupo: 'questoes',
             valor: questoes !== null ? `Acertos ÷ total × ${fmt(questoes)}.` : null,
           },
           {
             rotulo: 'Entrega prática',
-            valor: entrega ? `Até ${fmt(soma(entrega)!)} (${entrega.length} critérios).` : null,
+            grupo: 'entrega',
+            valor: rubrica(entrega),
           },
           {
             rotulo: 'Apresentação',
-            valor: apresentacao ? `Até ${fmt(soma(apresentacao)!)}.` : null,
+            grupo: 'apresentacao',
+            valor: rubrica(apresentacao),
           },
           { rotulo: 'Total', valor: total !== null ? `Até ${fmt(total)} por encontro.` : null },
         ],
@@ -133,9 +150,14 @@ export function resumoDoRegulamento(regras: unknown): ResumoRegulamento {
                 ? `${fmt(realizacao)} pontos por estudante com realização confirmada e +${fmt(bonus)} com nota confirmada ≥ ${fmt(notaMinima)}. Nota pendente não gera bônus.`
                 : null,
           },
-          { rotulo: 'Atrasos', valor: faixasDeAtraso(em(regras, 'entrega'), entrega) },
+          {
+            rotulo: 'Atrasos',
+            grupo: 'entrega',
+            valor: faixasDeAtraso(em(regras, 'entrega'), entrega),
+          },
           {
             rotulo: 'Descontos por ocorrências',
+            grupo: 'penalidades',
             valor:
               teto !== null
                 ? `Até ${fmt(teto)} pontos por encontro; nunca duas penalidades pelo mesmo fato.`
@@ -148,6 +170,7 @@ export function resumoDoRegulamento(regras: unknown): ResumoRegulamento {
           },
           {
             rotulo: 'Manifestação',
+            grupo: 'prazos',
             valor:
               manifestacao !== null
                 ? `Até ${fmt(manifestacao)} horas após o registro da ocorrência.`
@@ -155,10 +178,21 @@ export function resumoDoRegulamento(regras: unknown): ResumoRegulamento {
           },
           {
             rotulo: 'Pedido de revisão',
+            grupo: 'prazos',
             valor: revisao !== null ? `Até ${fmt(revisao)} horas após a publicação.` : null,
           },
         ],
       },
     ],
   };
+  const ajustados = opcoes.gruposAjustados ?? [];
+  for (const g of resumo.grupos)
+    for (const item of g.itens)
+      if (item.grupo && ajustados.includes(item.grupo)) item.daTurma = true;
+  if (opcoes.maximo !== undefined)
+    resumo.grupos[0]!.itens.push({
+      rotulo: 'Pontuação máxima da turma',
+      valor: `${fmt(opcoes.maximo)} pontos nos encontros da turma.`,
+    });
+  return resumo;
 }

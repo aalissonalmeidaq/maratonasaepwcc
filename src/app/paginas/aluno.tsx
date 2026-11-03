@@ -1,6 +1,5 @@
 import { Link } from 'react-router';
 import { useAuth } from '@/modules/auth';
-import { ResumoRegulamento } from '@/modules/comunicados';
 import { PainelAluno } from '@/modules/relatorios';
 import { Card, PageHeader } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
@@ -8,6 +7,7 @@ import { useConvitesPendentes, usePainelDoAluno } from '../dados/consultas';
 import { Atalhos } from '../layout/Atalhos';
 import { ComEdicao } from './ComEdicao';
 import { ComunicadosRecebidos } from './comunicados';
+import { RegulamentoVigente } from './RegulamentoVigente';
 
 /** Convites de equipe recebidos que esperam resposta (FR-016). */
 function CardConvitesEquipe() {
@@ -69,7 +69,7 @@ export function AlunoRegulamentoPage() {
             <Card icone="noticia" titulo="Comunicados">
               <ComunicadosRecebidos edicao={edicao} />
             </Card>
-            <ResumoRegulamento regras={edicao.regras} versao={edicao.regrasVersao} />
+            <RegulamentoVigente edicao={edicao} />
           </div>
         )}
       </ComEdicao>

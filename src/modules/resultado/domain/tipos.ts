@@ -110,6 +110,8 @@ export interface PontosDoEncontro {
 export interface PontosDaEquipe {
   duplaId: string;
   nome: string;
+  /** Pontuação máxima da turma da equipe (spec 011, FR-009). */
+  maximo?: number;
   totais: TotaisDaDupla;
   encontros: PontosDoEncontro[];
 }

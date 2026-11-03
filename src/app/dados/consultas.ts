@@ -350,3 +350,29 @@ export const usePendenciasDaEdicao = (edicaoId?: string) => {
     r.organizacao.pendenciasDaEdicao(id),
   );
 };
+
+// Spec 011 — regras da edição e das turmas.
+export const useRegrasDaEdicaoVigentes = (edicaoId?: string) => {
+  const r = useRepositorios();
+  return useDaEdicao('regras-edicao', edicaoId, (id) => r.regras.regrasDaEdicaoVigentes(id));
+};
+
+export function useRegrasDaTurma(turmaId?: string) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('regras-turma', turmaId),
+    queryFn: () => r.regras.regrasDaTurma(turmaId as string),
+    enabled: Boolean(turmaId),
+  });
+}
+
+export function useHistoricoRegras(edicaoId?: string, turmaId?: string | null) {
+  const r = useRepositorios();
+  const chave = useChave();
+  return useQuery({
+    queryKey: chave('historico-regras', edicaoId, turmaId ?? 'edicao'),
+    queryFn: () => r.regras.historico(edicaoId as string, turmaId ?? null),
+    enabled: Boolean(edicaoId),
+  });
+}

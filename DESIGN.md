@@ -188,7 +188,7 @@ exponencial única. Títulos usam entrelinha 1.2 e o corpo 1.5.
 
 ## Layout
 
-O shell usa navegação lateral fixa de 16rem a partir de lg (64rem). Abaixo desse
+O shell usa navegação lateral fixa de 17,5rem a partir de lg (64rem). Abaixo desse
 ponto, um botão abre o menu sobre a área abaixo do cabeçalho. O breakpoint sm
 (40rem) adapta espaçamentos, ações e informações da sessão.
 

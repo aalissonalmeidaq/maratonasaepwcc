@@ -73,4 +73,17 @@ describe('PontuacaoDoEncontro (US5, FR-021)', () => {
     expect(screen.getByText('Entrega prática').nextElementSibling).toHaveTextContent('34 / 40');
     expect(screen.getByText('Ótimo trabalho.')).toBeInTheDocument();
   });
+  it('usa as regras do encontro quando o servidor as envia (spec 011, FR-011)', () => {
+    const regrasDoEncontro = {
+      ...REGRAS_PILOTO,
+      presenca: { pontosPorIntegrante: 10, maximoPorDupla: 20 },
+    };
+    render(
+      <PontuacaoDoEncontro
+        encontro={{ ...encontro, regras: regrasDoEncontro }}
+        regras={REGRAS_PILOTO}
+      />,
+    );
+    expect(screen.getByText('Presença').nextElementSibling).toHaveTextContent('10 / 20');
+  });
 });

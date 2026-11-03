@@ -148,7 +148,10 @@ reset role;
 -- ===========================================================================
 -- US1 — criar a edição (T007, FR-001–003, FR-013, FR-016, FR-018)
 -- ===========================================================================
-select is(app.regras_piloto(), (select regras from public.edicoes where id = 'b0000000-0000-0000-0000-000000000001'),
+-- Versão inicial da edição do seed (spec 011): as regras com que ela nasceu, mesmo depois de
+-- versões novas gravadas pelos testes de ponta a ponta.
+select is(app.regras_piloto(), (select regras from public.versoes_regras
+                                where edicao_id = 'b0000000-0000-0000-0000-000000000001' and vale_desde = '-infinity'),
   'app.regras_piloto() é igual ao REGRAS_PILOTO copiado no seed');
 
 set local role authenticated;

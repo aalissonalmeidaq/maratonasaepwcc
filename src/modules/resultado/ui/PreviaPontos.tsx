@@ -75,6 +75,12 @@ const situacao = (pendente: boolean) =>
  * Prévia dos pontos oficiais calculados no servidor (FR-019, FR-019a). Não é o resultado
  * oficial: só a versão publicada do ranking é oficial. Nunca mostra nota individual da prova.
  */
+/** Total da equipe e, quando houver, a pontuação máxima da turma ("X de N"). */
+const deMaximo = (e: PontosDaEquipe) =>
+  e.maximo === undefined
+    ? pontos(e.totais.total)
+    : `${pontos(e.totais.total)} de ${pontos(e.maximo)}`;
+
 export function PreviaPontos({
   equipes,
   modo,
@@ -90,7 +96,7 @@ export function PreviaPontos({
     return (
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-3">
-          <p className="text-lg font-semibold">{pontos(e.totais.total)} pontos até agora</p>
+          <p className="text-lg font-semibold">{`${deMaximo(e)} pontos até agora`}</p>
           <Selo />
           {situacao(e.totais.pendente)}
         </div>
@@ -105,7 +111,7 @@ export function PreviaPontos({
           <details>
             <summary className="flex min-h-11 cursor-pointer flex-wrap items-center gap-3 p-3">
               <span className="font-semibold">{e.nome}</span>
-              <span className="tabular-nums">{pontos(e.totais.total)} pontos</span>
+              <span className="tabular-nums">{`${deMaximo(e)} pontos`}</span>
               {situacao(e.totais.pendente)}
             </summary>
             <div className="border-t border-border p-3">

@@ -73,12 +73,21 @@ async function abrirMenuSeNecessario(page: Page) {
   if (await botao.isVisible()) await botao.click();
 }
 
-async function navegarPeloMenu(page: Page, nome: string) {
+/** Abre, no menu visível, a categoria recolhida que contém o item (uma aberta por vez). */
+async function mostrarNoMenu(page: Page, nome: string) {
   await abrirMenuSeNecessario(page);
-  await page
-    .locator('nav:not([aria-label="Acesso rápido"])')
-    .getByRole('link', { name: nome, exact: true })
-    .click();
+  const menu = page.locator('nav:not([aria-label="Acesso rápido"])').filter({ visible: true });
+  const item = menu.getByRole('link', { name: nome, exact: true });
+  const categorias = menu.locator('button[aria-expanded]');
+  for (let i = 0; !(await item.isVisible()) && i < (await categorias.count()); i++) {
+    const categoria = categorias.nth(i);
+    if ((await categoria.getAttribute('aria-expanded')) === 'false') await categoria.click();
+  }
+  return item;
+}
+
+async function navegarPeloMenu(page: Page, nome: string) {
+  await (await mostrarNoMenu(page, nome)).click();
 }
 
 test.describe('jornadas por perfil (modo demonstração)', () => {
@@ -189,7 +198,13 @@ test('menu do celular pode ser fechado pelo botão (não fica coberto)', async (
   test.skip(!isMobile, 'menu recolhível só existe em telas pequenas');
   await entrarComo(page, /ana exemplo/i);
   await page.getByRole('button', { name: 'Abrir menu' }).click();
-  await expect(page.locator('#menu-movel').getByRole('link', { name: 'Ranking' })).toBeVisible();
+  const menuMovel = page.locator('#menu-movel');
+  await expect(menuMovel.getByRole('button', { name: 'Resultados' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  );
+  await menuMovel.getByRole('button', { name: 'Resultados' }).click();
+  await expect(menuMovel.getByRole('link', { name: 'Ranking' })).toBeVisible();
   const fechar = page.getByRole('button', { name: 'Fechar menu' });
   // O botão precisa ser o elemento visível no próprio centro (não coberto pelo painel).
   const coberto = await fechar.evaluate((b) => {
@@ -510,6 +525,66 @@ test.describe('gestão de edições (spec 010, demonstração)', () => {
     await expect(gestao.getByRole('region', { name: 'Alunos', exact: true })).toContainText(
       'Ana Exemplo',
     );
+    await semRolagemHorizontal(page);
+  });
+});
+
+test.describe('regras e menu (spec 011, demonstração)', () => {
+  test('coordenação vê as regras da edição com a escrita desabilitada', async ({ page }) => {
+    await entrarComo(page, /coordenação/i);
+    await page.goto('/coordenacao/edicoes');
+    const regras = page.getByRole('region', { name: 'Regras da edição' });
+    await expect(regras).toBeVisible();
+    await expect(regras.getByRole('group', { name: 'Entrega e atrasos' })).toBeVisible();
+    await expect(regras.getByText(/valores do PRD \(HU04\)/)).toBeVisible();
+    await expect(regras.getByRole('button', { name: 'Gravar versão' })).toBeDisabled();
+    await semRolagemHorizontal(page);
+  });
+
+  test('painel da turma mostra o ajuste fictício, a pontuação máxima e os encontros', async ({
+    page,
+  }) => {
+    await entrarComo(page, /coordenação/i);
+    await page.goto('/coordenacao/organizacao');
+    await page.getByRole('link', { name: /Gerir turma 3º ano A/ }).click();
+    await expect(page.getByText(/Pontuação máxima da turma: .* pontos/)).toBeVisible();
+    const regras = page.getByRole('region', { name: 'Regras da turma' });
+    await expect(
+      regras
+        .getByRole('group', { name: 'Apresentação' })
+        .getByRole('radio', { name: 'Definir para a turma' }),
+    ).toBeChecked();
+    await expect(regras.getByRole('button', { name: 'Gravar regras da turma' })).toBeDisabled();
+    await expect(regras.getByText(/Ajuste da turma: Apresentação/)).toBeVisible();
+    await expect(
+      page
+        .getByRole('region', { name: 'Encontros da turma' })
+        .getByRole('button', { name: 'Gravar encontros da turma' }),
+    ).toBeDisabled();
+    await semRolagemHorizontal(page);
+  });
+
+  test('menu da coordenação em categorias (desktop e celular)', async ({ page }) => {
+    await entrarComo(page, /coordenação/i);
+    await abrirMenuSeNecessario(page);
+    const menu = page
+      .getByRole('navigation', { name: 'Coordenação' })
+      .filter({ visible: true });
+    // Começa recolhido no Início; abrir uma categoria fecha a anterior.
+    await expect(menu.getByRole('list', { name: 'Preparação' })).toHaveCount(0);
+    await menu.getByRole('button', { name: 'Preparação' }).click();
+    await expect(
+      menu.getByRole('list', { name: 'Preparação' }).getByRole('link', { name: 'Edições' }),
+    ).toBeVisible();
+    await menu.getByRole('button', { name: 'Durante os encontros' }).click();
+    await expect(
+      menu
+        .getByRole('list', { name: 'Durante os encontros' })
+        .getByRole('link', { name: 'Ocorrências' }),
+    ).toBeVisible();
+    await expect(menu.getByRole('list', { name: 'Preparação' })).toHaveCount(0);
+    await expect(menu.getByRole('button', { name: 'Resultado' })).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Comunicação' })).toBeVisible();
     await semRolagemHorizontal(page);
   });
 });
