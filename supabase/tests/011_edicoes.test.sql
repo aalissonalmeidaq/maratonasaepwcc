@@ -505,10 +505,11 @@ select throws_ok(format($f$ select public.encerrar_edicao(%L, 'Justificativa vá
 
 -- Pendências e encerramento.
 select pg_temp.como(pg_temp.u('c1'));
-select is(public.pendencias_da_edicao(pg_temp.ed('e')) - 'categoriasSemRanking',
+select is(public.pendencias_da_edicao(pg_temp.ed('e')) - 'turmasSemDefinitiva',
   '{"ocorrenciasSemDecisao": 0, "revisoesAbertas": 0}'::jsonb, 'FR-011: contagens de ocorrências e revisões');
-select ok(public.pendencias_da_edicao(pg_temp.ed('e')) -> 'categoriasSemRanking' ? 'Categoria K2',
-  'FR-011: categoria sem ranking publicado aparece nas pendências');
+-- Spec 013: a pendência de ranking é por turma e só conta turmas com equipes (as de E não têm).
+select is(public.pendencias_da_edicao(pg_temp.ed('e')) -> 'turmasSemDefinitiva', '[]'::jsonb,
+  'FR-011 (spec 013): turmas sem equipes não entram nas pendências de ranking');
 select pg_temp.como(pg_temp.u('c2'));
 select throws_ok(format($f$ select public.encerrar_edicao(%L, 'curta') $f$, pg_temp.ed('f')), '23514', null,
   'FR-010: justificativa curta é recusada');
@@ -517,7 +518,7 @@ select ok((public.encerrar_edicao(pg_temp.ed('f'), 'Fim do ciclo de teste.') ->>
 select lives_ok(format($f$ select public.encerrar_edicao(%L, 'Fim do ciclo de teste.') $f$, pg_temp.ed('f')),
   'FR-013: encerrar de novo não falha');
 reset role;
-select is((select estado || '|' || justificativa_encerramento || '|' || (pendencias_no_encerramento ? 'categoriasSemRanking')::text
+select is((select estado || '|' || justificativa_encerramento || '|' || (pendencias_no_encerramento ? 'turmasSemDefinitiva')::text
            from public.edicoes where id = pg_temp.ed('f')), 'encerrada|Fim do ciclo de teste.|true',
   'FR-011: estado, justificativa e pendências gravados');
 set local role authenticated;

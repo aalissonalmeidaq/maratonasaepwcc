@@ -7,9 +7,12 @@ import type {
   CursoDoCadastro,
   Edicao,
   EdicaoGerida,
+  PendenciasDaEdicao,
   RepositorioOrganizacao,
+  TurmaSemDefinitiva,
 } from '@/modules/organizacao';
-import { cursos, edicao, turmas } from './dados';
+import { cursos, duplas, edicao, turmas } from './dados';
+import { estadoDaUltimaPublicacaoDemo } from './resultado';
 
 const recusar = async (): Promise<never> => {
   throw new Error('Indisponível no modo demonstração: nenhuma alteração é gravada.');
@@ -18,6 +21,16 @@ const recusar = async (): Promise<never> => {
 export const EDICAO_EM_PREPARACAO = {
   id: 'ed-demo-preparacao',
   nome: 'Maratona SAEP — próxima edição (fictícia)',
+};
+
+/** Edição encerrada fictícia, com o registro do encerramento (spec 013). */
+export const EDICAO_ENCERRADA = {
+  id: 'ed-demo-encerrada',
+  nome: 'Maratona SAEP — edição anterior (fictícia)',
+};
+const ENCERRAMENTO = {
+  encerradaEm: '2025-12-05T15:00:00Z',
+  justificativaEncerramento: 'Encerramento fictício da edição anterior.',
 };
 
 export function edicoesDemo(coordena: boolean, papeis: Edicao['meusPapeis'] = []): Edicao[] {
@@ -39,8 +52,39 @@ export function edicoesDemo(coordena: boolean, papeis: Edicao['meusPapeis'] = []
     inicio: null,
     fim: null,
   };
-  return coordena ? [ativa, preparacao] : [ativa];
+  const encerrada: Edicao = {
+    ...ativa,
+    ...EDICAO_ENCERRADA,
+    estado: 'encerrada',
+    inicio: '2025-03-03',
+    fim: '2025-11-28',
+  };
+  return coordena ? [ativa, preparacao, encerrada] : [ativa];
 }
+
+/** Turmas com equipes cuja última publicação fictícia não é a definitiva (spec 013). */
+function turmasSemDefinitiva(): TurmaSemDefinitiva[] {
+  return turmas
+    .filter((t) => duplas.some((d) => d.turmaId === t.id))
+    .flatMap((t): TurmaSemDefinitiva[] => {
+      const estado = estadoDaUltimaPublicacaoDemo(t.id);
+      if (estado === 'definitivo') return [];
+      return [
+        {
+          turmaId: t.id,
+          turma: t.nome,
+          categoria: cursos.find((c) => c.id === t.cursoId)?.categoria ?? '',
+          estado: estado ?? 'sem_publicacao',
+        },
+      ];
+    });
+}
+
+const pendenciasDemo = (): PendenciasDaEdicao => ({
+  ocorrenciasSemDecisao: 0,
+  revisoesAbertas: 0,
+  turmasSemDefinitiva: turmasSemDefinitiva(),
+});
 
 type MetodosDeEdicao = Pick<
   RepositorioOrganizacao,
@@ -79,6 +123,9 @@ export function criarEdicoesDemo(coordena: () => boolean): MetodosDeEdicao {
         fim: e.fim,
         estado: e.estado,
         regrasVersao: e.regrasVersao,
+        ...(e.id === EDICAO_ENCERRADA.id
+          ? { ...ENCERRAMENTO, pendenciasNoEncerramento: pendenciasDemo() }
+          : {}),
       }));
     },
     async cadastro() {
@@ -99,7 +146,7 @@ export function criarEdicoesDemo(coordena: () => boolean): MetodosDeEdicao {
     },
     async pendenciasDaEdicao() {
       exigirCoordenacao();
-      return { ocorrenciasSemDecisao: 0, revisoesAbertas: 0, categoriasSemRanking: [] };
+      return pendenciasDemo();
     },
     async pessoasParaVincular() {
       exigirCoordenacao();

@@ -78,3 +78,33 @@ describe('repositório de edições, cadastro e vínculos (spec 010)', () => {
     );
   });
 });
+
+describe('repositório de edições — encerramento por turma (spec 013)', () => {
+  it('a lista de edições traz o registro do encerramento como veio do servidor', async () => {
+    const registro = {
+      ocorrenciasSemDecisao: 0,
+      revisoesAbertas: 1,
+      turmasSemDefinitiva: [{ turmaId: 't1', turma: 'KB', categoria: 'K', estado: 'provisorio' }],
+    };
+    const anterior = { ocorrenciasSemDecisao: 0, revisoesAbertas: 0, categoriasSemRanking: ['K'] };
+    const { sb, rpc } = clienteFalso({
+      data: [
+        { id: 'e1', estado: 'encerrada', pendenciasNoEncerramento: registro },
+        { id: 'e2', estado: 'encerrada', pendenciasNoEncerramento: anterior },
+      ],
+      error: null,
+    });
+    const edicoes = await criarRepositorioOrganizacaoSupabase(sb).edicoesQueCoordeno();
+    expect(rpc).toHaveBeenCalledWith('edicoes_que_coordeno');
+    expect(edicoes.map((e) => e.pendenciasNoEncerramento)).toEqual([registro, anterior]);
+  });
+
+  it('pendências do encerramento trazem as turmas sem definitiva', async () => {
+    const pendencias = { ocorrenciasSemDecisao: 2, revisoesAbertas: 0, turmasSemDefinitiva: [] };
+    const { sb, rpc } = clienteFalso({ data: pendencias, error: null });
+    expect(await criarRepositorioOrganizacaoSupabase(sb).pendenciasDaEdicao('e1')).toEqual(
+      pendencias,
+    );
+    expect(rpc).toHaveBeenCalledWith('pendencias_da_edicao', { p_id: 'e1' });
+  });
+});

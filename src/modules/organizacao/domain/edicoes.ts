@@ -12,6 +12,8 @@ export interface EdicaoGerida {
   regrasVersao: string;
   encerradaEm?: string | null;
   justificativaEncerramento?: string | null;
+  /** Pendências gravadas no encerramento, no formato da época (spec 013, FR-006a). */
+  pendenciasNoEncerramento?: RegistroDoEncerramento | null;
 }
 
 export interface EntradaEdicao {
@@ -20,11 +22,30 @@ export interface EntradaEdicao {
   fim: string | null;
 }
 
+/** Turma cuja última publicação do ranking não é a definitiva (spec 013, FR-001). */
+export interface TurmaSemDefinitiva {
+  turmaId: string;
+  turma: string;
+  categoria: string;
+  estado: 'sem_publicacao' | 'parcial' | 'provisorio';
+}
+
 /** Pendências mostradas antes de encerrar (FR-011); não impedem o encerramento. */
 export interface PendenciasDaEdicao {
   ocorrenciasSemDecisao: number;
   revisoesAbertas: number;
-  categoriasSemRanking: string[];
+  turmasSemDefinitiva: TurmaSemDefinitiva[];
+}
+
+/**
+ * Pendências gravadas no encerramento: o formato novo (turmas, spec 013) ou o anterior
+ * (categorias, spec 010), como foram registradas.
+ */
+export interface RegistroDoEncerramento {
+  ocorrenciasSemDecisao: number;
+  revisoesAbertas: number;
+  turmasSemDefinitiva?: TurmaSemDefinitiva[];
+  categoriasSemRanking?: string[];
 }
 
 export type ErrosDaEdicao = Partial<Record<keyof EntradaEdicao, string>>;
