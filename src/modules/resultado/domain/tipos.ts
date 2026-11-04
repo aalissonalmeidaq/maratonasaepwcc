@@ -136,6 +136,9 @@ export interface PosicaoPublicada {
 
 export interface PublicacaoRanking {
   id: string;
+  /** Turma da publicação (spec 012); `null` nas publicações por categoria anteriores. */
+  turmaId: string | null;
+  turma: string | null;
   categoria: string;
   versao: number;
   estado: EstadoRanking;
@@ -162,7 +165,8 @@ export interface ResultadoPublicacao {
   revisaoAte: string | null;
 }
 
-export interface PendenciasDaCategoria {
+/** O que impede a publicação definitiva (spec 007, por turma na spec 012). */
+export interface PendenciasDoRanking {
   componentes: {
     duplaId: string;
     duplaNome: string;
@@ -171,6 +175,64 @@ export interface PendenciasDaCategoria {
   }[];
   ocorrencias: { id: string; duplaNome: string; estado: EstadoOcorrencia }[];
   revisoes: { id: string; duplaNome: string }[];
+}
+
+// ---------------------------------------------------------------------------
+// Ranking por turma (spec 012)
+// ---------------------------------------------------------------------------
+export interface TurmaNoRanking {
+  turmaId: string;
+  turma: string;
+  categoria: string;
+  equipes: number;
+  ultima: { id: string; versao: number; estado: EstadoRanking; publicadoEm: string } | null;
+  /** Pendências dos encontros realizados (mesmos números do painel da coordenação). */
+  pendencias: { componentes: number; ocorrencias: number; revisoes: number };
+}
+
+export interface ResultadoDaTurmaNoLote {
+  turmaId: string;
+  turma: string;
+  publicada: boolean;
+  versao: number | null;
+  motivo: string | null;
+}
+
+export type ResultadoLote = ResultadoDaTurmaNoLote[];
+
+export interface PublicacaoAnterior {
+  categoria: string;
+  versoes: number;
+  ultima: { versao: number; estado: EstadoRanking; publicadoEm: string };
+}
+
+export type SituacaoPremiacao = 'a_definir' | 'provisorio' | 'final' | 'empate_a_decidir';
+
+export interface DecisaoPremiacao {
+  decisao: string;
+  premiadas: string[];
+  justificativa: string;
+  decididoEm: string;
+}
+
+export interface ItemPremiacaoDaTurma {
+  posicao: number;
+  descricao: string;
+  detalhes: string | null;
+  equipes: { id: string; nome: string }[];
+  /** Empate persistente nesta posição premiada. */
+  empate: boolean;
+  /** Posição pulada por empate na posição anterior (ranking 1, 1, 3). */
+  semEquipePorEmpate: boolean;
+  decisao: DecisaoPremiacao | null;
+}
+
+export interface PremiacaoDaTurma {
+  turmaId: string;
+  turma: string;
+  situacao: SituacaoPremiacao;
+  publicacaoId: string | null;
+  itens: ItemPremiacaoDaTurma[];
 }
 
 // ---------------------------------------------------------------------------
@@ -275,15 +337,30 @@ export interface RepositorioResultado {
   pontosDaMinhaEquipe(edicaoId: string): Promise<PontosDaEquipe | null>;
   pontosDaTurma(turmaId: string): Promise<PontosDaEquipe[]>;
 
-  pendenciasDaCategoria(edicaoId: string, categoria: string): Promise<PendenciasDaCategoria>;
-  publicarRanking(dados: {
-    edicaoId: string;
-    categoria: string;
-    estado: EstadoRanking;
-    justificativa?: string;
-  }): Promise<ResultadoPublicacao>;
+  /** Publicações por categoria anteriores (só coordenação, spec 012 FR-017). */
   rankingPublicado(edicaoId: string, categoria?: string | null): Promise<PublicacaoRanking | null>;
   historicoPublicacoes(edicaoId: string, categoria: string): Promise<VersaoPublicada[]>;
+  publicacoesAnteriores(edicaoId: string): Promise<PublicacaoAnterior[]>;
+
+  // Ranking por turma (spec 012)
+  rankingDaEdicao(edicaoId: string): Promise<TurmaNoRanking[]>;
+  pendenciasRankingTurma(turmaId: string): Promise<PendenciasDoRanking>;
+  publicarRankingTurmas(dados: {
+    edicaoId: string;
+    turmas: { turmaId: string; versaoBase: number | null }[];
+    estado: EstadoRanking;
+    justificativa?: string;
+  }): Promise<ResultadoLote>;
+  rankingDaTurma(turmaId: string): Promise<PublicacaoRanking | null>;
+  historicoPublicacoesTurma(turmaId: string): Promise<VersaoPublicada[]>;
+  premiacaoDaEdicao(edicaoId: string): Promise<PremiacaoDaTurma[]>;
+  decidirPremiacaoEmpate(dados: {
+    publicacaoId: string;
+    posicao: number;
+    premiadas: string[];
+    decisao: string;
+    justificativa: string;
+  }): Promise<{ id: string; decididoEm: string }>;
 
   pedirRevisao(dados: DadosPedidoRevisao): Promise<{ id: string; criadoEm: string }>;
   responderRevisao(dados: {

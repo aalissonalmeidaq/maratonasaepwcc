@@ -62,7 +62,10 @@ export interface PainelDaGestao {
   turmas: TurmaDoPainel[];
 }
 
-export interface CategoriaDoPainel {
+/** Linha do painel da coordenação por turma (spec 012, FR-015). */
+export interface TurmaDoPainelCoordenacao {
+  turmaId: string;
+  turma: string;
   categoria: string;
   componentesPendentes: number;
   provasPendentes: number;
@@ -80,7 +83,7 @@ export interface PainelDaCoordenacao {
     encontrosRealizados: number;
     encontrosTotal: number;
   };
-  categorias: CategoriaDoPainel[];
+  turmas: TurmaDoPainelCoordenacao[];
 }
 
 export type TipoRelatorio = 'pontos' | 'presenca' | 'entregas' | 'ocorrencias' | 'revisoes';

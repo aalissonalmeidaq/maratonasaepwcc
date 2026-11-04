@@ -4,7 +4,8 @@ import { rotuloEstadoRanking } from '../domain/prazos';
 import type { PosicaoPublicada, PublicacaoRanking } from '../domain/tipos';
 
 /**
- * Versão publicada do ranking de uma categoria (US4, FR-016, FR-019): só posição, equipe e
+ * Versão publicada do ranking de uma turma (spec 012; por categoria nas publicações anteriores):
+ * só posição, equipe e
  * total — sem notas individuais. O detalhe por encontro aparece apenas nas linhas em que o
  * servidor o enviou (a própria equipe, ou as equipes da gestão).
  */
@@ -13,8 +14,8 @@ export function TabelaRanking({ publicacao }: { publicacao: PublicacaoRanking | 
     return (
       <EmptyState
         icone="ranking"
-        titulo="O ranking ainda não foi publicado."
-        descricao="A coordenação publica a classificação como parcial, provisória ou definitiva."
+        titulo="Ranking da turma ainda não publicado"
+        descricao="A coordenação publica a classificação da turma como parcial, provisória ou definitiva."
       />
     );
   }
@@ -31,7 +32,7 @@ export function TabelaRanking({ publicacao }: { publicacao: PublicacaoRanking | 
         </span>
       </div>
       <ResponsiveTable
-        legenda={`Classificação — ${publicacao.categoria}`}
+        legenda={`Classificação — ${publicacao.turma ?? `${publicacao.categoria} (anterior)`}`}
         chave={(p) => p.duplaId}
         linhas={publicacao.posicoes}
         colunas={[

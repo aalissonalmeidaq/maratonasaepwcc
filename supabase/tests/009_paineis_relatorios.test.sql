@@ -221,14 +221,16 @@ select is((pg_temp.lido('pa')::jsonb ->> 'avisosNaoLidos')::int, 1, 'US1: só o 
 select ok(not pg_temp.tem_chave(pg_temp.lido('pa')::jsonb, 'nota'), 'FR-006: painel sem a chave nota');
 select ok(position(pg_temp.d('a2')::text in pg_temp.lido('pa')) = 0, 'FR-006: nada de outra equipe');
 
--- Publicação do ranking parcial da Cat 1.
+-- Publicação do ranking parcial da turma TA (spec 012: a publicação é por turma).
 select pg_temp.como(pg_temp.u('0a'));
-select lives_ok($$ select public.publicar_ranking(pg_temp.e(), 'Cat 1', 'parcial') $$, 'US1: coordenação publica o parcial');
+select ok((public.publicar_ranking_turmas(pg_temp.e(),
+             jsonb_build_array(jsonb_build_object('turmaId', pg_temp.t('a'), 'versaoBase', null)), 'parcial') -> 0 ->> 'publicada')::boolean,
+  'US1: coordenação publica o parcial');
 select pg_temp.como(pg_temp.u('a1'));
 select is(public.painel_do_aluno(pg_temp.e()) -> 'ranking' -> 'posicao',
-          (select p -> 'posicao' from jsonb_array_elements(public.ranking_publicado(pg_temp.e()) -> 'posicoes') p
+          (select p -> 'posicao' from jsonb_array_elements(public.ranking_da_turma(pg_temp.t('a')) -> 'posicoes') p
            where (p ->> 'minha')::boolean),
-  'SC-001: posição igual à de ranking_publicado');
+  'SC-001: posição igual à do ranking da turma');
 select is(public.painel_do_aluno(pg_temp.e()) -> 'ranking' ->> 'estado', 'parcial', 'US1: estado da publicação');
 select is((public.painel_do_aluno(pg_temp.e()) -> 'ranking' ->> 'versao')::int, 1, 'US1: versão da publicação');
 select ok(not pg_temp.tem_chave(public.painel_do_aluno(pg_temp.e()), 'nota'), 'FR-006: sem nota depois da publicação');
@@ -344,10 +346,11 @@ reset role;
 
 -- ===========================================================================
 -- US3 — painel da coordenação (T015, FR-004, FR-004a, FR-006, FR-014)
--- Estado: Cat 1 publicada (parcial, v1); ocorrência de A1 sem decisão; Cat 2 sem publicação.
+-- Estado: TA publicada (parcial, v1); ocorrência de A1 sem decisão; TB e TC sem publicação.
+-- Desde a spec 012 o painel é por turma.
 -- ===========================================================================
-create function pg_temp.cat(p jsonb, nome text) returns jsonb language sql immutable as $$
-  select c from jsonb_array_elements(p -> 'categorias') c where c ->> 'categoria' = nome;
+create function pg_temp.tur(p jsonb, nome text) returns jsonb language sql immutable as $$
+  select c from jsonb_array_elements(p -> 'turmas') c where c ->> 'turma' = nome;
 $$;
 
 set local role authenticated;
@@ -356,37 +359,38 @@ select pg_temp.guardar('pc', public.painel_da_coordenacao(pg_temp.e())::text);
 select is(pg_temp.lido('pc')::jsonb -> 'indicadores',
   '{"cursos":2,"turmas":3,"equipes":5,"estudantes":11,"encontrosRealizados":1,"encontrosTotal":3}'::jsonb,
   'US3: indicadores da edição (o encontro cancelado fica fora do total)');
-select is((select jsonb_agg(c ->> 'categoria') from jsonb_array_elements(pg_temp.lido('pc')::jsonb -> 'categorias') c),
-  '["Cat 1","Cat 2"]'::jsonb, 'US3: uma linha por categoria');
-select is((pg_temp.cat(pg_temp.lido('pc')::jsonb, 'Cat 1') ->> 'componentesPendentes')::int,
-          jsonb_array_length(app.pendencias_realizadas_da_categoria(pg_temp.e(), 'Cat 1') -> 'componentes'),
+select is((select jsonb_agg(c ->> 'turma') from jsonb_array_elements(pg_temp.lido('pc')::jsonb -> 'turmas') c),
+  '["TA","TB","TC"]'::jsonb, 'US3: uma linha por turma');
+select is((pg_temp.tur(pg_temp.lido('pc')::jsonb, 'TA') ->> 'componentesPendentes')::int,
+          jsonb_array_length(app.pendencias_realizadas_da_turma(pg_temp.t('a')) -> 'componentes'),
   'SC-001: componentes pendentes iguais às pendências dos encontros realizados');
 select ok((select bool_and((c ->> 'encontroNumero')::int = 1)
-           from jsonb_array_elements(app.pendencias_realizadas_da_categoria(pg_temp.e(), 'Cat 1') -> 'componentes') c)
-          and jsonb_array_length(app.pendencias_realizadas_da_categoria(pg_temp.e(), 'Cat 1') -> 'componentes')
-              < jsonb_array_length(app.pendencias_da_categoria(pg_temp.e(), 'Cat 1') -> 'componentes'),
-  'FR-004a: só encontros realizados; a lista completa da spec 007 não muda');
-select is((pg_temp.cat(pg_temp.lido('pc')::jsonb, 'Cat 1') ->> 'ocorrenciasSemDecisao')::int,
-          jsonb_array_length(public.pendencias_da_categoria(pg_temp.e(), 'Cat 1') -> 'ocorrencias'),
+           from jsonb_array_elements(app.pendencias_realizadas_da_turma(pg_temp.t('a')) -> 'componentes') c)
+          and jsonb_array_length(app.pendencias_realizadas_da_turma(pg_temp.t('a')) -> 'componentes')
+              < jsonb_array_length(app.pendencias_do_ranking_da_turma(pg_temp.t('a')) -> 'componentes'),
+  'FR-004a: só encontros realizados; a lista completa da recusa da definitiva não muda');
+select is((pg_temp.tur(pg_temp.lido('pc')::jsonb, 'TA') ->> 'ocorrenciasSemDecisao')::int,
+          jsonb_array_length(public.pendencias_ranking_turma(pg_temp.t('a')) -> 'ocorrencias'),
   'SC-001: ocorrências sem decisão iguais às da spec 007');
-select is((pg_temp.cat(pg_temp.lido('pc')::jsonb, 'Cat 1') ->> 'ocorrenciasSemDecisao')::int, 1,
+select is((pg_temp.tur(pg_temp.lido('pc')::jsonb, 'TA') ->> 'ocorrenciasSemDecisao')::int, 1,
   'US3: a ocorrência registrada de A1 conta');
-select is((pg_temp.cat(pg_temp.lido('pc')::jsonb, 'Cat 1') ->> 'revisoesAbertas')::int,
-          jsonb_array_length(public.pendencias_da_categoria(pg_temp.e(), 'Cat 1') -> 'revisoes'),
+select is((pg_temp.tur(pg_temp.lido('pc')::jsonb, 'TA') ->> 'revisoesAbertas')::int,
+          jsonb_array_length(public.pendencias_ranking_turma(pg_temp.t('a')) -> 'revisoes'),
   'SC-001: revisões abertas iguais às da spec 007');
-select is((pg_temp.cat(pg_temp.lido('pc')::jsonb, 'Cat 1') ->> 'provasPendentes')::int, 0,
+select is((pg_temp.tur(pg_temp.lido('pc')::jsonb, 'TA') ->> 'provasPendentes')::int, 0,
   'FR-004a: prova de encontro futuro não gera pendência');
-select is(pg_temp.cat(pg_temp.lido('pc')::jsonb, 'Cat 1') -> 'publicacao' ->> 'estado', 'parcial',
-  'US3: última publicação da categoria');
-select is((pg_temp.cat(pg_temp.lido('pc')::jsonb, 'Cat 1') -> 'publicacao' ->> 'versao')::int, 1,
+select is(pg_temp.tur(pg_temp.lido('pc')::jsonb, 'TA') -> 'publicacao' ->> 'estado', 'parcial',
+  'US3: última publicação da turma');
+select is((pg_temp.tur(pg_temp.lido('pc')::jsonb, 'TA') -> 'publicacao' ->> 'versao')::int, 1,
   'US3: versão da última publicação');
-select is(pg_temp.cat(pg_temp.lido('pc')::jsonb, 'Cat 2') -> 'publicacao', 'null'::jsonb,
-  'US3: categoria sem publicação');
+select is(pg_temp.tur(pg_temp.lido('pc')::jsonb, 'TC') -> 'publicacao', 'null'::jsonb,
+  'US3: turma sem publicação');
 select ok(not pg_temp.tem_chave(pg_temp.lido('pc')::jsonb, 'nota'), 'FR-006/SC-002: painel sem a chave nota');
 
 -- Prova realizada: integrantes sem resultado e resultados pendentes contam; nota confirmada não.
 reset role;
-update public.encontros set data = current_date - 1 where id = pg_temp.en('4');
+-- Data de Brasília: "realizado" é avaliado no fuso America/Sao_Paulo (com current_date, falhava após 21h).
+update public.encontros set data = (now() at time zone 'America/Sao_Paulo')::date - 1 where id = pg_temp.en('4');
 insert into public.resultados_prova (encontro_id, estudante_id, dupla_id, realizacao, nota, nota_estado, fonte,
                                      escala_confirmada, autorizacao_confirmada) values
   (pg_temp.en('4'), pg_temp.u('a1'), pg_temp.d('a1'), 'confirmada', 80, 'confirmada', 'Planilha fictícia', true, true),
@@ -394,10 +398,12 @@ insert into public.resultados_prova (encontro_id, estudante_id, dupla_id, realiz
   (pg_temp.en('4'), pg_temp.u('a3'), pg_temp.d('a2'), 'confirmada', null, 'pendente', null, false, false);
 set local role authenticated;
 select pg_temp.como(pg_temp.u('0a'));
-select is((pg_temp.cat(public.painel_da_coordenacao(pg_temp.e()), 'Cat 1') ->> 'provasPendentes')::int, 5,
-  'US3: prova pendente = 2 resultados pendentes + 3 integrantes sem resultado');
-select is((pg_temp.cat(public.painel_da_coordenacao(pg_temp.e()), 'Cat 2') ->> 'provasPendentes')::int, 4,
-  'US3: na Cat 2, os 4 integrantes sem resultado');
+select is((pg_temp.tur(public.painel_da_coordenacao(pg_temp.e()), 'TA') ->> 'provasPendentes')::int, 3,
+  'US3: prova pendente = 2 resultados pendentes + 1 integrante sem resultado (TA)');
+select is((pg_temp.tur(public.painel_da_coordenacao(pg_temp.e()), 'TB') ->> 'provasPendentes')::int, 2,
+  'US3: na TB, os 2 integrantes sem resultado (antes, somados na Cat 1)');
+select is((pg_temp.tur(public.painel_da_coordenacao(pg_temp.e()), 'TC') ->> 'provasPendentes')::int, 4,
+  'US3: na TC, os 4 integrantes sem resultado');
 select ok(not pg_temp.tem_chave(public.painel_da_coordenacao(pg_temp.e()), 'nota'),
   'SC-002: com notas registradas, o painel continua sem a chave nota');
 reset role;
@@ -451,8 +457,8 @@ select pg_temp.como(pg_temp.u('0a'));
 select pg_temp.guardar('rp', public.relatorio('pontos', pg_temp.e(), null, null, null)::text);
 select is(pg_temp.colunas(pg_temp.lido('rp')::jsonb),
   array['categoria', 'turma', 'equipe', 'encontro', 'presenca', 'participacao', 'avaliacaoObjetiva',
-        'entrega', 'apresentacao', 'descontos', 'total', 'pendencias'],
-  'R6: colunas do relatório de pontos');
+        'entrega', 'apresentacao', 'descontos', 'total', 'pendencias', 'posicaoNaTurma'],
+  'R6: colunas do relatório de pontos (spec 012: com a posição na turma)');
 select is(pg_temp.linhas(pg_temp.lido('rp')::jsonb), 20, 'R6: uma linha por equipe ativa e encontro (5 × 4)');
 select is((select (l ->> 'total')::numeric from jsonb_array_elements(pg_temp.lido('rp')::jsonb -> 'linhas') l
            where l ->> 'equipe' = 'Equipe A1' and (l ->> 'encontro')::int = 1),

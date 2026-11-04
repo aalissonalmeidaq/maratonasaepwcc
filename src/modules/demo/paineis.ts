@@ -46,7 +46,7 @@ export function criarPaineisDemo(
       const dupla = duplas.find((d) => d.integrantes.includes(usuarioAtual() as never));
       const [pontos, publicacao, avisos, ocorrencias] = await Promise.all([
         resultado.pontosDaMinhaEquipe(edicaoId),
-        dupla ? resultado.rankingPublicado(edicaoId, null) : Promise.resolve(null),
+        dupla ? resultado.rankingDaTurma(dupla.turmaId) : Promise.resolve(null),
         resultado.meusAvisos(),
         resultado.ocorrencias(edicaoId, null),
       ]);
@@ -172,7 +172,10 @@ export function criarPaineisDemo(
     async painelDaCoordenacao(edicaoId) {
       if (!tem('coordenacao')) throw semPermissao();
       const numerosRealizados = new Set(encontros.filter(realizado).map((e) => e.numero));
-      const categorias = [...new Set(cursos.map((c) => c.categoria))].sort();
+      const lista = await resultado.rankingDaEdicao(edicaoId);
+      const provasRealizadas = encontros.filter(
+        (e) => realizado(e) && e.avaliacaoObjetiva === 'prova_oficial',
+      ).length;
       return {
         indicadores: {
           cursos: cursos.length,
@@ -182,35 +185,27 @@ export function criarPaineisDemo(
           encontrosRealizados: numerosRealizados.size,
           encontrosTotal: encontros.length,
         },
-        categorias: await Promise.all(
-          categorias.map(async (categoria) => {
-            const [pend, publicacao] = await Promise.all([
-              resultado.pendenciasDaCategoria(edicaoId, categoria),
-              resultado.rankingPublicado(edicaoId, categoria),
-            ]);
-            const integrantes = duplas
-              .filter((d) => categoriaDaTurma(d.turmaId) === categoria)
-              .reduce((n, d) => n + d.integrantes.length, 0);
-            return {
-              categoria,
-              componentesPendentes: pend.componentes.filter((c) =>
-                numerosRealizados.has(c.encontroNumero),
-              ).length,
-              provasPendentes:
-                encontros.filter((e) => realizado(e) && e.avaliacaoObjetiva === 'prova_oficial')
-                  .length * integrantes,
-              ocorrenciasSemDecisao: pend.ocorrencias.length,
-              revisoesAbertas: pend.revisoes.length,
-              publicacao: publicacao
-                ? {
-                    estado: publicacao.estado,
-                    versao: publicacao.versao,
-                    publicadoEm: publicacao.publicadoEm,
-                  }
-                : null,
-            };
-          }),
-        ),
+        // Mesmos números da tela de ranking (spec 012, SC-006).
+        turmas: lista.map((t) => ({
+          turmaId: t.turmaId,
+          turma: t.turma,
+          categoria: t.categoria,
+          componentesPendentes: t.pendencias.componentes,
+          provasPendentes:
+            provasRealizadas *
+            duplas
+              .filter((d) => d.turmaId === t.turmaId)
+              .reduce((n, d) => n + d.integrantes.length, 0),
+          ocorrenciasSemDecisao: t.pendencias.ocorrencias,
+          revisoesAbertas: t.pendencias.revisoes,
+          publicacao: t.ultima
+            ? {
+                estado: t.ultima.estado,
+                versao: t.ultima.versao,
+                publicadoEm: t.ultima.publicadoEm,
+              }
+            : null,
+        })),
       };
     },
 

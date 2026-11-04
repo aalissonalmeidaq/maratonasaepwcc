@@ -337,13 +337,14 @@ test.describe('atividades dos encontros na demonstração (spec 006)', () => {
 });
 
 test.describe('resultado oficial na demonstração (spec 007)', () => {
-  test('aluna vê a prévia, o ranking parcial com o detalhe só da própria equipe e o contador de avisos', async ({
+  test('aluna vê o ranking da turma com o detalhe só da própria equipe e o contador de avisos', async ({
     page,
   }) => {
     await entrarComo(page, /ana exemplo/i);
     await expect(page.getByRole('link', { name: /avisos não lidos/ })).toBeVisible();
     await page.goto('/aluno/ranking');
-    await expect(page.getByText('Parcial', { exact: true }).first()).toBeVisible();
+    // Demonstração (spec 012): o 3º ano A tem a publicação definitiva.
+    await expect(page.getByText('Definitivo', { exact: true }).first()).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Detalhe — Dupla Órbita' })).toBeVisible();
     await expect(page.getByRole('heading', { name: /^Detalhe — Dupla (?!Órbita)/ })).toHaveCount(0);
     await expect(page.getByText(/nota oficial/i)).toHaveCount(0);
@@ -371,9 +372,12 @@ test.describe('resultado oficial na demonstração (spec 007)', () => {
   }) => {
     await entrarComo(page, /coordenação \(fictícia\)/i);
     await page.goto('/coordenacao/ranking');
-    await expect(page.getByText(/pendência\(s\) impedem o definitivo/)).toBeVisible();
-    await expect(page.getByRole('radio', { name: 'Definitivo' })).toBeDisabled();
-    await expect(page.getByRole('button', { name: 'Publicar ranking' })).toBeDisabled();
+    // Spec 012: lista de turmas; as pendências e o histórico ficam no detalhe da turma.
+    await expect(page.getByRole('button', { name: 'Publicar 0 turmas' })).toBeDisabled();
+    await page.getByRole('checkbox', { name: 'Selecionar 3º ano B (fictícia)' }).check();
+    await expect(page.getByRole('button', { name: 'Publicar 1 turma' })).toBeDisabled();
+    await page.getByRole('button', { name: 'Abrir 3º ano A (fictícia)' }).click();
+    await expect(page.getByText(/pendências impedem o definitivo/)).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Histórico de versões' })).toBeVisible();
     await expect(
       page.getByText('Coordenação (fictícia)').filter({ visible: true }).first(),
@@ -401,7 +405,9 @@ test.describe('painéis e relatórios (spec 008, demonstração)', () => {
     await expect(page.getByRole('region', { name: 'Pontos' })).toContainText(
       'Prévia — não oficial',
     );
-    await expect(page.getByRole('region', { name: 'Posição' })).toContainText('Parcial');
+    await expect(page.getByRole('region', { name: 'Posição na turma' })).toContainText(
+      'Definitivo',
+    );
     await expect(
       page.getByRole('region', { name: 'Ações pendentes' }).getByRole('link'),
     ).toHaveAttribute('href', '/aluno/ocorrencias');
@@ -423,12 +429,10 @@ test.describe('painéis e relatórios (spec 008, demonstração)', () => {
     await semRolagemHorizontal(page);
   });
 
-  test('coordenação vê pendências por categoria e a exportação fica desabilitada', async ({
-    page,
-  }) => {
+  test('coordenação vê pendências por turma e a exportação fica desabilitada', async ({ page }) => {
     await entrarComo(page, /coordenação \(fictícia\)/i);
     await expect(page.getByText('Dados fictícios').first()).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Categoria A (exemplo)' })).toContainText(
+    await expect(page.getByRole('region', { name: '3º ano A (fictícia)' })).toContainText(
       'Ocorrências sem decisão',
     );
     await page.getByRole('link', { name: 'Relatórios', exact: true }).first().click();
@@ -582,6 +586,47 @@ test.describe('regras e menu (spec 011, demonstração)', () => {
     await expect(menu.getByRole('list', { name: 'Preparação' })).toHaveCount(0);
     await expect(menu.getByRole('button', { name: 'Resultado' })).toBeVisible();
     await expect(menu.getByRole('button', { name: 'Comunicação' })).toBeVisible();
+    await semRolagemHorizontal(page);
+  });
+});
+
+test.describe('ranking por turma (spec 012, demonstração)', () => {
+  test('aluna vê só o ranking da própria turma e a premiação com empate a decidir', async ({
+    page,
+  }) => {
+    await entrarComo(page, /ana exemplo/i);
+    await page.goto('/aluno/ranking');
+    await expect(page.getByRole('heading', { level: 1, name: 'Ranking da turma' })).toBeVisible();
+    await expect(
+      page.locator('caption', { hasText: 'Classificação — 3º ano A (fictícia)' }),
+    ).toBeAttached();
+    await expect(page.getByText('Dupla Faísca')).toHaveCount(0);
+    const premiacao = page.getByRole('region', { name: 'Premiação da turma' });
+    await expect(premiacao).toContainText('Empate a decidir');
+    await semRolagemHorizontal(page);
+  });
+
+  test('coordenação vê a premiação por turma e a decisão fica bloqueada na demonstração', async ({
+    page,
+  }) => {
+    await entrarComo(page, /coordenação \(fictícia\)/i);
+    await page.goto('/coordenacao/premiacao');
+    const a = page.getByRole('region', { name: 'Premiação — 3º ano A (fictícia)' });
+    await expect(a).toContainText('Empate a decidir');
+    await expect(a.getByRole('button', { name: 'Registrar decisão' })).toBeDisabled();
+    await expect(
+      page.getByRole('region', { name: 'Premiação — 3º ano B (fictícia)' }),
+    ).toContainText('A definir');
+    await semRolagemHorizontal(page);
+  });
+
+  test('coordenação consulta as publicações por categoria anteriores', async ({ page }) => {
+    await entrarComo(page, /coordenação \(fictícia\)/i);
+    await page.goto('/coordenacao/ranking');
+    await page.getByText('Publicações por categoria (anteriores)').click();
+    await expect(
+      page.locator('caption', { hasText: 'Classificação — Categoria A (exemplo) (anterior)' }),
+    ).toBeAttached();
     await semRolagemHorizontal(page);
   });
 });

@@ -25,13 +25,18 @@ export default defineConfig({
   reporter: [['list']],
   use: { baseURL: `http://localhost:${PORT}`, locale: 'pt-BR', trace: 'retain-on-failure' },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: /paineis\.spec\.ts/ },
-    // Os painéis (spec 008) leem o estado deixado pelas outras jornadas e publicam o ranking da
-    // Categoria B; rodam por último para não mudar as versões que resultado.spec espera.
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: /(paineis|ranking-turma)\.spec\.ts/,
+    },
+    // Os painéis (spec 008) e o ranking por turma (spec 012) leem o estado deixado pelas outras
+    // jornadas e publicam turmas; rodam por último para não mudar as versões que resultado.spec
+    // espera (painéis antes do ranking por turma, em ordem alfabética).
     {
       name: 'paineis',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /paineis\.spec\.ts/,
+      testMatch: /(paineis|ranking-turma)\.spec\.ts/,
       dependencies: ['desktop'],
     },
   ],

@@ -708,12 +708,25 @@ select is((public.pontos_da_minha_equipe(pg_temp.e()) -> 'totais' ->> 'total'), 
 reset role;
 
 -- ===========================================================================
--- US4 — publicação do ranking por categoria (T031, FR-015 a FR-019, SC-005)
--- "Cat 1" = TA (A1 86, A2 5) + TB (B1 30); "Cat 2" = TC (C1, C2 sem lançamentos).
+-- US4 — publicação do ranking (T031, FR-015 a FR-019, SC-005). Desde a spec 012 a publicação é
+-- por turma: TA (A1 86, A2 5); TC (C1, C2 sem lançamentos). A recusa de uma turma do lote vira
+-- exceção aqui, para manter as asserções da spec 007.
 -- ===========================================================================
-create function pg_temp.publicar(p_estado text, p_justificativa text default null, p_categoria text default 'Cat 1')
-returns jsonb language sql as $$
-  select public.publicar_ranking(pg_temp.e(), p_categoria, p_estado, p_justificativa);
+create function pg_temp.publicar(p_estado text, p_justificativa text default null, p_turma text default 'a')
+returns jsonb language plpgsql as $$
+declare
+  v_resposta jsonb;
+  v_base int := (select max(versao) from public.publicacoes_ranking where turma_id = pg_temp.t(p_turma));
+begin
+  v_resposta := public.publicar_ranking_turmas(pg_temp.e(),
+    jsonb_build_array(jsonb_build_object('turmaId', pg_temp.t(p_turma), 'versaoBase', v_base)), p_estado, p_justificativa) -> 0;
+  if not (v_resposta ->> 'publicada')::boolean then
+    raise exception '%', v_resposta ->> 'motivo' using errcode = '23514';
+  end if;
+  return jsonb_build_object('versao', v_resposta -> 'versao',
+    'id', (select id from public.publicacoes_ranking
+           where turma_id = pg_temp.t(p_turma) and versao = (v_resposta ->> 'versao')::int));
+end;
 $$;
 
 set local role authenticated;
@@ -725,8 +738,9 @@ select pg_temp.como(pg_temp.u('0e'));
 select throws_ok($$ select pg_temp.publicar('parcial') $$, '42501', null, 'SC-003: coordenação de outra edição não publica');
 
 select pg_temp.como(pg_temp.u('0a'));
-select throws_ok($$ select pg_temp.publicar('parcial', null, 'Inexistente') $$, '23514', null,
-  'FR-015: categoria precisa existir na edição');
+select throws_ok(format($f$ select public.publicar_ranking_turmas(%L, %L, 'parcial', null) $f$, pg_temp.e(),
+                        jsonb_build_array(jsonb_build_object('turmaId', pg_temp.t('e'), 'versaoBase', null))), '23514', null,
+  'FR-015: a turma precisa ser da edição');
 select pg_temp.guardar('v1', pg_temp.publicar('parcial') ->> 'id');
 reset role;
 select is((select versao from public.publicacoes_ranking where id = pg_temp.g('v1')::uuid), 1, 'FR-015: primeira versão');
@@ -735,8 +749,8 @@ select ok((select revisao_ate is null and estado = 'parcial' and regras_versao =
   'FR-015/FR-020: parcial guarda a versão das regras e não abre prazo de revisão');
 select is((select array_agg(dupla_id::text || ':' || posicao order by posicao)
            from public.publicacao_posicoes where publicacao_id = pg_temp.g('v1')::uuid),
-  array[pg_temp.d('a1') || ':1', pg_temp.d('b1') || ':2', pg_temp.d('a2') || ':3'],
-  'FR-015/FR-016: posições congeladas por total');
+  array[pg_temp.d('a1') || ':1', pg_temp.d('a2') || ':2'],
+  'FR-015/FR-016: posições congeladas por total (só equipes da turma)');
 select ok((select not bool_or(pg_temp.tem_chave(detalhe, 'nota')) from public.publicacao_posicoes
            where publicacao_id = pg_temp.g('v1')::uuid), 'SC-002: posições congeladas sem nota individual');
 
@@ -747,13 +761,13 @@ select throws_ok($$ select pg_temp.publicar('provisorio') $$, '23514', null,
   'FR-018: a segunda versão exige justificativa');
 select throws_like($$ select pg_temp.publicar('definitivo', 'Fechamento da edição.') $$, '%pendência%',
   'FR-017/SC-005: definitivo recusado com a lista de pendências');
-select ok(jsonb_array_length(public.pendencias_da_categoria(pg_temp.e(), 'Cat 1') -> 'componentes') > 0,
+select ok(jsonb_array_length(public.pendencias_ranking_turma(pg_temp.t('a')) -> 'componentes') > 0,
   'FR-017: pendências de componentes listadas');
 select pg_temp.guardar('o8', pg_temp.ocorrencia('a0000000-0000-0000-0008-000000000008', pg_temp.d('a1'), 'reincidencia'));
-select is(jsonb_array_length(public.pendencias_da_categoria(pg_temp.e(), 'Cat 1') -> 'ocorrencias'), 1,
+select is(jsonb_array_length(public.pendencias_ranking_turma(pg_temp.t('a')) -> 'ocorrencias'), 1,
   'FR-017: ocorrência não decidida listada nas pendências');
 select pg_temp.como(pg_temp.u('0b'));
-select throws_ok($$ select public.pendencias_da_categoria(pg_temp.e(), 'Cat 1') $$, '42501', null,
+select throws_ok($$ select public.pendencias_ranking_turma(pg_temp.t('a')) $$, '42501', null,
   'SC-003: pendências só para a coordenação');
 
 select pg_temp.como(pg_temp.u('0a'));
@@ -762,44 +776,45 @@ reset role;
 select ok((select versao = 2 and revisao_ate = publicado_em + interval '24 hours' and justificativa is not null
            from public.publicacoes_ranking where id = pg_temp.g('v2')::uuid),
   'FR-018/FR-020: provisória é a versão 2, com justificativa e prazo de revisão de 24 h');
-select is(pg_temp.contar('publicacoes_ranking', format('edicao_id = %L', pg_temp.e())), 2,
+select is(pg_temp.contar('publicacoes_ranking', format('turma_id = %L', pg_temp.t('a'))), 2,
   'FR-018: a versão anterior continua no histórico');
 select throws_ok(format($f$ update public.publicacoes_ranking set estado = 'definitivo' where id = %L $f$, pg_temp.g('v2')),
   '23514', null, 'FR-015: versão publicada é imutável (atualização)');
 select throws_ok(format($f$ delete from public.publicacao_posicoes where publicacao_id = %L $f$, pg_temp.g('v1')),
   '23514', null, 'FR-015: versão publicada é imutável (remoção)');
 select ok(pg_temp.contar('avisos', format('tipo = %L and destinatario_id = %L', 'ranking_publicado', pg_temp.u('a1'))) >= 1
-          and pg_temp.contar('avisos', format('tipo = %L and destinatario_id = %L', 'ranking_publicado', pg_temp.u('0d'))) >= 1
-          and pg_temp.contar('avisos', format('tipo = %L and destinatario_id = %L', 'ranking_publicado', pg_temp.u('c1'))) = 0,
-  'FR-026: alunos e equipe docente da categoria são avisados; outras categorias não');
+          and pg_temp.contar('avisos', format('tipo = %L and destinatario_id = %L', 'ranking_publicado', pg_temp.u('0b'))) >= 1
+          and pg_temp.contar('avisos', format('tipo = %L and destinatario_id in (%L, %L)', 'ranking_publicado', pg_temp.u('0d'), pg_temp.u('c1'))) = 0,
+  'FR-026 (spec 012, FR-012a): alunos e equipe docente da turma são avisados; outras turmas não');
 
 -- Leitura por perfil (FR-019, FR-019a).
 set local role authenticated;
 select pg_temp.como(pg_temp.u('a1'));
-select is(public.ranking_publicado(pg_temp.e(), null) ->> 'versao', '2', 'FR-019: aluno vê a versão mais recente');
-select is(public.ranking_publicado(pg_temp.e(), 'Cat 2') ->> 'categoria', 'Cat 1', 'FR-019: aluno vê só a própria categoria');
-select is((select count(*)::int from jsonb_array_elements(public.ranking_publicado(pg_temp.e(), null) -> 'posicoes') p
+select is(public.ranking_da_turma(pg_temp.t('a')) ->> 'versao', '2', 'FR-019: aluno vê a versão mais recente');
+select throws_ok($$ select public.ranking_da_turma(pg_temp.t('c')) $$, '42501', null,
+  'FR-019 (spec 012, FR-008): aluno vê só a própria turma');
+select is((select count(*)::int from jsonb_array_elements(public.ranking_da_turma(pg_temp.t('a')) -> 'posicoes') p
            where p ? 'detalhe'), 1, 'FR-019: detalhe só da própria equipe');
-select is((select p ->> 'duplaId' from jsonb_array_elements(public.ranking_publicado(pg_temp.e(), null) -> 'posicoes') p
+select is((select p ->> 'duplaId' from jsonb_array_elements(public.ranking_da_turma(pg_temp.t('a')) -> 'posicoes') p
            where (p ->> 'minha')::boolean), pg_temp.d('a1')::text, 'FR-019: a própria equipe vem marcada');
-select ok(not pg_temp.tem_chave(public.ranking_publicado(pg_temp.e(), null), 'nota'), 'SC-002: ranking sem nota individual');
+select ok(not pg_temp.tem_chave(public.ranking_da_turma(pg_temp.t('a')), 'nota'), 'SC-002: ranking sem nota individual');
 select is((select count(*)::int from public.publicacoes_ranking), 0, 'RLS: aluno não lê as publicações diretamente');
 select pg_temp.como(pg_temp.u('c1'));
-select is(public.ranking_publicado(pg_temp.e(), null), null, 'FR-019: sem publicação na categoria, nada a mostrar');
+select is(public.ranking_da_turma(pg_temp.t('c')), null, 'FR-019: sem publicação na turma, nada a mostrar');
 select pg_temp.como(pg_temp.u('0b'));
-select is((select count(*)::int from jsonb_array_elements(public.ranking_publicado(pg_temp.e(), null) -> 'posicoes') p
+select is((select count(*)::int from jsonb_array_elements(public.ranking_da_turma(pg_temp.t('a')) -> 'posicoes') p
            where p ? 'detalhe'), 2, 'FR-019a: docente vê o detalhe das equipes da própria turma');
-select throws_ok($$ select public.ranking_publicado(pg_temp.e(), 'Cat 2') $$, '42501', null,
-  'SC-003: docente não vê categoria de outras turmas');
-select throws_ok($$ select public.historico_publicacoes(pg_temp.e(), 'Cat 1') $$, '42501', null,
+select throws_ok($$ select public.ranking_da_turma(pg_temp.t('c')) $$, '42501', null,
+  'SC-003: docente não vê o ranking de outras turmas');
+select throws_ok($$ select public.historico_publicacoes_turma(pg_temp.t('a')) $$, '42501', null,
   'SC-003: histórico só para a coordenação');
 select pg_temp.como(pg_temp.u('0e'));
-select throws_ok($$ select public.ranking_publicado(pg_temp.e(), 'Cat 1') $$, '42501', null,
+select throws_ok($$ select public.ranking_da_turma(pg_temp.t('a')) $$, '42501', null,
   'SC-003: quem não participa da edição não vê o ranking');
 select pg_temp.como(pg_temp.u('0a'));
-select is((select count(*)::int from jsonb_array_elements(public.ranking_publicado(pg_temp.e(), 'Cat 1') -> 'posicoes') p
-           where p ? 'detalhe'), 3, 'FR-019: coordenação vê o detalhe de todas');
-select is(jsonb_array_length(public.historico_publicacoes(pg_temp.e(), 'Cat 1')), 2, 'FR-018: histórico de versões');
+select is((select count(*)::int from jsonb_array_elements(public.ranking_da_turma(pg_temp.t('a')) -> 'posicoes') p
+           where p ? 'detalhe'), 2, 'FR-019: coordenação vê o detalhe de todas');
+select is(jsonb_array_length(public.historico_publicacoes_turma(pg_temp.t('a'))), 2, 'FR-018: histórico de versões');
 select is(public.painel_da_turma(pg_temp.t('a')) -> 'pontuacao' ->> 'estado', 'provisorio',
   'US4: o painel da turma mostra a última publicação');
 
@@ -809,12 +824,12 @@ select lives_ok(format($f$ select public.registrar_presencas(pg_temp.en('1'), pg
   'FR-022: correção depois da publicação');
 select pg_temp.como(pg_temp.u('a1'));
 select is(public.pontos_da_minha_equipe(pg_temp.e()) -> 'totais' ->> 'total', '91', 'FR-022: a prévia muda');
-select is((select p ->> 'total' from jsonb_array_elements(public.ranking_publicado(pg_temp.e(), null) -> 'posicoes') p
+select is((select p ->> 'total' from jsonb_array_elements(public.ranking_da_turma(pg_temp.t('a')) -> 'posicoes') p
            where (p ->> 'minha')::boolean), '86', 'FR-022: o ranking publicado só muda numa nova publicação');
 
 -- C3: equipe sem lançamentos aparece com total 0 e pendente.
 select pg_temp.como(pg_temp.u('0a'));
-select pg_temp.guardar('vc2', pg_temp.publicar('parcial', null, 'Cat 2') ->> 'id');
+select pg_temp.guardar('vc2', pg_temp.publicar('parcial', null, 'c') ->> 'id');
 reset role;
 select ok((select total = 0 and pendente from public.publicacao_posicoes
            where publicacao_id = pg_temp.g('vc2')::uuid and dupla_id = pg_temp.d('c2')),
@@ -823,9 +838,10 @@ select ok((select total = 0 and pendente from public.publicacao_posicoes
 -- U1: edição encerrada recusa a publicação e mantém a leitura.
 set local role authenticated;
 select pg_temp.como(pg_temp.u('0f'));
-select throws_ok($$ select public.publicar_ranking('10000000-0000-0000-0008-000000000003', 'Cat G', 'parcial', null) $$,
+select throws_ok(format($f$ select public.publicar_ranking_turmas('10000000-0000-0000-0008-000000000003', %L, 'parcial', null) $f$,
+                        jsonb_build_array(jsonb_build_object('turmaId', pg_temp.t('e'), 'versaoBase', null))),
   '23514', null, 'U1: edição encerrada recusa a publicação');
-select lives_ok($$ select public.ranking_publicado('10000000-0000-0000-0008-000000000003', 'Cat G') $$,
+select lives_ok($$ select public.ranking_da_turma(pg_temp.t('e')) $$,
   'U1: edição encerrada mantém a leitura do ranking');
 reset role;
 
@@ -878,7 +894,7 @@ select throws_ok($$ select pg_temp.pedir('b0000000-0000-0000-0008-000000000009',
 reset role;
 select ok(pg_temp.contar('avisos', format('tipo = %L and destinatario_id = %L', 'revisao_pedida', pg_temp.u('0a'))) >= 2,
   'FR-026: a coordenação é avisada dos pedidos');
-select ok(jsonb_array_length(app.pendencias_da_categoria(pg_temp.e(), 'Cat 1') -> 'revisoes') >= 2,
+select ok(jsonb_array_length(app.pendencias_do_ranking_da_turma(pg_temp.t('a')) -> 'revisoes') >= 2,
   'FR-017: pedido aberto entra nas pendências do definitivo');
 
 -- Prazo vencido e exceção de prazo (SC-006).

@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 // Spec 008 — painéis com dados reais e relatórios CSV (quickstart.md). Contas fictícias do seed;
 // roda depois das outras jornadas (projeto "paineis"), que já registraram a presença do
-// encontro 1 e publicaram o ranking da Categoria A. A Categoria B começa sem publicação.
+// encontro 1 e publicaram o ranking do 3º ano A. O 3º ano B começa sem publicação (spec 012).
 const SENHA = 'senha-local-123';
 const BOM = '﻿';
 
@@ -59,27 +59,25 @@ test('aluna vê a prévia e o próximo encontro, sem nota individual', async ({ 
   await expect(page.getByText('Dados fictícios')).toHaveCount(0);
 });
 
-test('o painel da aluna da Categoria B passa a mostrar a posição depois da publicação', async ({
+test('o painel da aluna do 3º ano B passa a mostrar a posição depois da publicação', async ({
   page,
 }) => {
   await entrar(page, 'iris@exemplo.invalid');
-  await expect(page.getByRole('region', { name: 'Posição' })).toContainText(
-    'Ranking ainda não publicado',
+  await expect(page.getByRole('region', { name: 'Posição na turma' })).toContainText(
+    'Ranking da turma ainda não publicado',
   );
   await page.getByRole('button', { name: 'Sair' }).click();
 
   await entrar(page, 'coordenacao@exemplo.invalid');
   await page.goto('/coordenacao/ranking');
-  await page
-    .getByRole('combobox', { name: 'Categoria' })
-    .selectOption({ label: 'Categoria B (exemplo)' });
+  await page.getByRole('checkbox', { name: 'Selecionar 3º ano B (fictícia)' }).check();
   await page.getByRole('radio', { name: 'Parcial' }).check();
-  await page.getByRole('button', { name: 'Publicar ranking' }).click();
-  await expect(page.getByText(/Ranking publicado/)).toBeVisible();
+  await page.getByRole('button', { name: 'Publicar 1 turma' }).click();
+  await expect(page.getByText('3º ano B (fictícia) — versão 1')).toBeVisible();
   await page.getByRole('button', { name: 'Sair' }).click();
 
   await entrar(page, 'iris@exemplo.invalid');
-  const posicao = page.getByRole('region', { name: 'Posição' });
+  const posicao = page.getByRole('region', { name: 'Posição na turma' });
   await expect(posicao).toContainText(/\dº lugar/);
   await expect(posicao).toContainText('Parcial');
 });
@@ -97,7 +95,7 @@ test('coordenação exporta os pontos em até 3 interações a partir do painel 
   expect(csv.startsWith(BOM)).toBe(true);
   const [cabecalho, ...linhas] = csv.slice(1).split('\r\n');
   expect(cabecalho).toBe(
-    'Categoria;Turma;Equipe;Encontro;Presença;Participação;Questões/prova oficial;Entrega prática;Apresentação;Descontos;Total;Pendências',
+    'Categoria;Turma;Equipe;Encontro;Presença;Participação;Questões/prova oficial;Entrega prática;Apresentação;Descontos;Total;Pendências;Posição na turma',
   );
   expect(
     linhas.some((l) => l.startsWith('Categoria A (exemplo);3º ano A (fictícia);Dupla Órbita;1;')),
