@@ -64,7 +64,7 @@ export function PainelAluno({
         )}
         {p.equipe && (
           <Indicador
-            titulo="Posição"
+            titulo="Posição na turma"
             icone="ranking"
             acento="amarelo"
             valor={
@@ -75,7 +75,7 @@ export function PainelAluno({
                   <span className="text-lg">Equipe fora desta publicação</span>
                 )
               ) : (
-                <span className="text-lg">Ranking ainda não publicado</span>
+                <span className="text-lg">Ranking da turma ainda não publicado</span>
               )
             }
             link={<LinkDoPainel para="/aluno/ranking">Ver ranking</LinkDoPainel>}

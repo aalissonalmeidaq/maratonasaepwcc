@@ -1,82 +1,76 @@
 import { useState, type FormEvent } from 'react';
 import { validarJustificativa } from '@/modules/duplas';
 import { Alert, RodapeDoFormulario, TextAreaField, useEnvio } from '@/shared/ui';
-import type { EstadoRanking, PendenciasDaCategoria } from '../domain/tipos';
-
-const COMPONENTE: Record<string, string> = {
-  participacao: 'participação',
-  avaliacaoObjetiva: 'questões/prova oficial',
-  entrega: 'entrega',
-  apresentacao: 'apresentação',
-};
+import type { EstadoRanking, ResultadoLote } from '../domain/tipos';
+import { ResultadoDoLote } from './ResultadoDoLote';
 
 const ESTADOS: { valor: EstadoRanking; rotulo: string; dica: string }[] = [
   { valor: 'parcial', rotulo: 'Parcial', dica: 'Retrato do andamento; não abre prazo de revisão.' },
   {
     valor: 'provisorio',
     rotulo: 'Provisório',
-    dica: 'Abre 24 horas para as equipes pedirem revisão dos pontos.',
+    dica: 'Abre o prazo para as equipes pedirem revisão dos pontos.',
   },
-  { valor: 'definitivo', rotulo: 'Definitivo', dica: 'Resultado final; exige zero pendências.' },
+  {
+    valor: 'definitivo',
+    rotulo: 'Definitivo',
+    dica: 'Resultado final; turmas com pendências são recusadas e as demais publicadas.',
+  },
 ];
 
+export interface TurmaMarcada {
+  turmaId: string;
+  turma: string;
+  /** Última versão que a tela carregou (`null` sem publicação): o servidor recusa se mudou. */
+  versaoBase: number | null;
+}
+
 /**
- * Publicação do ranking de uma categoria pela coordenação (US4). Cada publicação cria uma versão
- * imutável; a partir da segunda, a justificativa é obrigatória (FR-018). O servidor recusa o
- * definitivo enquanto houver pendências (FR-017) e devolve a lista.
+ * Publicação do ranking das turmas marcadas (spec 012, FR-007a). Cada turma vira uma versão
+ * própria; a justificativa é obrigatória se alguma já tiver publicação (FR-005). O resultado de
+ * cada turma vem do servidor.
  */
 export function PainelPublicacao({
-  pendencias,
-  versaoAtual,
+  turmas,
   onPublicar,
+  onRecarregar,
   bloqueio,
 }: {
-  pendencias: PendenciasDaCategoria;
-  versaoAtual: number | null;
-  onPublicar: (d: { estado: EstadoRanking; justificativa?: string }) => Promise<unknown>;
+  turmas: TurmaMarcada[];
+  onPublicar: (d: { estado: EstadoRanking; justificativa?: string }) => Promise<ResultadoLote>;
+  onRecarregar?: () => void;
   bloqueio?: string;
 }) {
   const [estado, setEstado] = useState<EstadoRanking>('parcial');
   const [justificativa, setJustificativa] = useState('');
   const [erro, setErro] = useState<string | null>(null);
+  const [resultado, setResultado] = useState<ResultadoLote | null>(null);
   const { estado: envio, enviando, enviar } = useEnvio();
-  const exigeJustificativa = versaoAtual !== null;
-  const itens = [
-    ...pendencias.componentes.map(
-      (c) =>
-        `${c.duplaNome} — encontro ${c.encontroNumero}: ${COMPONENTE[c.componente] ?? c.componente}`,
-    ),
-    ...pendencias.ocorrencias.map((o) => `${o.duplaNome} — ocorrência sem decisão`),
-    ...pendencias.revisoes.map((r) => `${r.duplaNome} — revisão aberta`),
-  ];
+  const exigeJustificativa = turmas.some((t) => t.versaoBase !== null);
+  const semTurma = turmas.length === 0;
 
   async function aoEnviar(ev: FormEvent) {
     ev.preventDefault();
+    if (semTurma) return;
     const motivo = exigeJustificativa ? validarJustificativa(justificativa) : null;
     setErro(motivo);
     if (motivo) return;
-    await enviar(
-      () =>
-        onPublicar({
-          estado,
-          justificativa: exigeJustificativa ? justificativa.trim() : undefined,
-        }),
-      'Ranking publicado. As equipes da categoria foram avisadas.',
-    );
+    setResultado(null);
+    await enviar(async () => {
+      const r = await onPublicar({
+        estado,
+        justificativa: exigeJustificativa ? justificativa.trim() : undefined,
+      });
+      setResultado(r);
+      return r;
+      // O desfecho de cada turma aparece no resultado do lote, não numa mensagem única.
+    }, '');
   }
 
   return (
     <form onSubmit={aoEnviar} noValidate className="flex flex-col gap-4">
-      {itens.length > 0 ? (
-        <Alert tom="alerta" titulo={`${itens.length} pendência(s) impedem o definitivo`}>
-          <ul className="list-disc pl-5">
-            {itens.slice(0, 20).map((t) => (
-              <li key={t}>{t}</li>
-            ))}
-          </ul>
-        </Alert>
-      ) : (
-        <Alert tom="sucesso" titulo="Nenhuma pendência na categoria." />
+      {!semTurma && (
+        <p className="text-sm">Turmas marcadas: {turmas.map((t) => t.turma).join(', ')}.</p>
       )}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 text-sm font-semibold">Estado da publicação</legend>
@@ -89,7 +83,6 @@ export function PainelPublicacao({
                 className="size-5"
                 value={e.valor}
                 checked={estado === e.valor}
-                disabled={e.valor === 'definitivo' && itens.length > 0}
                 onChange={() => setEstado(e.valor)}
                 aria-describedby={`estado-${e.valor}-dica`}
               />
@@ -103,21 +96,25 @@ export function PainelPublicacao({
       </fieldset>
       {exigeJustificativa && (
         <TextAreaField
-          rotulo="Justificativa da nova versão"
-          dica={`A versão ${versaoAtual} continua no histórico.`}
+          rotulo="Justificativa"
+          dica="Obrigatória: alguma turma marcada já tem versão publicada, que continua no histórico."
           maxLength={2000}
           value={justificativa}
           erro={erro ?? undefined}
           onChange={(e) => setJustificativa(e.target.value)}
         />
       )}
+      {envio.tipo === 'erro' && <Alert tom="erro" titulo={envio.mensagem} anunciar />}
       <RodapeDoFormulario
-        bloqueio={bloqueio}
-        estado={envio}
+        bloqueio={bloqueio ?? (semTurma ? 'Marque ao menos uma turma na lista.' : undefined)}
+        estado={envio.tipo === 'enviando' ? envio : { tipo: 'ocioso' }}
         enviando={enviando}
-        rotulo="Publicar ranking"
+        rotulo={`Publicar ${turmas.length} ${turmas.length === 1 ? 'turma' : 'turmas'}`}
         icone="ranking"
       />
+      {resultado && (
+        <ResultadoDoLote resultado={resultado} onRecarregar={onRecarregar ?? (() => {})} />
+      )}
     </form>
   );
 }

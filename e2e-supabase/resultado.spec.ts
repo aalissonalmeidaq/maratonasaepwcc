@@ -128,16 +128,18 @@ test.describe('US4 — publicação do ranking', () => {
     await expect(page.getByText('Presenças salvas.')).toBeVisible();
   });
 
-  test('coordenação publica o parcial; o definitivo fica indisponível com pendências', async ({
+  test('coordenação publica o parcial do 3º ano A; as pendências aparecem no detalhe da turma', async ({
     page,
   }) => {
     await entrar(page, 'coordenacao@exemplo.invalid');
     await page.goto('/coordenacao/ranking');
-    await expect(page.getByText(/pendência\(s\) impedem o definitivo/)).toBeVisible();
-    await expect(page.getByRole('radio', { name: 'Definitivo' })).toBeDisabled();
+    // Spec 012: a publicação é por turma.
+    await page.getByRole('button', { name: 'Abrir 3º ano A (fictícia)' }).click();
+    await expect(page.getByText(/pendências? impedem? o definitivo/)).toBeVisible();
+    await page.getByRole('checkbox', { name: 'Selecionar 3º ano A (fictícia)' }).check();
     await page.getByRole('radio', { name: 'Parcial' }).check();
-    await page.getByRole('button', { name: 'Publicar ranking' }).click();
-    await expect(page.getByText(/Ranking publicado/)).toBeVisible();
+    await page.getByRole('button', { name: 'Publicar 1 turma' }).click();
+    await expect(page.getByText('3º ano A (fictícia) — versão 1')).toBeVisible();
     await expect(page.getByText(/Versão 1, publicada em/)).toBeVisible();
   });
 
@@ -152,13 +154,11 @@ test.describe('US4 — publicação do ranking', () => {
   test('coordenação publica o provisório com justificativa (versão 2)', async ({ page }) => {
     await entrar(page, 'coordenacao@exemplo.invalid');
     await page.goto('/coordenacao/ranking');
+    await page.getByRole('checkbox', { name: 'Selecionar 3º ano A (fictícia)' }).check();
     await page.getByRole('radio', { name: 'Provisório' }).check();
-    await page
-      .getByLabel('Justificativa da nova versão')
-      .fill('Prova oficial registrada para a categoria.');
-    await page.getByRole('button', { name: 'Publicar ranking' }).click();
-    await expect(page.getByText(/Ranking publicado/)).toBeVisible();
-    await expect(page.getByText(/Versão 2, publicada em/)).toBeVisible();
+    await page.getByLabel('Justificativa').fill('Prova oficial registrada para a turma.');
+    await page.getByRole('button', { name: 'Publicar 1 turma' }).click();
+    await expect(page.getByText('3º ano A (fictícia) — versão 2')).toBeVisible();
   });
 });
 

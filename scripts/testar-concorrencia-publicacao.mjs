@@ -1,10 +1,11 @@
 /**
- * Teste de concorrência da publicação do ranking (spec 007, T033, R6) com DUAS conexões reais ao
- * banco do Supabase LOCAL (container `supabase_db_maratona`).
+ * Teste de concorrência da publicação do ranking por turma (specs 007 e 012, FR-006) com DUAS
+ * conexões reais ao banco do Supabase LOCAL (container `supabase_db_maratona`).
  *
- * A coordenação publica a mesma categoria duas vezes ao mesmo tempo: a primeira transação segura
- * a trava da categoria por 1 s; a segunda começa logo depois e precisa esperar. Esperado: as duas
- * aceitas com versões 1 e 2, sem número de versão repetido. Apaga as fixtures fictícias ao final.
+ * A coordenação publica a mesma turma duas vezes ao mesmo tempo, as duas sobre a mesma versão
+ * (nenhuma publicação ainda): a primeira transação segura a trava da turma por 1 s; a segunda
+ * começa logo depois e precisa esperar. Esperado: uma versão (1) e uma recusa com "recarregue",
+ * sem número de versão repetido. Apaga as fixtures fictícias ao final.
  *
  * Uso: `node scripts/testar-concorrencia-publicacao.mjs` (Supabase local iniciado).
  */
@@ -49,7 +50,8 @@ function publicar(estado, segurarMs) {
 begin;
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', '${coord}', 'role', 'authenticated')::text, true);
-select public.publicar_ranking('${edicao}', '${CATEGORIA}', '${estado}', 'Publicação simultânea do teste de concorrência.');
+select public.publicar_ranking_turmas('${edicao}', '[{"turmaId": "${turma}", "versaoBase": null}]', '${estado}',
+  'Publicação simultânea do teste de concorrência.') -> 0;
 select pg_sleep(${segurarMs / 1000});
 commit;`;
 }
@@ -74,10 +76,13 @@ async function limpar() {
   await psql(`
 begin;
 set local session_replication_role = replica;
-delete from public.avisos where referencia ->> 'categoria' = '${CATEGORIA}';
+delete from public.avisos where referencia ->> 'turmaId' = '${turma}';
 delete from public.publicacao_posicoes where publicacao_id in (select id from public.publicacoes_ranking where edicao_id = '${edicao}');
 delete from public.publicacoes_ranking where edicao_id = '${edicao}';
 delete from public.duplas where id = '${dupla}';
+delete from public.atribuicoes where edicao_id = '${edicao}';
+delete from public.turmas where id = '${turma}';
+delete from public.cursos where id = '${curso}';
 delete from public.edicoes where id = '${edicao}';
 delete from auth.users where email like 'concp-%@exemplo.invalid';
 commit;`);
@@ -91,10 +96,24 @@ try {
   const segunda = psql(publicar('parcial', 0));
   const respostas = await Promise.all([primeira, segunda]);
   const versoes = (
-    await psql(`select string_agg(versao::text, ',' order by versao) from public.publicacoes_ranking where edicao_id = '${edicao}';`)
+    await psql(
+      `select string_agg(versao::text, ',' order by versao) from public.publicacoes_ranking where edicao_id = '${edicao}';`,
+    )
   ).saida;
-  const aprovado = respostas.every(ok) && versoes === '1,2';
-  console.log(JSON.stringify({ respostas: respostas.map(resumo), versoes, aprovado }, null, 2));
+  // A saída traz também as linhas de `set_config` e `pg_sleep`: vale a do resultado da turma.
+  const resultado = (r) =>
+    r.saida
+      .split(String.fromCharCode(10))
+      .filter((l) => l.includes('"publicada"'))
+      .map((l) => JSON.parse(l))[0] ?? null;
+  const turmas = respostas.map((r) => (ok(r) ? resultado(r) : null));
+  const publicadas = turmas.filter((t) => t?.publicada).length;
+  const recusa = turmas.find((t) => t && !t.publicada)?.motivo ?? null;
+  const aprovado =
+    respostas.every(ok) && versoes === '1' && publicadas === 1 && /recarregue/.test(recusa ?? '');
+  console.log(
+    JSON.stringify({ respostas: respostas.map(resumo), versoes, recusa, aprovado }, null, 2),
+  );
   process.exitCode = aprovado ? 0 : 1;
 } catch (e) {
   console.error(e);

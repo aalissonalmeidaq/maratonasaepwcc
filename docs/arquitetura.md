@@ -38,26 +38,26 @@ valem para os dois lados.
 
 ## Mapa de módulos
 
-| #   | Módulo                              | Pasta                                     | Situação no ciclo 1                                                   |
-| --- | ----------------------------------- | ----------------------------------------- | --------------------------------------------------------------------- |
-| 1   | Autenticação e usuários             | `modules/auth`                            | Adaptadores Supabase (real) e demonstração, sessão, rotas protegidas  |
-| 2   | Perfis, permissões e vínculos       | `modules/acesso` + tabela `atribuicoes`   | Papéis, áreas, RLS e testes pgTAP                                     |
-| 3   | Edições, cursos e turmas            | `modules/organizacao` + tabelas           | Edições pelo app, cadastro permanente, turmas e mentores (spec 010)   |
-| 4   | Equipes (duplas e trios)            | `modules/duplas`                          | Convites, trio, nome e gestão por RPC; histórico (specs 002 e 003)    |
-| 5   | Encontros e ambientes               | `modules/encontros`                       | Cadastro com validação no servidor (spec 002)                         |
-| 6   | Questões preparatórias              | `modules/atividades`                      | Listas, gabarito protegido e submissão única por RPC (spec 006)       |
-| 7   | Desafios, projetos e entregas       | `modules/atividades` + bucket `entregas`  | Entrega em duas etapas (Storage + RPC), comprovante do servidor       |
-| 8   | Presença e participação             | `modules/atividades`                      | Registro em lote e participação por RPC idempotente (spec 006)        |
-| 9   | Avaliação e rubricas                | `modules/atividades`                      | Rubrica com feedback, correção justificada e prorrogação (spec 006)   |
-| 10  | Prova oficial (registro)            | `modules/resultado`                       | Registro pela coordenação; nota só para ela (spec 007)                |
-| 11  | Pontuação e classificação           | `modules/pontuacao` + `app.calcular_*`    | Cálculo com paridade (ADR 0011); regras com versões e por turma (011) |
-| 12  | Ocorrências, penalidades e recursos | `modules/resultado` + bucket `evidencias` | Ocorrência, manifestação, decisão, ranking e revisão (spec 007)       |
-| 13  | Comunicados e regulamento           | `modules/comunicados`                     | Comunicados por público e resumo das regras da turma (specs 009/011)  |
-| 14  | Relatórios e acompanhamento         | `modules/relatorios`                      | Painéis por perfil e CSV autorizados no servidor (spec 008)           |
-| 15  | Componentes compartilhados          | `shared/ui`, `shared/pwa`                 | Prontos (botões, campos, tabela, diálogo, badges…)                    |
-| 16  | Auditoria e histórico               | tabela `auditoria` + gatilhos             | Gatilhos em edições, cursos, turmas, atribuições e regras (011)       |
-| 17  | Painel da turma                     | `modules/painel-turma`                    | Leitura por RPC com acesso no servidor (spec 004)                     |
-| —   | Dados fictícios                     | `modules/demo`                            | Somente modo demonstração                                             |
+| #   | Módulo                              | Pasta                                     | Situação no ciclo 1                                                               |
+| --- | ----------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------- |
+| 1   | Autenticação e usuários             | `modules/auth`                            | Adaptadores Supabase (real) e demonstração, sessão, rotas protegidas              |
+| 2   | Perfis, permissões e vínculos       | `modules/acesso` + tabela `atribuicoes`   | Papéis, áreas, RLS e testes pgTAP                                                 |
+| 3   | Edições, cursos e turmas            | `modules/organizacao` + tabelas           | Edições pelo app, cadastro permanente, turmas e mentores (spec 010)               |
+| 4   | Equipes (duplas e trios)            | `modules/duplas`                          | Convites, trio, nome e gestão por RPC; histórico (specs 002 e 003)                |
+| 5   | Encontros e ambientes               | `modules/encontros`                       | Cadastro com validação no servidor (spec 002)                                     |
+| 6   | Questões preparatórias              | `modules/atividades`                      | Listas, gabarito protegido e submissão única por RPC (spec 006)                   |
+| 7   | Desafios, projetos e entregas       | `modules/atividades` + bucket `entregas`  | Entrega em duas etapas (Storage + RPC), comprovante do servidor                   |
+| 8   | Presença e participação             | `modules/atividades`                      | Registro em lote e participação por RPC idempotente (spec 006)                    |
+| 9   | Avaliação e rubricas                | `modules/atividades`                      | Rubrica com feedback, correção justificada e prorrogação (spec 006)               |
+| 10  | Prova oficial (registro)            | `modules/resultado`                       | Registro pela coordenação; nota só para ela (spec 007)                            |
+| 11  | Pontuação e classificação           | `modules/pontuacao` + `app.calcular_*`    | Cálculo com paridade (ADR 0011); regras com versões e por turma (011)             |
+| 12  | Ocorrências, penalidades e recursos | `modules/resultado` + bucket `evidencias` | Ocorrência, decisão, revisão (007); ranking e premiação por turma (012, ADR 0012) |
+| 13  | Comunicados e regulamento           | `modules/comunicados`                     | Comunicados por público e resumo das regras da turma (specs 009/011)              |
+| 14  | Relatórios e acompanhamento         | `modules/relatorios`                      | Painéis por perfil e CSV autorizados no servidor (spec 008)                       |
+| 15  | Componentes compartilhados          | `shared/ui`, `shared/pwa`                 | Prontos (botões, campos, tabela, diálogo, badges…)                                |
+| 16  | Auditoria e histórico               | tabela `auditoria` + gatilhos             | Gatilhos em edições, cursos, turmas, atribuições e regras (011)                   |
+| 17  | Painel da turma                     | `modules/painel-turma`                    | Leitura por RPC com acesso no servidor (spec 004)                                 |
+| —   | Dados fictícios                     | `modules/demo`                            | Somente modo demonstração                                                         |
 
 Módulos ainda sem código têm apenas `README.md` descrevendo responsabilidade e incremento.
 

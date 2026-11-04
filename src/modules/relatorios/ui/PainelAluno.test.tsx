@@ -58,7 +58,7 @@ describe('PainelAluno (US1, FR-002, FR-006)', () => {
       '/aluno/pontuacao',
     );
 
-    const posicao = cartao('Posição');
+    const posicao = cartao('Posição na turma');
     expect(within(posicao).getByText('2º lugar (empatada)')).toBeInTheDocument();
     expect(within(posicao).getByText('Parcial')).toBeInTheDocument();
 
@@ -76,7 +76,7 @@ describe('PainelAluno (US1, FR-002, FR-006)', () => {
     expect(within(cartao('Avisos')).getByText('1 aviso não lido')).toBeInTheDocument();
     // Dashboard: os indicadores principais ficam juntos no topo, com o valor em destaque.
     const indicadores = screen.getByRole('region', { name: 'Indicadores' });
-    for (const nome of ['Pontos', 'Posição', 'Próximo encontro', 'Próximo prazo']) {
+    for (const nome of ['Pontos', 'Posição na turma', 'Próximo encontro', 'Próximo prazo']) {
       expect(within(indicadores).getByRole('region', { name: nome })).toBeInTheDocument();
     }
     expect(within(cartao('Próximo encontro')).getByText('09 de nov.')).toBeInTheDocument();
@@ -85,9 +85,11 @@ describe('PainelAluno (US1, FR-002, FR-006)', () => {
     expect(await violacoesA11y(container)).toEqual([]);
   });
 
-  it('sem publicação: "Ranking ainda não publicado"; sem ações: estado vazio', () => {
+  it('sem publicação: "Ranking da turma ainda não publicado"; sem ações: estado vazio', () => {
     renderizar({ ...base, ranking: null, acoes: [], proximoPrazo: null, avisosNaoLidos: 0 });
-    expect(within(cartao('Posição')).getByText('Ranking ainda não publicado')).toBeInTheDocument();
+    expect(
+      within(cartao('Posição na turma')).getByText('Ranking da turma ainda não publicado'),
+    ).toBeInTheDocument();
     expect(
       within(cartao('Ações pendentes')).getByText('Nenhuma ação pendente.'),
     ).toBeInTheDocument();
@@ -109,7 +111,7 @@ describe('PainelAluno (US1, FR-002, FR-006)', () => {
       '/aluno/dupla',
     );
     expect(screen.queryByRole('region', { name: 'Pontos' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: 'Posição' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Posição na turma' })).not.toBeInTheDocument();
     expect(cartao('Próximo encontro')).toBeInTheDocument();
     expect(await violacoesA11y(container)).toEqual([]);
   });

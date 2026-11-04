@@ -5,12 +5,15 @@ import type {
   Avisos,
   Ocorrencia,
   PedidoRevisao,
-  PendenciasDaCategoria,
+  PendenciasDoRanking,
   PontosDaEquipe,
+  PremiacaoDaTurma,
+  PublicacaoAnterior,
   PublicacaoRanking,
   RepositorioResultado,
+  ResultadoLote,
   ResultadoProva,
-  ResultadoPublicacao,
+  TurmaNoRanking,
   VersaoPublicada,
 } from '../domain/tipos';
 
@@ -127,21 +130,6 @@ export function criarRepositorioResultadoSupabase(sb: SupabaseClient): Repositor
       return verificar(await sb.rpc('pontos_da_turma', { p_turma: turmaId })) as PontosDaEquipe[];
     },
 
-    async pendenciasDaCategoria(edicaoId, categoria) {
-      return verificar(
-        await sb.rpc('pendencias_da_categoria', { p_edicao: edicaoId, p_categoria: categoria }),
-      ) as PendenciasDaCategoria;
-    },
-    async publicarRanking(d) {
-      return verificar(
-        await sb.rpc('publicar_ranking', {
-          p_edicao: d.edicaoId,
-          p_categoria: d.categoria,
-          p_estado: d.estado,
-          p_justificativa: d.justificativa?.trim() || null,
-        }),
-      ) as ResultadoPublicacao;
-    },
     async rankingPublicado(edicaoId, categoria) {
       return talvez<PublicacaoRanking>(
         await sb.rpc('ranking_publicado', { p_edicao: edicaoId, p_categoria: categoria ?? null }),
@@ -151,6 +139,57 @@ export function criarRepositorioResultadoSupabase(sb: SupabaseClient): Repositor
       return verificar(
         await sb.rpc('historico_publicacoes', { p_edicao: edicaoId, p_categoria: categoria }),
       ) as VersaoPublicada[];
+    },
+    async publicacoesAnteriores(edicaoId) {
+      return verificar(
+        await sb.rpc('publicacoes_anteriores', { p_edicao: edicaoId }),
+      ) as PublicacaoAnterior[];
+    },
+
+    async rankingDaEdicao(edicaoId) {
+      return verificar(
+        await sb.rpc('ranking_da_edicao', { p_edicao: edicaoId }),
+      ) as TurmaNoRanking[];
+    },
+    async pendenciasRankingTurma(turmaId) {
+      return verificar(
+        await sb.rpc('pendencias_ranking_turma', { p_turma: turmaId }),
+      ) as PendenciasDoRanking;
+    },
+    async publicarRankingTurmas(d) {
+      // A resposta lista o resultado de cada turma: só o servidor diz o que foi publicado.
+      return verificar(
+        await sb.rpc('publicar_ranking_turmas', {
+          p_edicao: d.edicaoId,
+          p_turmas: d.turmas.map((t) => ({ turmaId: t.turmaId, versaoBase: t.versaoBase })),
+          p_estado: d.estado,
+          p_justificativa: d.justificativa?.trim() || null,
+        }),
+      ) as ResultadoLote;
+    },
+    async rankingDaTurma(turmaId) {
+      return talvez<PublicacaoRanking>(await sb.rpc('ranking_da_turma', { p_turma: turmaId }));
+    },
+    async historicoPublicacoesTurma(turmaId) {
+      return verificar(
+        await sb.rpc('historico_publicacoes_turma', { p_turma: turmaId }),
+      ) as VersaoPublicada[];
+    },
+    async premiacaoDaEdicao(edicaoId) {
+      return verificar(
+        await sb.rpc('premiacao_da_edicao', { p_edicao: edicaoId }),
+      ) as PremiacaoDaTurma[];
+    },
+    async decidirPremiacaoEmpate(d) {
+      return verificar(
+        await sb.rpc('decidir_premiacao_empate', {
+          p_publicacao: d.publicacaoId,
+          p_posicao: d.posicao,
+          p_premiadas: d.premiadas,
+          p_decisao: d.decisao,
+          p_justificativa: d.justificativa,
+        }),
+      ) as { id: string; decididoEm: string };
     },
 
     async pedirRevisao(d) {

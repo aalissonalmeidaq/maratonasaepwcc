@@ -1,15 +1,17 @@
 import { useAuth } from '@/modules/auth';
-import { painelCoordenacao } from '@/modules/demo';
 import type { Edicao } from '@/modules/organizacao';
 import { PainelCoordenacao } from '@/modules/relatorios';
-import { Alert, PageHeader, StatCard, StatusBadge } from '@/shared/ui';
+import { FormDecisaoEmpate, PremiacaoPorTurma } from '@/modules/resultado';
+import { EmptyState, PageHeader } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
-import { usePainelDaCoordenacao } from '../dados/consultas';
-import { ComDadosDemo } from './comum';
+import {
+  useBloqueioDeEscrita,
+  useGravar,
+  usePainelDaCoordenacao,
+  usePremiacaoDaEdicao,
+} from '../dados/consultas';
+import { useRepositorios } from '../dados/useRepositorios';
 import { ComEdicao } from './ComEdicao';
-
-type Painel = ReturnType<typeof painelCoordenacao>;
-const carregar = () => painelCoordenacao();
 
 function PainelDaEdicao({ edicao }: { edicao: Edicao }) {
   const { sessao } = useAuth();
@@ -31,34 +33,50 @@ export function CoordenacaoInicioPage() {
   );
 }
 
-export function CoordenacaoPremiacaoPage() {
+/** Premiação por turma com os dados do servidor (spec 012, FR-018, FR-018a, FR-018b). */
+function PremiacaoDaCoordenacao({ edicao }: { edicao: Edicao }) {
+  const r = useRepositorios();
+  const gravar = useGravar();
+  const bloqueio = useBloqueioDeEscrita();
   return (
-    <ComDadosDemo carregar={carregar}>
-      {(p: Painel) => (
-        <>
-          <PageHeader
-            icone="trofeu"
-            titulo="Premiação"
-            descricao="Configuração da edição — não fixada no código."
-          />
-          <Alert tom="alerta" titulo="Detalhes a confirmar pela coordenação">
-            Valores, quantidade de itens por dupla, validade dos vouchers e condições de entrega
-            ainda não foram informados.
-          </Alert>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            {p.edicao.premiacao.map((item) => (
-              <StatCard
-                key={item.posicao}
-                icone="medalha"
-                acento={item.posicao === 1 ? 'amarelo' : item.posicao === 2 ? 'ciano' : 'coral'}
-                rotulo={`${item.posicao}º lugar`}
-                valor={<span className="text-lg">{item.descricao}</span>}
-                complemento={item.detalhes ?? <StatusBadge estado="a_confirmar" />}
-              />
-            ))}
-          </div>
-        </>
-      )}
-    </ComDadosDemo>
+    <>
+      <PageHeader
+        icone="trofeu"
+        titulo="Premiação"
+        descricao="Os prêmios configurados na edição valem para cada turma, pela publicação definitiva."
+      />
+      <Consulta consulta={usePremiacaoDaEdicao(edicao.id)}>
+        {(premiacoes) =>
+          premiacoes.length === 0 ? (
+            <EmptyState titulo="Nenhuma turma cadastrada nesta edição." />
+          ) : (
+            <PremiacaoPorTurma
+              premiacoes={premiacoes}
+              renderizarDecisao={(p, item) =>
+                p.publicacaoId && (
+                  <FormDecisaoEmpate
+                    item={item}
+                    bloqueio={bloqueio}
+                    onDecidir={(d) =>
+                      gravar(() =>
+                        r.resultado.decidirPremiacaoEmpate({
+                          publicacaoId: p.publicacaoId as string,
+                          posicao: item.posicao,
+                          ...d,
+                        }),
+                      )()
+                    }
+                  />
+                )
+              }
+            />
+          )
+        }
+      </Consulta>
+    </>
   );
+}
+
+export function CoordenacaoPremiacaoPage() {
+  return <ComEdicao>{(edicao) => <PremiacaoDaCoordenacao edicao={edicao} />}</ComEdicao>;
 }

@@ -121,24 +121,6 @@ describe('repositório Supabase do resultado — RPCs e erros', () => {
     ).rejects.toThrow('O prazo de manifestação ainda está aberto.');
   });
 
-  it('publicação envia estado e justificativa', async () => {
-    const pub = { id: 'p1', versao: 2, estado: 'provisorio', publicadoEm: 'x', revisaoAte: 'y' };
-    const { sb, chamar } = clienteFalso({ rpc: { data: pub, error: null } });
-    const r = await criarRepositorioResultadoSupabase(sb).publicarRanking({
-      edicaoId: 'ed',
-      categoria: 'Cat 1',
-      estado: 'provisorio',
-      justificativa: 'Prova oficial registrada.',
-    });
-    expect(chamar).toHaveBeenCalledWith('publicar_ranking', {
-      p_edicao: 'ed',
-      p_categoria: 'Cat 1',
-      p_estado: 'provisorio',
-      p_justificativa: 'Prova oficial registrada.',
-    });
-    expect(r).toEqual(pub);
-  });
-
   it('ranking sem publicação devolve nulo', async () => {
     const { sb } = clienteFalso({ rpc: { data: null, error: null } });
     expect(await criarRepositorioResultadoSupabase(sb).rankingPublicado('ed', null)).toBeNull();
@@ -198,5 +180,92 @@ describe('repositório Supabase do resultado — RPCs e erros', () => {
     const { sb, chamar } = clienteFalso({ rpc: { data: 2, error: null } });
     expect(await criarRepositorioResultadoSupabase(sb).marcarAvisosLidos(['a1', 'a2'])).toBe(2);
     expect(chamar).toHaveBeenCalledWith('marcar_avisos_lidos', { p_ids: ['a1', 'a2'] });
+  });
+});
+
+describe('repositório Supabase do resultado — ranking por turma (spec 012)', () => {
+  it('publicação em lote envia turmas com a versão base, estado e justificativa', async () => {
+    const lote = [
+      { turmaId: 't1', turma: 'KA', publicada: true, versao: 2, motivo: null },
+      { turmaId: 't2', turma: 'KB', publicada: false, versao: null, motivo: 'Pendências.' },
+    ];
+    const { sb, chamar } = clienteFalso({ rpc: { data: lote, error: null } });
+    const r = await criarRepositorioResultadoSupabase(sb).publicarRankingTurmas({
+      edicaoId: 'ed',
+      turmas: [
+        { turmaId: 't1', versaoBase: 1 },
+        { turmaId: 't2', versaoBase: null },
+      ],
+      estado: 'definitivo',
+      justificativa: '  Fechamento das turmas.  ',
+    });
+    expect(chamar).toHaveBeenCalledWith('publicar_ranking_turmas', {
+      p_edicao: 'ed',
+      p_turmas: [
+        { turmaId: 't1', versaoBase: 1 },
+        { turmaId: 't2', versaoBase: null },
+      ],
+      p_estado: 'definitivo',
+      p_justificativa: 'Fechamento das turmas.',
+    });
+    expect(r).toEqual(lote);
+  });
+
+  it('justificativa vazia vai como nula', async () => {
+    const { sb, chamar } = clienteFalso({ rpc: { data: [], error: null } });
+    await criarRepositorioResultadoSupabase(sb).publicarRankingTurmas({
+      edicaoId: 'ed',
+      turmas: [{ turmaId: 't1', versaoBase: null }],
+      estado: 'parcial',
+      justificativa: '   ',
+    });
+    expect(chamar).toHaveBeenCalledWith(
+      'publicar_ranking_turmas',
+      expect.objectContaining({ p_justificativa: null }),
+    );
+  });
+
+  it('leituras por turma e por edição usam os nomes do contrato', async () => {
+    const { sb, chamar } = clienteFalso({ rpc: { data: [], error: null } });
+    const r = criarRepositorioResultadoSupabase(sb);
+    await r.rankingDaEdicao('ed');
+    await r.pendenciasRankingTurma('t1');
+    await r.historicoPublicacoesTurma('t1');
+    await r.publicacoesAnteriores('ed');
+    await r.premiacaoDaEdicao('ed');
+    expect(chamar.mock.calls).toEqual([
+      ['ranking_da_edicao', { p_edicao: 'ed' }],
+      ['pendencias_ranking_turma', { p_turma: 't1' }],
+      ['historico_publicacoes_turma', { p_turma: 't1' }],
+      ['publicacoes_anteriores', { p_edicao: 'ed' }],
+      ['premiacao_da_edicao', { p_edicao: 'ed' }],
+    ]);
+  });
+
+  it('turma sem publicação devolve nulo', async () => {
+    const { sb, chamar } = clienteFalso({ rpc: { data: null, error: null } });
+    expect(await criarRepositorioResultadoSupabase(sb).rankingDaTurma('t1')).toBeNull();
+    expect(chamar).toHaveBeenCalledWith('ranking_da_turma', { p_turma: 't1' });
+  });
+
+  it('decisão de empate da premiação usa os nomes do contrato', async () => {
+    const { sb, chamar } = clienteFalso({
+      rpc: { data: { id: 'dp1', decididoEm: 'agora' }, error: null },
+    });
+    const r = await criarRepositorioResultadoSupabase(sb).decidirPremiacaoEmpate({
+      publicacaoId: 'p1',
+      posicao: 1,
+      premiadas: ['e1', 'e2'],
+      decisao: 'Dividir o prêmio.',
+      justificativa: 'Empate após todos os critérios.',
+    });
+    expect(chamar).toHaveBeenCalledWith('decidir_premiacao_empate', {
+      p_publicacao: 'p1',
+      p_posicao: 1,
+      p_premiadas: ['e1', 'e2'],
+      p_decisao: 'Dividir o prêmio.',
+      p_justificativa: 'Empate após todos os critérios.',
+    });
+    expect(r).toEqual({ id: 'dp1', decididoEm: 'agora' });
   });
 });

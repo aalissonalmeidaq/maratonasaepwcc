@@ -271,6 +271,44 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   pelo vínculo ao curso (só a derivada da turma ativa); fixtures em edição encerrada reabrem a
   edição durante a gravação; criação de cursos e turmas passou às RPCs do cadastro.
 
+## 6.10 Spec 012 — ranking por turma (implementada em 2026-11-04)
+
+- **Divergência com o PRD:** RF14, HU05 e o risco "múltiplos cursos incomparáveis" falam em
+  ranking por categoria; vale a instrução mais recente do usuário (spec 011): a classificação é
+  por turma. A categoria continua como atributo da turma e da equipe.
+- **Premiação:** vale para cada turma — as posições premiadas da publicação definitiva de cada
+  turma recebem os prêmios configurados na edição. Empate persistente numa posição premiada:
+  a coordenação decide, com justificativa auditada; até lá a turma fica em "empate a decidir".
+  Valores, quantidade e condições dos prêmios continuam pendentes (§2).
+- **Publicação em lote:** a coordenação marca várias turmas e publica no mesmo estado com uma
+  justificativa; cada turma vira uma versão própria e uma recusa (ex.: pendência na definitiva)
+  não impede as outras.
+- **Premiação visível:** coordenação (todas as turmas); docentes e mentores (suas turmas, também a
+  provisória, marcada "provisório — não final"); alunos (própria turma, só depois da definitiva).
+- Publicações por categoria anteriores ficam imutáveis e só a coordenação as lê (auditoria e
+  revisões já abertas); novas publicações por categoria são recusadas.
+- Implementação: migration `20261106120000_ranking_por_turma.sql` (`turma_id` e `lote_id` em
+  `publicacoes_ranking`, `decisoes_premiacao`, `publicar_ranking_turmas`, `ranking_da_edicao`,
+  `ranking_da_turma`, `premiacao_da_edicao`, `decidir_premiacao_empate`, gatilhos de recusa) e
+  ADR 0012; telas em `@/modules/resultado` (lista de turmas, publicação em lote, premiação).
+- **Pendências contadas na lista do ranking:** só de encontros realizados, os mesmos números do
+  painel da coordenação; a recusa da definitiva olha todos os encontros da turma.
+- **Prazo de revisão da provisória:** pelas regras vigentes da turma no momento da publicação.
+- **Aviso de publicação:** aluno, docente e mentor da turma (inclusive o mentor ligado ao curso).
+- **Premiação provisória:** segue a última publicação da turma; uma parcial depois de uma
+  provisória volta a "a definir".
+- Desvios e observações:
+  - o painel da turma mostra todas as posições da publicação da turma, mesmo de uma equipe que
+    mudou de turma depois (a versão publicada não muda);
+  - o teste `009` usava `current_date` para "ontem" e falhava depois das 21h de Brasília; passou a
+    usar a data de Brasília;
+  - na demonstração, o 3º ano A aparece com a definitiva e pendências (impossível no servidor),
+    para mostrar o empate a decidir na premiação.
+- **[pendência]** O encerramento da edição (spec 010) ainda confere "categoria sem ranking": com
+  uma publicação de qualquer turma da categoria a verificação passa. Decidir se deve exigir a
+  publicação de cada turma.
+- Editar os prêmios da edição continua fora do escopo (a lista vem do cadastro da edição).
+
 ## 6.9 Spec 011 — regras da edição e das turmas (implementada em 2026-11-03)
 
 - Implementação: migration `20261105120000_regras_edicao.sql`; módulo `src/modules/pontuacao`

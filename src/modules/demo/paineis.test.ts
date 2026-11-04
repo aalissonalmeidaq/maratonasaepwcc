@@ -21,14 +21,15 @@ describe('painéis da demonstração (spec 008, R7)', () => {
     await expect(como('e01').painelDaGestao('ed-demo')).rejects.toThrow(/permissão/);
   });
 
-  it('coordenação: indicadores e uma linha por categoria', async () => {
+  it('coordenação: indicadores e uma linha por turma (spec 012)', async () => {
     const p = await como('u-coord').painelDaCoordenacao('ed-demo');
     expect(p.indicadores).toMatchObject({ cursos: 2, turmas: 2, equipes: 6, encontrosTotal: 4 });
-    expect(p.categorias.map((c) => c.categoria)).toEqual([
-      'Categoria A (exemplo)',
-      'Categoria B (exemplo)',
+    expect(p.turmas.map((c) => [c.turma, c.categoria])).toEqual([
+      ['3º ano A (fictícia)', 'Categoria A (exemplo)'],
+      ['3º ano B (fictícia)', 'Categoria B (exemplo)'],
     ]);
-    expect(p.categorias[0]?.publicacao?.estado).toBe('parcial');
+    expect(p.turmas[0]?.publicacao?.estado).toBe('definitivo');
+    expect(p.turmas[1]?.publicacao).toBeNull();
   });
 
   it('a exportação é recusada (FR-015)', async () => {

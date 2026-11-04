@@ -8,11 +8,14 @@ import {
   FormRespostaRevisao,
   FormResultadosProva,
   HistoricoPublicacoes,
+  ListaPendencias,
+  ListaTurmasRanking,
   PainelPublicacao,
   TabelaRanking,
   ListaAvisos,
   ListaOcorrencias,
   ListaRevisoes,
+  PremiacaoPorTurma,
   PreviaPontos,
   podeManifestar,
   podePedirRevisao,
@@ -26,10 +29,14 @@ import { Alert, Card, EmptyState, PageHeader, SelectField } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
 import {
   useBloqueioDeEscrita,
-  useCursos,
   useHistoricoPublicacoes,
-  usePendenciasDaCategoria,
+  useHistoricoPublicacoesTurma,
+  usePremiacaoDaEdicao,
+  usePublicacoesAnteriores,
   useRankingPublicado,
+  usePendenciasRankingTurma,
+  useRankingDaEdicao,
+  useRankingDaTurma,
   useDesafiosGestao,
   useEncontros,
   useEquipesGestao,
@@ -588,9 +595,10 @@ function PontosDaGestao({ edicao }: { edicao: Edicao }) {
                 Só a versão publicada do ranking é oficial.
               </Alert>
               <PontosDaTurma turmaId={atual} />
-              <Card icone="ranking" titulo="Ranking publicado da categoria">
-                <RankingPublicado edicaoId={edicao.id} />
+              <Card icone="ranking" titulo="Ranking publicado da turma">
+                <RankingPublicado turmaId={atual} />
               </Card>
+              <PremiacaoDaTurma edicaoId={edicao.id} turmaId={atual} />
             </div>
           );
         }}
@@ -607,9 +615,9 @@ export function DocentePontosPage() {
 // Ranking publicado (US4): aluno, equipe docente e coordenação
 // ===========================================================================
 
-function RankingPublicado({ edicaoId, categoria }: { edicaoId: string; categoria?: string }) {
+function RankingPublicado({ turmaId }: { turmaId: string }) {
   return (
-    <Consulta consulta={useRankingPublicado(edicaoId, categoria ?? null)}>
+    <Consulta consulta={useRankingDaTurma(turmaId)}>
       {(publicacao) => <TabelaRanking publicacao={publicacao} />}
     </Consulta>
   );
@@ -618,11 +626,11 @@ function RankingPublicado({ edicaoId, categoria }: { edicaoId: string; categoria
 const AVISO_DESEMPATE =
   'O ranking mostra apenas o total de cada equipe; notas individuais não são exibidas. Desempate: entrega prática, depois questões/prova oficial, depois presença.';
 
-function PedirRevisaoDosPontos({ edicao }: { edicao: Edicao }) {
+function PedirRevisaoDosPontos({ edicao, turmaId }: { edicao: Edicao; turmaId: string }) {
   const r = useRepositorios();
   const gravar = useGravar();
   const bloqueio = useBloqueioDeEscrita();
-  const publicacao = useRankingPublicado(edicao.id, null);
+  const publicacao = useRankingDaTurma(turmaId);
   const encontros = useEncontros(edicao.id);
   const p = publicacao.data;
   if (
@@ -662,17 +670,54 @@ function PedirRevisaoDosPontos({ edicao }: { edicao: Edicao }) {
   );
 }
 
+/**
+ * Premiação da turma para quem acompanha o ranking (spec 012, FR-018a): o servidor já filtra o que
+ * cada perfil vê (aluno só a final; docente e mentor também a provisória).
+ */
+function PremiacaoDaTurma({ edicaoId, turmaId }: { edicaoId: string; turmaId: string }) {
+  const premiacao = usePremiacaoDaEdicao(edicaoId).data?.find((p) => p.turmaId === turmaId);
+  if (!premiacao || premiacao.situacao === 'a_definir') return null;
+  return (
+    <section aria-label="Premiação da turma" className="mt-4">
+      <h2 className="mb-3 font-display text-xl font-semibold">Premiação da turma</h2>
+      <PremiacaoPorTurma premiacoes={[premiacao]} />
+    </section>
+  );
+}
+
 function RankingDaEquipe({ edicao }: { edicao: Edicao }) {
   return (
     <>
-      <PageHeader icone="ranking" titulo="Ranking" descricao="Versão publicada pela coordenação." />
-      <Alert tom="info" titulo="Classificação da sua categoria">
+      <PageHeader
+        icone="ranking"
+        titulo="Ranking da turma"
+        descricao="Versão publicada pela coordenação."
+      />
+      <Alert tom="info" titulo="Classificação da sua turma">
         {AVISO_DESEMPATE}
       </Alert>
-      <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-        <RankingPublicado edicaoId={edicao.id} />
-      </div>
-      <PedirRevisaoDosPontos edicao={edicao} />
+      {/* O servidor só devolve a turma do próprio aluno (spec 012, FR-008). */}
+      <Consulta consulta={useTurmas(edicao.id)}>
+        {(turmas) => {
+          const turma = turmas[0];
+          if (!turma)
+            return (
+              <EmptyState
+                titulo="Você ainda não está vinculado a uma turma nesta edição."
+                descricao="Procure a coordenação."
+              />
+            );
+          return (
+            <>
+              <div className="mt-4 rounded-lg border border-border bg-surface p-4">
+                <RankingPublicado turmaId={turma.id} />
+              </div>
+              <PedirRevisaoDosPontos edicao={edicao} turmaId={turma.id} />
+              <PremiacaoDaTurma edicaoId={edicao.id} turmaId={turma.id} />
+            </>
+          );
+        }}
+      </Consulta>
     </>
   );
 }
@@ -681,73 +726,136 @@ export function AlunoRankingPage() {
   return <ComEdicao>{(edicao) => <RankingDaEquipe edicao={edicao} />}</ComEdicao>;
 }
 
-function PublicacaoDaCategoria({ edicao, categoria }: { edicao: Edicao; categoria: string }) {
-  const r = useRepositorios();
-  const gravar = useGravar();
-  const bloqueio = useBloqueioDeEscrita();
-  const historico = useHistoricoPublicacoes(edicao.id, categoria);
+function DetalheDaTurma({ turmaId, turma }: { turmaId: string; turma: string }) {
+  const historico = useHistoricoPublicacoesTurma(turmaId);
   return (
-    <div className="flex flex-col gap-6">
-      <Card icone="ranking" titulo="Publicar">
-        <Consulta consulta={usePendenciasDaCategoria(edicao.id, categoria)}>
-          {(pendencias) => (
-            <Consulta consulta={historico}>
-              {(versoes) => (
-                <PainelPublicacao
-                  key={categoria}
-                  pendencias={pendencias}
-                  versaoAtual={versoes[0]?.versao ?? null}
-                  bloqueio={bloqueio}
-                  onPublicar={(d) =>
-                    gravar(() =>
-                      r.resultado.publicarRanking({ edicaoId: edicao.id, categoria, ...d }),
-                    )()
-                  }
-                />
-              )}
-            </Consulta>
-          )}
+    <section aria-label={`Detalhe de ${turma}`} className="flex flex-col gap-6">
+      <Card icone="checklist" titulo={`Pendências — ${turma}`}>
+        <Consulta consulta={usePendenciasRankingTurma(turmaId)}>
+          {(pendencias) => <ListaPendencias pendencias={pendencias} />}
         </Consulta>
       </Card>
       <Card icone="trofeu" titulo="Última versão publicada">
-        <RankingPublicado edicaoId={edicao.id} categoria={categoria} />
+        <Consulta consulta={useRankingDaTurma(turmaId)}>
+          {(publicacao) => <TabelaRanking publicacao={publicacao} />}
+        </Consulta>
       </Card>
       <Card icone="checklist" titulo="Histórico de versões">
         <Consulta consulta={historico}>
           {(versoes) => <HistoricoPublicacoes versoes={versoes} />}
         </Consulta>
       </Card>
+    </section>
+  );
+}
+
+function RankingAnterior({ edicaoId, categoria }: { edicaoId: string; categoria: string }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <Consulta consulta={useRankingPublicado(edicaoId, categoria)}>
+        {(publicacao) => <TabelaRanking publicacao={publicacao} />}
+      </Consulta>
+      <Consulta consulta={useHistoricoPublicacoes(edicaoId, categoria)}>
+        {(versoes) => <HistoricoPublicacoes versoes={versoes} />}
+      </Consulta>
     </div>
   );
 }
 
-function RankingDaCoordenacao({ edicao }: { edicao: Edicao }) {
+/** Publicações por categoria feitas antes da spec 012: só leitura, só para a coordenação. */
+function PublicacoesAnteriores({ edicao }: { edicao: Edicao }) {
   const [categoria, setCategoria] = useState('');
+  return (
+    <Consulta consulta={usePublicacoesAnteriores(edicao.id)}>
+      {(lista) => {
+        if (lista.length === 0) return null;
+        const atual = categoria || lista[0]!.categoria;
+        return (
+          <details className="rounded-lg border border-border bg-surface p-4 shadow-sm sm:p-5">
+            <summary className="flex min-h-11 cursor-pointer items-center font-display text-lg font-semibold">
+              Publicações por categoria (anteriores)
+            </summary>
+            <p className="mt-2 mb-4 text-sm text-text-secondary">
+              Feitas antes do ranking por turma. Ficam guardadas como foram publicadas, só para
+              consulta.
+            </p>
+            <div className="mb-4 max-w-sm">
+              <SelectField
+                rotulo="Categoria"
+                opcoes={lista.map((a) => ({
+                  valor: a.categoria,
+                  rotulo: `${a.categoria} (${a.versoes} ${a.versoes === 1 ? 'versão' : 'versões'})`,
+                }))}
+                value={atual}
+                onChange={(e) => setCategoria(e.target.value)}
+              />
+            </div>
+            <RankingAnterior edicaoId={edicao.id} categoria={atual} />
+          </details>
+        );
+      }}
+    </Consulta>
+  );
+}
+
+function RankingDaCoordenacao({ edicao }: { edicao: Edicao }) {
+  const r = useRepositorios();
+  const gravar = useGravar();
+  const bloqueio = useBloqueioDeEscrita();
+  const lista = useRankingDaEdicao(edicao.id);
+  const [selecionadas, setSelecionadas] = useState<string[]>([]);
+  const [aberta, setAberta] = useState<string | null>(null);
   return (
     <>
       <PageHeader
         icone="ranking"
         titulo="Ranking"
-        descricao="Cálculo oficial no servidor com as regras da edição; desempate: entrega → questões/prova → presença."
+        descricao="Classificação por turma, com o cálculo oficial no servidor; desempate: entrega prática → questões/prova → presença."
       />
-      <Consulta consulta={useCursos(edicao.id)}>
-        {(cursos) => {
-          const categorias = [...new Set(cursos.map((c) => c.categoria))].sort((a, b) =>
-            a.localeCompare(b, 'pt-BR'),
-          );
-          const atual = categoria || categorias[0] || '';
-          if (!atual) return <EmptyState titulo="Nenhuma categoria cadastrada nesta edição." />;
+      <Consulta consulta={lista}>
+        {(turmas) => {
+          if (turmas.length === 0)
+            return <EmptyState titulo="Nenhuma turma cadastrada nesta edição." />;
+          const marcadas = turmas
+            .filter((t) => selecionadas.includes(t.turmaId))
+            .map((t) => ({
+              turmaId: t.turmaId,
+              turma: t.turma,
+              versaoBase: t.ultima?.versao ?? null,
+            }));
+          const detalhe = turmas.find((t) => t.turmaId === aberta);
           return (
             <div className="flex flex-col gap-6">
-              <div className="max-w-sm">
-                <SelectField
-                  rotulo="Categoria"
-                  opcoes={categorias.map((c) => ({ valor: c, rotulo: c }))}
-                  value={atual}
-                  onChange={(e) => setCategoria(e.target.value)}
+              <Card icone="turma" titulo="Turmas da edição">
+                <ListaTurmasRanking
+                  turmas={turmas}
+                  selecionadas={selecionadas}
+                  onSelecionar={setSelecionadas}
+                  onAbrir={(id) => setAberta((atual) => (atual === id ? null : id))}
+                  aberta={aberta}
                 />
-              </div>
-              <PublicacaoDaCategoria edicao={edicao} categoria={atual} />
+              </Card>
+              <Card icone="ranking" titulo="Publicar">
+                <PainelPublicacao
+                  turmas={marcadas}
+                  bloqueio={bloqueio}
+                  onRecarregar={() => void lista.refetch()}
+                  onPublicar={(d) =>
+                    gravar(() =>
+                      r.resultado.publicarRankingTurmas({
+                        edicaoId: edicao.id,
+                        turmas: marcadas.map((m) => ({
+                          turmaId: m.turmaId,
+                          versaoBase: m.versaoBase,
+                        })),
+                        ...d,
+                      }),
+                    )()
+                  }
+                />
+              </Card>
+              {detalhe && <DetalheDaTurma turmaId={detalhe.turmaId} turma={detalhe.turma} />}
+              <PublicacoesAnteriores edicao={edicao} />
             </div>
           );
         }}

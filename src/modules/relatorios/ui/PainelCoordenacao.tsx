@@ -1,11 +1,11 @@
 import { Link } from 'react-router';
 import { formatarDataHora } from '@/shared/lib/formatacao';
 import { BannerDestaque, Card, ProgressBar, StatusBadge, cx } from '@/shared/ui';
-import type { CategoriaDoPainel, PainelDaCoordenacao } from '../domain/tipos';
+import type { PainelDaCoordenacao, TurmaDoPainelCoordenacao } from '../domain/tipos';
 import { AcaoDoBanner, FaixaDeIndicadores, Indicador, SeloFicticio } from './comum';
 import { plural } from './texto';
 
-function Categoria({ c }: { c: CategoriaDoPainel }) {
+function Turma({ c }: { c: TurmaDoPainelCoordenacao }) {
   const itens = [
     {
       rotulo: 'Componentes sem registro',
@@ -25,7 +25,8 @@ function Categoria({ c }: { c: CategoriaDoPainel }) {
     { rotulo: 'Revisões abertas', valor: c.revisoesAbertas, para: '/coordenacao/revisoes' },
   ];
   return (
-    <Card icone="ranking" titulo={c.categoria}>
+    <Card icone="turma" titulo={c.turma}>
+      <p className="-mt-2 mb-2 text-sm text-text-secondary">{c.categoria}</p>
       {/* Linhas com contador: o que pede atenção (valor acima de zero) se destaca dos zeros. */}
       <ul className="-mx-2 flex flex-col">
         {itens.map((i) => (
@@ -62,7 +63,7 @@ function Categoria({ c }: { c: CategoriaDoPainel }) {
             <StatusBadge estado={c.publicacao.estado} />
           </p>
         ) : (
-          <p>Ranking ainda não publicado</p>
+          <p>Ranking da turma ainda não publicado</p>
         )}
       </div>
     </Card>
@@ -70,8 +71,8 @@ function Categoria({ c }: { c: CategoriaDoPainel }) {
 }
 
 /**
- * Painel inicial da coordenação (US3): indicadores da edição e, por categoria, as pendências dos
- * encontros realizados e a última publicação. Os números são os das páginas de origem.
+ * Painel inicial da coordenação (US3): indicadores da edição e, por turma (spec 012), as
+ * pendências dos encontros realizados e a última publicação. Os números são os das páginas de origem.
  */
 export function PainelCoordenacao({
   painel: p,
@@ -83,10 +84,10 @@ export function PainelCoordenacao({
   ficticio?: boolean;
 }) {
   const i = p.indicadores;
-  const totalDa = (c: CategoriaDoPainel) =>
+  const totalDa = (c: TurmaDoPainelCoordenacao) =>
     c.componentesPendentes + c.provasPendentes + c.ocorrenciasSemDecisao + c.revisoesAbertas;
-  const pendencias = p.categorias.reduce((soma, c) => soma + totalDa(c), 0);
-  const comPendencia = p.categorias.filter((c) => totalDa(c) > 0).length;
+  const pendencias = p.turmas.reduce((soma, c) => soma + totalDa(c), 0);
+  const comPendencia = p.turmas.filter((c) => totalDa(c) > 0).length;
   return (
     <>
       <BannerDestaque
@@ -132,7 +133,7 @@ export function PainelCoordenacao({
           {pendencias > 0 ? (
             <StatusBadge
               estado="pendente"
-              rotulo={`Em ${plural(comPendencia, 'categoria', 'categorias')}`}
+              rotulo={`Em ${plural(comPendencia, 'turma', 'turmas')}`}
             />
           ) : (
             <StatusBadge estado="concluido" rotulo="Tudo em dia" />
@@ -143,8 +144,8 @@ export function PainelCoordenacao({
         Pendências dos encontros realizados
       </h2>
       <div className="grid gap-4 lg:grid-cols-2">
-        {p.categorias.map((c) => (
-          <Categoria key={c.categoria} c={c} />
+        {p.turmas.map((c) => (
+          <Turma key={c.turmaId} c={c} />
         ))}
       </div>
     </>

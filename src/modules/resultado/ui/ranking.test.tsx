@@ -1,10 +1,9 @@
 import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { violacoesA11y } from '@/test/a11y';
-import type { PendenciasDaCategoria, PublicacaoRanking, VersaoPublicada } from '../domain/tipos';
+import type { PendenciasDoRanking, PublicacaoRanking, VersaoPublicada } from '../domain/tipos';
+import { ListaPendencias } from './ListaPendencias';
 import { HistoricoPublicacoes } from './HistoricoPublicacoes';
-import { PainelPublicacao } from './PainelPublicacao';
 import { TabelaRanking } from './TabelaRanking';
 
 const pontuacao = {
@@ -20,6 +19,8 @@ const pontuacao = {
 
 const publicacao: PublicacaoRanking = {
   id: 'p1',
+  turmaId: 't1',
+  turma: '3º ano A',
   categoria: 'Categoria A',
   versao: 2,
   estado: 'provisorio',
@@ -62,6 +63,7 @@ describe('TabelaRanking (US4, FR-016, FR-019)', () => {
     const { container } = render(<TabelaRanking publicacao={publicacao} />);
     expect(screen.getByText('Provisório')).toBeInTheDocument();
     expect(screen.getByText(/Versão 2/)).toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Classificação — 3º ano A' })).toBeInTheDocument();
     const tabela = within(screen.getByRole('table'));
     expect(tabela.getAllByText('(empate)')).toHaveLength(2);
     expect(tabela.getByText('(sua equipe)')).toBeInTheDocument();
@@ -74,14 +76,21 @@ describe('TabelaRanking (US4, FR-016, FR-019)', () => {
     expect(await violacoesA11y(container)).toEqual([]);
   });
 
-  it('sem publicação: estado vazio', () => {
+  it('sem publicação: estado vazio da turma', () => {
     render(<TabelaRanking publicacao={null} />);
-    expect(screen.getByText('O ranking ainda não foi publicado.')).toBeInTheDocument();
+    expect(screen.getByText('Ranking da turma ainda não publicado')).toBeInTheDocument();
+  });
+
+  it('publicação por categoria anterior: legenda com a categoria', () => {
+    render(<TabelaRanking publicacao={{ ...publicacao, turmaId: null, turma: null }} />);
+    expect(
+      screen.getByRole('table', { name: 'Classificação — Categoria A (anterior)' }),
+    ).toBeInTheDocument();
   });
 });
 
-const semPendencias: PendenciasDaCategoria = { componentes: [], ocorrencias: [], revisoes: [] };
-const comPendencias: PendenciasDaCategoria = {
+const semPendencias: PendenciasDoRanking = { componentes: [], ocorrencias: [], revisoes: [] };
+const comPendencias: PendenciasDoRanking = {
   componentes: [
     {
       duplaId: 'e2',
@@ -94,74 +103,20 @@ const comPendencias: PendenciasDaCategoria = {
   revisoes: [],
 };
 
-describe('PainelPublicacao (US4, FR-015, FR-017, FR-018, SC-004)', () => {
-  it('publica em até 3 interações e só confirma após o servidor', async () => {
-    let concluir!: () => void;
-    const onPublicar = vi.fn(() => new Promise<void>((r) => (concluir = r)));
-    const { container } = render(
-      <PainelPublicacao pendencias={semPendencias} versaoAtual={null} onPublicar={onPublicar} />,
-    );
-    await userEvent.click(screen.getByRole('radio', { name: 'Parcial' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Publicar ranking' }));
-    expect(onPublicar).toHaveBeenCalledWith({ estado: 'parcial', justificativa: undefined });
-    expect(screen.queryByText(/Ranking publicado/)).not.toBeInTheDocument();
-    concluir();
-    expect(await screen.findByText(/Ranking publicado/)).toBeInTheDocument();
-    expect(await violacoesA11y(container)).toEqual([]);
-  });
-
-  it('a partir da versão 2 exige justificativa; lista as pendências e o definitivo fica indisponível', async () => {
-    const onPublicar = vi.fn().mockResolvedValue(undefined);
-    render(<PainelPublicacao pendencias={comPendencias} versaoAtual={1} onPublicar={onPublicar} />);
+describe('ListaPendencias (FR-004, FR-017 da spec 007)', () => {
+  it('lista componentes, ocorrências e revisões que impedem a definitiva', async () => {
+    const { container } = render(<ListaPendencias pendencias={comPendencias} />);
+    expect(screen.getByText(/2 pendências impedem o definitivo/)).toBeInTheDocument();
     expect(
       screen.getByText(/Equipe Vetor — encontro 4: questões\/prova oficial/),
     ).toBeInTheDocument();
     expect(screen.getByText(/Equipe Pixel — ocorrência sem decisão/)).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /Definitivo/ })).toBeDisabled();
-    await userEvent.click(screen.getByRole('radio', { name: 'Provisório' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Publicar ranking' }));
-    expect(
-      screen.getByText('Informe uma justificativa com pelo menos 10 caracteres.'),
-    ).toBeInTheDocument();
-    expect(onPublicar).not.toHaveBeenCalled();
-    await userEvent.type(
-      screen.getByLabelText('Justificativa da nova versão'),
-      'Prova oficial registrada.',
-    );
-    await userEvent.click(screen.getByRole('button', { name: 'Publicar ranking' }));
-    expect(onPublicar).toHaveBeenCalledWith({
-      estado: 'provisorio',
-      justificativa: 'Prova oficial registrada.',
-    });
+    expect(await violacoesA11y(container)).toEqual([]);
   });
 
-  it('recusa do servidor aparece no lugar do sucesso', async () => {
-    const onPublicar = vi
-      .fn()
-      .mockRejectedValue(
-        new Error(
-          'A publicação definitiva foi recusada por pendências: Equipe Vetor — revisão aberta.',
-        ),
-      );
-    render(
-      <PainelPublicacao pendencias={semPendencias} versaoAtual={null} onPublicar={onPublicar} />,
-    );
-    await userEvent.click(screen.getByRole('radio', { name: /Definitivo/ }));
-    await userEvent.click(screen.getByRole('button', { name: 'Publicar ranking' }));
-    expect(await screen.findByText(/recusada por pendências/)).toBeInTheDocument();
-  });
-
-  it('sem conexão ou na demonstração: publicar desabilitado com o motivo (FR-025)', () => {
-    render(
-      <PainelPublicacao
-        pendencias={semPendencias}
-        versaoAtual={null}
-        onPublicar={vi.fn()}
-        bloqueio="Sem conexão: gravações exigem conexão com o servidor."
-      />,
-    );
-    expect(screen.getByRole('button', { name: 'Publicar ranking' })).toBeDisabled();
-    expect(screen.getByText(/Sem conexão/)).toBeInTheDocument();
+  it('sem pendências: a turma pode ser publicada como definitiva', () => {
+    render(<ListaPendencias pendencias={semPendencias} />);
+    expect(screen.getByText('Nenhuma pendência na turma.')).toBeInTheDocument();
   });
 });
 

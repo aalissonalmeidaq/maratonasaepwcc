@@ -249,15 +249,6 @@ export function usePontosDaTurma(turmaId?: string) {
     r.resultado.pontosDaTurma(turmaId as string),
   );
 }
-export function usePendenciasDaCategoria(edicaoId?: string, categoria?: string) {
-  const r = useRepositorios();
-  return useResultado(
-    'pendencias-categoria',
-    [edicaoId, categoria],
-    Boolean(edicaoId && categoria),
-    () => r.resultado.pendenciasDaCategoria(edicaoId as string, categoria as string),
-  );
-}
 export function useRankingPublicado(edicaoId?: string, categoria?: string | null) {
   const r = useRepositorios();
   return useResultado('ranking-publicado', [edicaoId, categoria], Boolean(edicaoId), () =>
@@ -271,6 +262,43 @@ export function useHistoricoPublicacoes(edicaoId?: string, categoria?: string) {
     [edicaoId, categoria],
     Boolean(edicaoId && categoria),
     () => r.resultado.historicoPublicacoes(edicaoId as string, categoria as string),
+  );
+}
+export function usePublicacoesAnteriores(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('publicacoes-anteriores', [edicaoId], Boolean(edicaoId), () =>
+    r.resultado.publicacoesAnteriores(edicaoId as string),
+  );
+}
+// Ranking por turma (spec 012).
+export function useRankingDaEdicao(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('ranking-edicao', [edicaoId], Boolean(edicaoId), () =>
+    r.resultado.rankingDaEdicao(edicaoId as string),
+  );
+}
+export function usePendenciasRankingTurma(turmaId?: string) {
+  const r = useRepositorios();
+  return useResultado('pendencias-ranking-turma', [turmaId], Boolean(turmaId), () =>
+    r.resultado.pendenciasRankingTurma(turmaId as string),
+  );
+}
+export function useRankingDaTurma(turmaId?: string) {
+  const r = useRepositorios();
+  return useResultado('ranking-turma', [turmaId], Boolean(turmaId), () =>
+    r.resultado.rankingDaTurma(turmaId as string),
+  );
+}
+export function useHistoricoPublicacoesTurma(turmaId?: string) {
+  const r = useRepositorios();
+  return useResultado('historico-publicacoes-turma', [turmaId], Boolean(turmaId), () =>
+    r.resultado.historicoPublicacoesTurma(turmaId as string),
+  );
+}
+export function usePremiacaoDaEdicao(edicaoId?: string) {
+  const r = useRepositorios();
+  return useResultado('premiacao', [edicaoId], Boolean(edicaoId), () =>
+    r.resultado.premiacaoDaEdicao(edicaoId as string),
   );
 }
 export function usePedidosRevisao(edicaoId?: string) {
