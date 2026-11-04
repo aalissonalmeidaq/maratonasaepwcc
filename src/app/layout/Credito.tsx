@@ -24,7 +24,15 @@ export function Credito({
     >
       {/* Espaços explícitos: o leitor de tela lê "feito com amor por Alisson Almeida". */}
       <span className="flex items-center gap-1">
-        feito com <Icon nome="coracao" tamanho="sm" cor="marca" rotulo="amor" />{' '}
+        feito com{' '}
+        {/* Coral no fundo escuro (≈4,8:1); no claro, o vermelho da paleta (o coral ficaria < 3:1). */}
+        <Icon
+          nome="coracao"
+          tamanho="sm"
+          cor={fundo === 'escuro' ? 'marca' : 'mono'}
+          className={fundo === 'escuro' ? undefined : 'text-red-700'}
+          rotulo="amor"
+        />{' '}
       </span>{' '}
       <span>por Alisson Almeida</span>
     </p>

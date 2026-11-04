@@ -14,7 +14,10 @@ describe('Credito', () => {
       </div>,
     );
     expect(container).toHaveTextContent('feito com por Alisson Almeida');
-    expect(screen.getByRole('img', { name: 'amor' })).toBeInTheDocument();
+    const coracao = screen.getByRole('img', { name: 'amor' });
+    // Contraste do coração (WCAG 1.4.11): vermelho da paleta no fundo claro, coral no escuro.
+    if (fundo === 'claro') expect(coracao).toHaveClass('text-red-700');
+    else expect(coracao).not.toHaveClass('text-red-700');
     expect(await violacoesA11y(container)).toEqual([]);
   });
 });
