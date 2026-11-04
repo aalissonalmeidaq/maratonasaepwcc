@@ -58,7 +58,8 @@ function PassosDaEdicao({ edicao }: { edicao: EdicaoGerida }) {
             <span className="sr-only">{p.feito ? ' (feito)' : ' (pendente)'}</span>
           </span>
           {p.caminho && (
-            <Link to={p.caminho} className="text-link underline-offset-4 hover:underline">
+            // Não encolhe: o conteúdo quebra em qualquer ponto (wrap-anywhere) e partia "Abrir".
+            <Link to={p.caminho} className="shrink-0 text-link underline-offset-4 hover:underline">
               Abrir
             </Link>
           )}

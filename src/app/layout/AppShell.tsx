@@ -10,6 +10,7 @@ import { SeletorEdicao, edicaoPadrao } from '@/modules/organizacao';
 import { useConvitesPendentes, useEdicoesVisiveis, useMeusAvisos } from '../dados/consultas';
 import { useEdicaoEmUso } from '../dados/edicaoEmUsoContexto';
 import { ROTULO_AREA } from '../navegacao';
+import { Credito } from './Credito';
 import { Menu } from './Menu';
 
 function obterIniciais(nome?: string): string {
@@ -319,6 +320,7 @@ export function AppShell({ area }: { area: Area }) {
         </nav>
         <div className="relative z-10 mt-6">
           <MarcaSenai fundo="escuro" className="w-28" />
+          <Credito fundo="escuro" empilhado className="mt-3" />
         </div>
         <PadraoGrafico
           nome="canto"
@@ -385,6 +387,7 @@ export function AppShell({ area }: { area: Area }) {
           </button>
           <div className="mt-3 px-2">
             <MarcaSenai fundo="escuro" className="w-24 opacity-90" />
+            <Credito fundo="escuro" className="mt-2" />
           </div>
         </div>
       </div>

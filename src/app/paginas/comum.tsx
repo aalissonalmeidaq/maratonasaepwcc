@@ -17,6 +17,7 @@ import {
   cx,
   type NomeIcone,
 } from '@/shared/ui';
+import { Credito } from '../layout/Credito';
 
 const esquemaEntrada = z.object({
   email: z
@@ -315,8 +316,10 @@ export function EntradaPage() {
                 </details>
               </div>
             )}
-            <div className="mt-5 flex justify-center sm:mt-8 lg:hidden">
-              <MarcaSenai fundo="claro" className="w-24 sm:w-28" />
+            {/* Marca SENAI (só celular e tablet) e o crédito na mesma linha: cabe sem rolagem. */}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:mt-8">
+              <MarcaSenai fundo="claro" className="w-24 sm:w-28 lg:hidden" />
+              <Credito fundo="claro" />
             </div>
           </div>
         </main>

@@ -649,6 +649,12 @@ export const ICONES = {
     acento: 'coral',
     svg: `<path d="M5 12.5a10 10 0 0 1 4-2.3M2 9a14.5 14.5 0 0 1 4.5-2.9M15 10.2a10 10 0 0 1 4 2.3M17.5 6.1A14.5 14.5 0 0 1 22 9M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/><path d="m3 3 18 18" ${a}/>`,
   },
+  coracao: {
+    rotulo: 'Coração',
+    acento: 'coral',
+    // Coração no traço da biblioteca: o corpo na cor de apoio e um brilho no contorno.
+    svg: `<path d="M12 20s-7.5-4.5-7.5-10a4.25 4.25 0 0 1 7.5-2.75A4.25 4.25 0 0 1 19.5 10c0 5.5-7.5 10-7.5 10z" ${a}/><path d="M8 9.2a1.9 1.9 0 0 1 1.6-1.5"/>`,
+  },
   ocorrencia: {
     rotulo: 'Ocorrência',
     acento: 'coral',

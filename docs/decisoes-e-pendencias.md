@@ -271,6 +271,17 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   pelo vínculo ao curso (só a derivada da turma ativa); fixtures em edição encerrada reabrem a
   edição durante a gravação; criação de cursos e turmas passou às RPCs do cadastro.
 
+## 6.12 Ajustes visuais (2026-11-04, pedido do usuário)
+
+- **Crédito de autoria:** "feito com ❤️ por Alisson Almeida", discreto, no rodapé da barra lateral
+  (abaixo da marca SENAI, em duas linhas para não cruzar as faixas do canto), no rodapé do menu do
+  celular e no rodapé da tela Entrar (na mesma linha da marca SENAI no celular, para a tela seguir
+  sem rolagem em 360×640). Componente `src/app/layout/Credito.tsx`.
+- **Ícone `coracao`:** criado no traço da biblioteca (24×24, traço 2), com o corpo na cor de apoio
+  coral; o leitor de tela anuncia "amor". Validação visual pela unidade pendente, como os demais
+  ícones.
+- **Passos da edição:** o link "Abrir" não encolhe mais (quebrava como "Abri / r" no celular).
+
 ## 6.11 Spec 013 — encerramento da edição por turma (implementada em 2026-11-04)
 
 - Implementação: migration `20261107120000_encerramento_por_turma.sql` (recria
