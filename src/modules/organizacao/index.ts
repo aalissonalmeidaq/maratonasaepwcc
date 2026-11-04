@@ -19,6 +19,8 @@ export {
   type ErrosDaEdicao,
   type EstadoEdicao,
   type PendenciasDaEdicao,
+  type RegistroDoEncerramento,
+  type TurmaSemDefinitiva,
 } from './domain/edicoes';
 export {
   validarItemDoCadastro,

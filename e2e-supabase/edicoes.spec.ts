@@ -77,10 +77,14 @@ test('fluxo da edição: criar → cadastro → vincular → enturmar → mentor
   await expect(page.getByText('Edição ativada.')).toBeVisible();
   await page.getByRole('button', { name: 'Encerrar edição' }).click();
   const dialogo = page.getByRole('dialog');
-  await expect(dialogo).toContainText('Categorias sem ranking publicado: Categoria E2E');
+  // Spec 013: a pendência de ranking é por turma; a turma E2E não tem equipes, então não entra.
+  await expect(dialogo).toContainText('Todas as turmas têm o ranking definitivo');
   await dialogo.getByLabel('Justificativa').fill('Fim do ciclo de teste E2E.');
   await dialogo.getByRole('button', { name: 'Encerrar' }).click();
   await expect(page.getByText(/Edição encerrada em .*: Fim do ciclo de teste E2E\./)).toBeVisible();
+  await expect(
+    page.getByRole('region', { name: 'Pendências registradas no encerramento' }),
+  ).toContainText('Todas as turmas têm o ranking definitivo');
 
   // Encerrada: só leitura.
   await page.goto('/coordenacao/organizacao');

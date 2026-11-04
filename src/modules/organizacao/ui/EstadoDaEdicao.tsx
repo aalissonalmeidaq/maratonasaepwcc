@@ -1,23 +1,69 @@
 import { useState } from 'react';
 import { formatarData } from '@/shared/lib/formatacao';
 import { Alert, Button, ConfirmDialog, RetornoEnvio, TextAreaField, useEnvio } from '@/shared/ui';
-import type { EdicaoGerida, PendenciasDaEdicao } from '../domain/edicoes';
+import type {
+  EdicaoGerida,
+  PendenciasDaEdicao,
+  RegistroDoEncerramento,
+  TurmaSemDefinitiva,
+} from '../domain/edicoes';
 
 const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
 
-function ListaDePendencias({ pendencias }: { pendencias: PendenciasDaEdicao }) {
-  const itens = [
-    plural(pendencias.ocorrenciasSemDecisao, 'ocorrência sem decisão', 'ocorrências sem decisão'),
-    plural(pendencias.revisoesAbertas, 'pedido de revisão aberto', 'pedidos de revisão abertos'),
-    pendencias.categoriasSemRanking.length
-      ? `Categorias sem ranking publicado: ${pendencias.categoriasSemRanking.join(', ')}`
-      : 'Todas as categorias têm ranking publicado',
-  ];
+const ESTADO_DA_TURMA: Record<TurmaSemDefinitiva['estado'], string> = {
+  sem_publicacao: 'Sem publicação',
+  parcial: 'Parcial',
+  provisorio: 'Provisório',
+};
+
+/**
+ * Pendências antes de encerrar (FR-011) ou registradas no encerramento. O ranking é por turma
+ * (spec 013); registros anteriores trazem as categorias sem ranking, como foram gravados.
+ */
+function ListaDePendencias({
+  pendencias,
+}: {
+  pendencias: PendenciasDaEdicao | RegistroDoEncerramento;
+}) {
+  const turmas = pendencias.turmasSemDefinitiva;
+  const categorias =
+    'categoriasSemRanking' in pendencias ? pendencias.categoriasSemRanking : undefined;
   return (
     <ul className="list-disc pl-5 text-sm">
-      {itens.map((i) => (
-        <li key={i}>{i}</li>
-      ))}
+      <li>
+        {plural(
+          pendencias.ocorrenciasSemDecisao,
+          'ocorrência sem decisão',
+          'ocorrências sem decisão',
+        )}
+      </li>
+      <li>
+        {plural(
+          pendencias.revisoesAbertas,
+          'pedido de revisão aberto',
+          'pedidos de revisão abertos',
+        )}
+      </li>
+      {turmas ? (
+        turmas.length ? (
+          <li>
+            Turmas sem ranking definitivo:
+            <ul aria-label="Turmas sem ranking definitivo" className="list-[circle] pl-5">
+              {turmas.map((t) => (
+                <li key={t.turmaId}>
+                  {t.turma} ({t.categoria}): {ESTADO_DA_TURMA[t.estado]}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ) : (
+          <li>Todas as turmas têm o ranking definitivo</li>
+        )
+      ) : categorias?.length ? (
+        <li>Categorias sem ranking publicado: {categorias.join(', ')}</li>
+      ) : (
+        <li>Todas as categorias tinham ranking publicado</li>
+      )}
     </ul>
   );
 }
@@ -50,12 +96,26 @@ export function EstadoDaEdicao({
   if (edicao.estado === 'encerrada') {
     const quando = edicao.encerradaEm ? formatarData(edicao.encerradaEm) : 'data não registrada';
     return (
-      <Alert
-        tom="info"
-        titulo={`Edição encerrada em ${quando}: ${edicao.justificativaEncerramento ?? 'sem justificativa registrada'}`}
-      >
-        Os dados desta edição só podem ser lidos.
-      </Alert>
+      <div className="flex flex-col gap-3">
+        <Alert
+          tom="info"
+          titulo={`Edição encerrada em ${quando}: ${edicao.justificativaEncerramento ?? 'sem justificativa registrada'}`}
+        >
+          Os dados desta edição só podem ser lidos.
+        </Alert>
+        <section aria-labelledby={`registro-${edicao.id}`}>
+          <h3 id={`registro-${edicao.id}`} className="mb-1 text-sm font-semibold">
+            Pendências registradas no encerramento
+          </h3>
+          {edicao.pendenciasNoEncerramento ? (
+            <ListaDePendencias pendencias={edicao.pendenciasNoEncerramento} />
+          ) : (
+            <p className="text-sm text-text-secondary">
+              Pendências do encerramento não registradas
+            </p>
+          )}
+        </section>
+      </div>
     );
   }
 

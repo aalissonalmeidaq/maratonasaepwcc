@@ -271,6 +271,22 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   pelo vínculo ao curso (só a derivada da turma ativa); fixtures em edição encerrada reabrem a
   edição durante a gravação; criação de cursos e turmas passou às RPCs do cadastro.
 
+## 6.11 Spec 013 — encerramento da edição por turma (implementada em 2026-11-04)
+
+- Implementação: migration `20261107120000_encerramento_por_turma.sql` (recria
+  `app.pendencias_json` e `edicoes_que_coordeno`); tela `EstadoDaEdicao`.
+- **Pendência de ranking ao encerrar:** turmas com equipes ativas cuja última publicação não é a
+  definitiva ("Sem publicação", "Parcial" ou "Provisório"), no lugar das categorias sem ranking.
+  Publicações por categoria anteriores não contam para a turma.
+- **Não impede o encerramento** (decisão do usuário, mantém a spec 010); a lista fica no registro.
+- **Edição encerrada mostra o registro** das pendências no formato gravado: turmas (encerramentos
+  novos) ou categorias (anteriores); sem registro, "Pendências do encerramento não registradas".
+- Desvios e observações:
+  - o `011_edicoes` não tem equipes nas turmas da edição, então a lista de turmas fica vazia
+    ali; a lista com turmas é coberta pelo `014_encerramento_turma`;
+  - na demonstração há uma edição encerrada fictícia (também no seletor da coordenação), com o
+    3º ano B "Sem publicação", porque o botão de encerrar fica desabilitado no modo demonstração.
+
 ## 6.10 Spec 012 — ranking por turma (implementada em 2026-11-04)
 
 - **Divergência com o PRD:** RF14, HU05 e o risco "múltiplos cursos incomparáveis" falam em
@@ -304,9 +320,8 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
     usar a data de Brasília;
   - na demonstração, o 3º ano A aparece com a definitiva e pendências (impossível no servidor),
     para mostrar o empate a decidir na premiação.
-- **[pendência]** O encerramento da edição (spec 010) ainda confere "categoria sem ranking": com
-  uma publicação de qualquer turma da categoria a verificação passa. Decidir se deve exigir a
-  publicação de cada turma.
+- ~~**[pendência]** O encerramento da edição (spec 010) ainda confere "categoria sem ranking".~~
+  Resolvida na spec 013 (§6.11): a pendência passa a ser por turma.
 - Editar os prêmios da edição continua fora do escopo (a lista vem do cadastro da edição).
 
 ## 6.9 Spec 011 — regras da edição e das turmas (implementada em 2026-11-03)

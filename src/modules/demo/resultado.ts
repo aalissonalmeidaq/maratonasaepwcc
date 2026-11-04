@@ -51,6 +51,10 @@ const VERSOES_DA_TURMA: Record<string, VersaoFicticia[]> = {
     { versao: 1, estado: 'parcial', em: PUBLICADO_EM, justificativa: null },
   ],
 };
+/** Estado da última publicação fictícia da turma (spec 013: pendências do encerramento). */
+export const estadoDaUltimaPublicacaoDemo = (turmaId: string): EstadoRanking | null =>
+  VERSOES_DA_TURMA[turmaId]?.[0]?.estado ?? null;
+
 /** Publicação por categoria anterior à spec 012 (só a coordenação vê). */
 const CATEGORIA_ANTERIOR = 'Categoria A (exemplo)';
 const categoriaDaTurma = (turmaId: string) =>

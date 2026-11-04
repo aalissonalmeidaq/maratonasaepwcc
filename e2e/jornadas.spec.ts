@@ -505,6 +505,22 @@ test.describe('gestão de edições (spec 010, demonstração)', () => {
     await semRolagemHorizontal(page);
   });
 
+  test('edição encerrada mostra as turmas sem ranking definitivo registradas (spec 013)', async ({
+    page,
+  }) => {
+    await entrarComo(page, /coordenação/i);
+    await page.goto('/coordenacao/edicoes');
+    await page
+      .getByRole('button', { name: 'Gerir: Maratona SAEP — edição anterior (fictícia)' })
+      .click();
+    const registro = page.getByRole('region', { name: 'Pendências registradas no encerramento' });
+    await expect(registro).toContainText(
+      '3º ano B (fictícia) (Categoria B (exemplo)): Sem publicação',
+    );
+    await expect(registro).not.toContainText('3º ano A');
+    await semRolagemHorizontal(page);
+  });
+
   test('seletor troca a edição em até 2 interações (SC-007)', async ({ page }) => {
     await entrarComo(page, /coordenação/i);
     await page.goto('/coordenacao/organizacao');
