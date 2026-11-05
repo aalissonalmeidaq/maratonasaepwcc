@@ -1,33 +1,34 @@
 # Decisões, premissas e pendências
 
-Atualizado em 2026-10-29 (ciclo 1 — spec 001). Itens marcados **[validar]** dependem da
-coordenação/unidade e devem ser resolvidos antes de usar dados reais.
+Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]** estão no catálogo
+"Premissas em validação" da coordenação (spec 015), onde a unidade registra "Confirmada" ou
+"Precisa mudar"; resolver antes de usar dados reais. Itens já decididos citam a spec que os resolveu.
 
 ## 1. Documentos e ativos
 
-| Item                                                                                   | Situação                                                                                                                                                                                                                                                     |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| PRD, Documento de Visão, Design System, `tokens_maratona.css`                          | Encontrados em `docs/referencias/` e usados                                                                                                                                                                                                                  |
-| SVGs da marca Maratona (horizontal, branca, negativo, cinza, preta, vertical, símbolo) | Encontrados em `docs/referencias/identidade visual/`; copiados sem alteração para `public/brand/`                                                                                                                                                            |
-| Pranchas PNG (paleta, tipografia, ícones, interface, mockups)                          | Usadas como referência visual; dados ilustrativos ignorados                                                                                                                                                                                                  |
-| `docs/VETORIZADAS CLAUDE/`                                                             | Versão anterior dos SVGs (prefixo `saep-`), arquivos diferentes dos de `referencias/`. Usamos os de `referencias/` (mais recentes). **[validar]** qual é a versão aprovada                                                                                   |
-| **Projeto pedagógico / livro de regras / regulamento**                                 | **AUSENTE.** Regras implementadas a partir do PRD e das instruções do usuário, versão `piloto-2026.0-a-confirmar`                                                                                                                                            |
-| **Marca SENAI Ceará** (colorida e totalmente branca)                                   | Disponíveis em `public/brand/`: `senai-ceara-colorido.svg` para fundo claro (arquivo `logo-senai.svg` indicado pelo usuário em 30/10/2026, copiado sem alteração) e `senai-ceara-branco.svg` para fundo escuro.                                              |
-| **Ícones do projeto em SVG individual**                                                | **Vetorizados (2026-10-29)**: 103 ícones redesenhados à mão a partir da prancha em `src/shared/ui/icones/dados.ts`; arquivos em `docs/icones/svg` e galeria em `docs/icones/galeria.html`. Não é rastreio automático: **[validar]** fidelidade com a unidade |
-| Licença/arquivos de fonte                                                              | Montserrat (SIL OFL) via `@fontsource`, auto-hospedada. **[validar]** confirmação institucional                                                                                                                                                              |
+| Item                                                                                   | Situação                                                                                                                                                                                                                                                                |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PRD, Documento de Visão, Design System, `tokens_maratona.css`                          | Encontrados em `docs/referencias/` e usados                                                                                                                                                                                                                             |
+| SVGs da marca Maratona (horizontal, branca, negativo, cinza, preta, vertical, símbolo) | Encontrados em `docs/referencias/identidade visual/`; copiados sem alteração para `public/brand/`                                                                                                                                                                       |
+| Pranchas PNG (paleta, tipografia, ícones, interface, mockups)                          | Usadas como referência visual; dados ilustrativos ignorados                                                                                                                                                                                                             |
+| `docs/VETORIZADAS CLAUDE/`                                                             | Versão anterior dos SVGs (prefixo `saep-`), arquivos diferentes dos de `referencias/`. Usamos os de `referencias/` (mais recentes). **[P01 — em validação]** qual é a versão aprovada                                                                                   |
+| **Projeto pedagógico / livro de regras / regulamento**                                 | **AUSENTE.** Regras implementadas a partir do PRD e das instruções do usuário, versão `piloto-2026.0-a-confirmar`                                                                                                                                                       |
+| **Marca SENAI Ceará** (colorida e totalmente branca)                                   | Disponíveis em `public/brand/`: `senai-ceara-colorido.svg` para fundo claro (arquivo `logo-senai.svg` indicado pelo usuário em 30/10/2026, copiado sem alteração) e `senai-ceara-branco.svg` para fundo escuro.                                                         |
+| **Ícones do projeto em SVG individual**                                                | **Vetorizados (2026-10-29)**: 103 ícones redesenhados à mão a partir da prancha em `src/shared/ui/icones/dados.ts`; arquivos em `docs/icones/svg` e galeria em `docs/icones/galeria.html`. Não é rastreio automático: **[P02 — em validação]** fidelidade com a unidade |
+| Licença/arquivos de fonte                                                              | Montserrat (SIL OFL) via `@fontsource`, auto-hospedada. **[P08 — em validação]** confirmação institucional                                                                                                                                                              |
 
 ## 2. Divergências registradas
 
 - A prancha "Diretrizes de marca" mostra hex diferentes dos tokens (ex.: azul-marinho `#0B2D6B`
   vs `#062457`; amarelo `#FFC02E` vs `#FFB820`). O Design System diz que o CSS é a referência
-  inicial → usamos `tokens_maratona.css`. **[validar]**
+  inicial → usamos `tokens_maratona.css`. **[P03 — em validação]**
 - O prompt cita "seta da marca em laranja"; os SVGs oficiais usam coral `#FC4B55`. Mantivemos os
-  arquivos como estão (não alteramos a marca). **[validar]**
+  arquivos como estão (não alteramos a marca). **[P04 — em validação]**
 - Tokens têm `--color-coral-500 #FF5866` e os SVGs `#FC4B55` (diferença pequena). Sem ação.
 
 - **Largura da barra lateral (2026-11-03, spec 011):** `--sidebar-width` passou de 16rem para
   17.5rem no arquivo de tokens, no tema e no `DESIGN.md`, para caber os títulos e ícones das
-  categorias do menu. Decisão do usuário. **[validar]** com o Design System.
+  categorias do menu. Decisão do usuário. **[P05 — em validação]** com o Design System.
 
 ## 2.1 Identidade visual — pranchas recebidas em 2026-10-29
 
@@ -36,31 +37,31 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   identidade visual da aplicação.
 - **Padrões gráficos** (prancha 08) recriados em SVG em `src/shared/ui/padroes/dados.ts`;
   arquivos em `docs/padroes/svg` e galeria em `docs/padroes/galeria.html` (`npm run padroes`).
-  **[validar]**
+  **[P06 — em validação]**
 - **13 ícones** das pranchas "Navegação e conta", "Maratona e aprendizagem" e "Avaliação e
   administração" acrescentados, mais o ícone "Salvar" criado no mesmo estilo em 2026-10-30
-  (117 no total). **[validar]**
+  (117 no total). **[P02 — em validação]**
 - **Paleta da prancha × tokens em uso:** azul-marinho `#0B2D6B` × `#062457`; amarelo `#FFC02E` ×
   `#FFB820`; borda sutil `#E6EBF2` × `#DCE5EF`. Os padrões gráficos usam a paleta da prancha; os
-  tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[decidir]**
+  tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[P03 — em validação]**
   se os tokens devem migrar para a paleta da prancha.
 - Ilustrações de pessoas enviadas como modelo não chegaram como arquivos; aguardam
   `docs/referencias/ilustracoes/`.
 
 ## 3. Premissas de regra (configuração `REGRAS_PILOTO`)
 
-| Premissa                             | Escolha provisória                                                                                       |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Arredondamento                       | 2 casas, meio para cima, só no resultado do componente e no total. **[validar]**                         |
-| Teto de 10 pontos                    | Vale para descontos gerais de ocorrências; zerar entrega por plágio não entra no teto. **[validar]**     |
-| Atraso com exceção autorizada        | Prorrogação/impedimento registrado ⇒ sem desconto de atraso. **[validar]**                               |
-| Penalidade duplicada (mesmo fato)    | Mantém a primeira registrada e informa as ignoradas. **[validar]**                                       |
-| Ranking                              | Por categoria; no piloto, categoria = curso. **[validar]**                                               |
-| Desempate "questões e prova oficial" | Soma do componente objetivo (30) de todos os encontros                                                   |
-| Prova oficial                        | Encontro em que o componente objetivo é a prova; realização "pendente" também deixa o resultado pendente |
-| Pedido de revisão                    | 24 h, exceção registrada pela coordenação (spec 007, §6.5)                                               |
-| Premiação                            | Itens registrados como configuração; valores, quantidade, validade e entrega **[validar]**               |
-| Cronograma                           | Nada fixado no código; demo usa datas relativas ao dia atual                                             |
+| Premissa                             | Escolha provisória                                                                                              |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Arredondamento                       | 2 casas, meio para cima, só no resultado do componente e no total. **[P09 — em validação]**                     |
+| Teto de 10 pontos                    | Vale para descontos gerais de ocorrências; zerar entrega por plágio não entra no teto. **[P10 — em validação]** |
+| Atraso com exceção autorizada        | Prorrogação/impedimento registrado ⇒ sem desconto de atraso. **[P11 — em validação]**                           |
+| Penalidade duplicada (mesmo fato)    | Mantém a primeira registrada e informa as ignoradas. **[P12 — em validação]**                                   |
+| Ranking                              | Por categoria; no piloto, categoria = curso. (resolvido pela spec 012 — ranking por turma)                      |
+| Desempate "questões e prova oficial" | Soma do componente objetivo (30) de todos os encontros                                                          |
+| Prova oficial                        | Encontro em que o componente objetivo é a prova; realização "pendente" também deixa o resultado pendente        |
+| Pedido de revisão                    | 24 h, exceção registrada pela coordenação (spec 007, §6.5)                                                      |
+| Premiação                            | Itens registrados como configuração; valores, quantidade, validade e entrega **[P13 — em validação]**           |
+| Cronograma                           | Nada fixado no código; demo usa datas relativas ao dia atual                                                    |
 
 ## 4. Decisões técnicas (ver `docs/adr/`)
 
@@ -84,12 +85,12 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   por CSV com prévia. **Implementados em 2026-10-30:** convite de 7 dias, situação de acesso com
   reenvio e importação CSV (ADR 0009). Rotas `/primeiro-acesso`, `/esqueci-senha` e
   `/redefinir-senha` e o link "Esqueci minha senha" na entrada também concluídos. **Pendente:**
-  provedor de e-mail da produção e SMTP do Auth **[validar]**.
+  provedor de e-mail da produção e SMTP do Auth **[P32 — em validação]**.
 - Criação de edições: resolvida na spec 010 (seção 6.8); só a primeira edição de uma instalação
   continua criada pela administração do banco.
-- Ícones PWA gerados a partir de `maratona-simbolo.svg` com fundo branco no maskable. **[validar]**
-- Contraste foi verificado apenas por inspeção dos tokens; auditoria axe no navegador real e
-  testes com leitor de tela ficam para o Incremento 5.
+- Ícones PWA gerados a partir de `maratona-simbolo.svg` com fundo branco no maskable. **[P07 — em validação]**
+- Contraste e axe no navegador real: resolvidos pela spec 014 (auditoria automática); o teste com
+  leitor de tela segue o roteiro manual da spec 014, aguardando execução pela unidade.
 - O CLI `claude` não está no PATH (sessão via extensão do VS Code); `specify init` rodou com
   `--ignore-agent-tools`. As skills `/speckit-*` foram instaladas em `.claude/skills/`.
 - Porta do Supabase local alterada para 5442x porque outro projeto local usa as portas padrão.
@@ -100,8 +101,8 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   ou um trio por turma em turma com número ímpar de alunos ativos. A coordenação não forma
   equipes; coordenação, docente e mentor alteram com justificativa. **Implementado em
   2026-10-30** (ver §6.2). Duplas entre turmas continuam recusadas.
-- Encontros valem para todas as turmas da edição. **[validar]**
-- Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[validar]**
+- Encontros valem para todas as turmas da edição. (resolvido pela spec 011 — encontros por turma)
+- Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[P21 — em validação]**
 - Edição de curso e turma pela interface: implementada em 2026-10-30. Decidido na mesma data
   (spec 002, Clarifications): com dupla ativa, o curso da turma não pode mudar — regra no servidor
   implementada (gatilho `turmas_validar_troca_de_curso`); a tela mostra o curso bloqueado.
@@ -119,9 +120,9 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   ao FR-013). A RPC `formar_dupla` foi removida.
 - Seed local: turma fictícia "3º ano C" (5 alunos, ímpar, sem equipes) para os E2E de trio e de
   formação pelo docente. Os E2E reais exigem `supabase db reset` antes de cada execução.
-- **[validar]** Convites não expiram e não há limite de convites por aluno (a spec não define;
+- **[P22 — em validação]** Convites não expiram e não há limite de convites por aluno (a spec não define;
   nada foi inventado).
-- **[validar]** Nomes de equipe não passam por moderação; o docente/mentor pode renomear com
+- **[P23 — em validação]** Nomes de equipe não passam por moderação; o docente/mentor pode renomear com
   justificativa.
 
 ## 6.3 Spec 004 — painel da turma (implementada em 2026-10-30)
@@ -160,20 +161,20 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Decidido em 2026-10-30: cada docente cria e publica desafios e listas de questões para as
   próprias turmas; a equipe pode reenviar a entrega até o prazo (vale a última versão); a
   avaliação fica visível à equipe ao ser registrada, e correções exigem justificativa.
-- **[validar]** Turmas do mesmo curso podem receber atividades diferentes, o que afeta a
+- (resolvido pela spec 012 — ranking por turma) Turmas do mesmo curso podem receber atividades diferentes, o que afeta a
   comparabilidade do ranking por curso.
 - Formatos e limite de arquivo (decidido em 2026-10-30): PDF, ZIP, PNG e JPG até 50 MB.
 - Presença apenas presente/ausente (decidido em 2026-10-30); atraso/saída antecipada em observação
   opcional, sem efeito nos pontos.
 - Decidido em 2026-10-30: o mentor da turma tem as mesmas permissões do docente (cria e publica
   atividades, registra presença, participação, avaliação e prorrogação).
-- **[validar]** Prorrogação/impedimento registrados pelo docente/mentor da turma ou pela
+- **[P24 — em validação]** Prorrogação/impedimento registrados pelo docente/mentor da turma ou pela
   coordenação.
-- **[validar]** Trio: presença de três alunos limitada ao máximo por equipe das regras (piloto 10).
+- **[P15 — em validação]** Trio: presença de três alunos limitada ao máximo por equipe das regras (piloto 10).
 - **Pendente (operação):** limpeza automática de arquivos sem entrega no bucket `entregas` (upload
   concluído com registro recusado). Exige rotina com a API do Storage no ambiente de produção.
 - Decidido em 2026-10-30: um encontro pode ter vários desafios e listas por turma; a pontuação
-  do componente é a média simples dos itens (o PRD não define a agregação). **[validar]**
+  do componente é a média simples dos itens (o PRD não define a agregação). **[P14 — em validação]**
 
 ## 6.5 Spec 007 — resultado oficial, ocorrências e ranking (implementada em 2026-11-01)
 
@@ -187,10 +188,10 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Regras completadas pela migration: `penalidades.tipos` (reincidência 2, desrespeito 5, uso não
   autorizado 5, plágio zera a entrega) e `prazos` (24 h para manifestação e revisão), valores do
   PRD. Só edições não encerradas, com o sufixo `+inc4` no `regras_versao`; a auditoria de
-  `edicoes` guarda o antes. **[validar]** com o regulamento.
+  `edicoes` guarda o antes. **[P16 — em validação]** com o regulamento.
 - Nota da prova "indisponível": mantém os 5 pontos da realização, sem bônus e sem pendência. Nota
   sem escala 0–100 e autorização confirmadas fica pendente; o sistema não converte escalas.
-  **[validar]** a equivalência para escalas diferentes.
+  **[P17 — em validação]** a equivalência para escalas diferentes.
 - Decididos em 2026-11-01: revisão vale para decisão de ocorrência e para componente da
   publicação **provisória** (parcial não abre prazo; definitiva é final); revisão aceita corrige o
   registro de origem, ligado ao pedido, sem ajuste manual de pontos; a coordenação só decide
@@ -222,7 +223,8 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   milhar, datas `DD/MM/AAAA HH:MM`, "Sim"/"Não", nulo como célula vazia e apóstrofo antes de texto
   que começa com `=`, `+`, `-`, `@`, tabulação ou CR (injeção de fórmula). Arquivo
   `maratona-<tipo>-<AAAA-MM-DD>.csv`.
-- **Fuso:** datas do CSV e o corte de "encontro realizado" em `America/Sao_Paulo`. **[validar]**
+- **Fuso:** datas do CSV e o corte de "encontro realizado" em `America/Fortaleza`, fuso oficial de Juazeiro do Norte (resolvido pela spec 015;
+  antes `America/Sao_Paulo`, com o mesmo horário).
 - **Textos livres fora do CSV:** fato, evidência, manifestação, justificativas e respostas podem
   conter dados pessoais e ficam só nas telas. A observação da presença entra no relatório de
   presença (R6). Nenhum relatório traz nota individual, e-mail ou identificador interno.
@@ -250,17 +252,17 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   coordenada e não mudam nesta spec.
 - **Cadastro permanente:** cursos e turmas são da unidade; `cursos` e `turmas` passaram a ser o curso
   e a turma **na edição**. Correções do cadastro chegam sozinhas só às edições em preparação; na
-  edição ativa, por "Atualizar a partir do cadastro". Instalação de uma só unidade. **[validar]**
+  edição ativa, por "Atualizar a partir do cadastro". Instalação de uma só unidade. **[P25 — em validação]**
 - **Gestão por turma:** só a coordenação cadastra, importa e vincula alunos e docentes na turma.
   A busca de pessoas traz só contas que participam ou participaram de edições que a pessoa
-  coordena, sem e-mail. **[validar]** se é preciso buscar qualquer conta.
+  coordena, sem e-mail. **[P26 — em validação]** se é preciso buscar qualquer conta.
 - **Mentor por curso:** o vínculo ao curso gera linhas por turma (derivadas), mantidas por gatilho;
   vínculo direto de mentor a turma é recusado. Na migração, cada mentor por turma passou a ser
-  vinculado ao curso e atua também nas outras turmas dele. **[validar]**
+  vinculado ao curso e atua também nas outras turmas dele. **[P27 — em validação]**
 - **Encerramento:** lista ocorrências sem decisão, revisões abertas e categorias sem ranking, sem
   impedir; a justificativa e a lista ficam na edição e na auditoria. Edição encerrada recusa
   escrita em todas as tabelas dela (gatilho central); avisos e exportações continuam. Edição
-  encerrada não é reaberta. **[validar]**
+  encerrada não é reaberta. **[P28 — em validação]**
 - **Coordenação:** a edição mantém ao menos uma coordenação ativa; ninguém altera a própria.
 - **Várias edições ativas:** o seletor no topo aparece com duas ou mais edições da área; a escolha
   fica no dispositivo (só o id). Edição em preparação aparece com o selo "Em preparação".
@@ -270,6 +272,24 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Testes das specs anteriores ajustados sem perder asserções: fixtures de mentor por turma passam
   pelo vínculo ao curso (só a derivada da turma ativa); fixtures em edição encerrada reabrem a
   edição durante a gravação; criação de cursos e turmas passou às RPCs do cadastro.
+
+## 6.13 Spec 015 — premissas em validação (implementada em 2026-11-05)
+
+- Implementação: migrations `20261109120000_premissas_em_validacao.sql` (catálogo P01–P32,
+  respostas só de inserção e auditadas, RPCs `premissas_em_validacao` e `responder_premissa`) e
+  `20261109121000_fuso_fortaleza.sql`; tela "Premissas em validação" na coordenação (grupo
+  "Preparação") e no docente/mentor (grupo "Comunicação"), aviso no início da coordenação.
+- **Catálogo da instalação:** as marcas em aberto deste documento viraram premissas (P01–P32); o
+  texto vem da documentação, sem regra nova. Responder "Precisa mudar" não muda o sistema: cada
+  mudança precisa de uma spec, que então marca a premissa como resolvida (`resolvida_por`).
+- **Quem responde:** coordenação de qualquer edição, inclusive encerrada; docentes e mentores com
+  vínculo ativo só leem; estudantes e visitantes são recusados no servidor.
+- **Resolvidos sem perguntar à unidade:** encontros por turma (spec 011), ranking por turma
+  (spec 012), contraste e axe no navegador (spec 014) e o fuso, que passou a `America/Fortaleza`
+  (fuso oficial de Juazeiro do Norte; mesmo horário de `America/Sao_Paulo` desde 2019).
+- **Comentários antigos:** as migrations já aplicadas não foram editadas. Os comentários
+  "a validar" de `20261104120000_gestao_edicoes.sql` (busca de pessoas e mentor por curso) estão
+  cobertos por P26 e P27.
 
 ## 6.12 Ajustes visuais (2026-11-04, pedido do usuário)
 
@@ -331,7 +351,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
     usar a data de Brasília;
   - na demonstração, o 3º ano A aparece com a definitiva e pendências (impossível no servidor),
     para mostrar o empate a decidir na premiação.
-- ~~**[pendência]** O encerramento da edição (spec 010) ainda confere "categoria sem ranking".~~
+- ~~O encerramento da edição (spec 010) ainda confere "categoria sem ranking".~~
   Resolvida na spec 013 (§6.11): a pendência passa a ser por turma.
 - Editar os prêmios da edição continua fora do escopo (a lista vem do cadastro da edição).
 
@@ -349,7 +369,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   atraso e tipos de penalidade podem ser criados, removidos e renomeados; o id do critério nasce do
   nome e não muda ao renomear. A prova oficial segue o PRD (HU04) e não muda. Limites de proteção
   contra erro de digitação: 20 critérios por rubrica, nomes de 80 caracteres, 0 a 4 casas
-  decimais, 1 a 20 encontros. **[validar]**
+  decimais, 1 a 20 encontros. **[P18 — em validação]**
 - **Ajustes da turma:** cada ajuste guarda o conjunto completo de grupos definidos para a turma
   (`{}` volta a herdar tudo); o restante vem da edição, inclusive mudanças posteriores. Coordenação
   ajusta qualquer grupo; o mentor do curso, só presença, participação, questões, entrega e
@@ -362,7 +382,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   prazos usam as regras do encontro para a turma da equipe; avaliação já lançada continua válida e
   com os nomes antigos. As leituras para o cálculo parcial devolvem as regras de cada encontro.
 - **Limite de atraso exibido do desafio** (desafio encerrado na lista): o maior entre as turmas do
-  desafio; o envio de cada equipe usa o da própria turma. **[validar]**
+  desafio; o envio de cada equipe usa o da própria turma. **[P20 — em validação]**
 - **Prazo de revisão do ranking publicado:** ainda pelas regras atuais da edição (o ranking por
   turma é a spec 012).
 - **Encontros da turma:** guardam-se só as exclusões; encontro com presença, participação,
@@ -371,7 +391,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   encontro" do painel do aluno continua o da edição.
 - **Pontuação máxima da turma:** soma, nos encontros da turma, de presença + participação +
   questões (ou prova oficial, conforme o encontro) + entrega + apresentação pelas regras de cada
-  encontro. **[validar]** encontros com avaliação objetiva diferente.
+  encontro. **[P19 — em validação]** encontros com avaliação objetiva diferente.
 - **Regulamento:** quem tem uma turma só (estudante, docente de uma turma) vê as regras da turma, com
   "definido para a sua turma" e a pontuação máxima; coordenação e docentes de várias turmas veem as
   da edição.
@@ -393,7 +413,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   (ex.: convites pendentes) e um ponto quando contém a página atual. A barra lateral passa de 16rem
   para 17,5rem (token `--sidebar-width`, atualizado também na referência de tokens) e o menu do
   celular de 15rem para 16rem (18rem no tablet), para caber ícone, título e seta sem cortar.
-  **[validar]** com a identidade visual.
+  **[P05 — em validação]** com a identidade visual.
 - **Barras de rolagem:** finas, trilho transparente e polegar na cor azul-marinho da marca (branco
   translúcido nas áreas escuras do menu); a barra lateral rola quando a categoria aberta não cabe.
 - **Tela Entrar:** ocupa exatamente a altura da tela (o aviso de demonstração e o de sem conexão
@@ -420,7 +440,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   comunicado da edição. Quem deixa de atuar numa turma não corrige mais os comunicados dela.
 - **Público por perfil e turma:** todos (estudantes, docentes e mentores), estudantes ou equipe
   docente, opcionalmente limitado a turmas, avaliado na leitura. Público por equipe ou por pessoa
-  fica fora. **[validar]**
+  fica fora. **[P29 — em validação]**
 - **Apoio e analista** não leem comunicados neste incremento, porque o PRD não define o que
   recebem.
 - **Avisos e selo "Novo":** publicação e cada correção geram avisos na tabela `avisos` (tipos
@@ -433,7 +453,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
   de `app.exigir_justificativa`, já usada no projeto), registrada na auditoria com a versão
   anterior. O público não muda depois de publicado; publicado não é apagado, só retirado.
 - **Limites:** título de 1 a 200 caracteres e texto de 1 a 5.000, sem marcação (exibido como texto
-  puro). **[validar]**
+  puro). **[P30 — em validação]**
 - **Regulamento:** o resumo passa a ler `edicoes.regras` e `regras_versao` da edição, sem números
   fixos na tela; valor ausente aparece como "a definir". O documento oficial do regulamento
   continua ausente e não é publicado por esta spec.
@@ -444,7 +464,7 @@ coordenação/unidade e devem ser resolvidos antes de usar dados reais.
 - Busca e paginação são feitas no navegador sobre os registros que a RLS já entregou (volume
   pequeno por edição). Se as listagens crescerem (ex.: centenas de estudantes por edição), migrar
   para paginação e busca no servidor (`range` + filtro no PostgREST).
-- Tamanho de página: 10. **[validar]** com a coordenação.
+- Tamanho de página: 10. **[P31 — em validação]** com a coordenação.
 - Resumos dos painéis iniciais não são listagens e não têm busca.
 
 ## 7. Questões em aberto (PRD §19)

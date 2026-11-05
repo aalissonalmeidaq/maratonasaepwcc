@@ -152,6 +152,9 @@ const CoordenacaoOrganizacaoPage = lazy(() =>
 const CoordenacaoDuplasPage = lazy(() =>
   import('./paginas/organizacao').then((modulo) => ({ default: modulo.CoordenacaoDuplasPage })),
 );
+const PremissasEmValidacaoPage = lazy(() =>
+  import('./paginas/premissas').then((modulo) => ({ default: modulo.PremissasEmValidacaoPage })),
+);
 const CoordenacaoEncontrosPage = lazy(() =>
   import('./paginas/organizacao').then((modulo) => ({ default: modulo.CoordenacaoEncontrosPage })),
 );
@@ -198,6 +201,7 @@ export function AppRotas() {
               <Route path="pontos" element={<DocentePontosPage />} />
               <Route path="comunicados" element={<DocenteComunicadosPage />} />
               <Route path="relatorios" element={<DocenteRelatoriosPage />} />
+              <Route path="premissas" element={<PremissasEmValidacaoPage />} />
               <Route path="avisos" element={<AvisosPage />} />
             </Route>
           </Route>
@@ -206,6 +210,7 @@ export function AppRotas() {
             <Route path="/coordenacao" element={<AppShell area="coordenacao" />}>
               <Route index element={<CoordenacaoInicioPage />} />
               <Route path="edicoes" element={<CoordenacaoEdicoesPage />} />
+              <Route path="premissas" element={<PremissasEmValidacaoPage />} />
               <Route path="cadastro" element={<CoordenacaoCadastroPage />} />
               <Route path="organizacao" element={<CoordenacaoOrganizacaoPage />} />
               <Route path="turmas/:turmaId" element={<CoordenacaoPainelTurmaPage />} />

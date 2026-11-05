@@ -19,7 +19,7 @@
      (uma conta criada sem senha recebe senha aleatória do Auth, então o campo de senha não
      serve de critério).
 - **E-mail:** interface `EnviadorDeEmail` com adaptador Mailpit (API HTTP) no ambiente local.
-  O provedor de homologação/produção é decisão da unidade **[validar]**.
+  O provedor de homologação/produção é decisão da unidade **[P32 — em validação]** (spec 015).
 - **Consequências:** mais uma tabela e três funções do servidor; em troca, prazos independentes
   e nenhum segredo de convite legível no banco. Testes: `supabase/tests/004_convites_acesso.test.sql`
   e `e2e-supabase/contas.spec.ts`.

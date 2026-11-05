@@ -26,6 +26,7 @@ const CAMINHOS = {
     '/docente/ocorrencias',
     '/docente/comunicados',
     '/docente/relatorios',
+    '/docente/premissas',
   ],
   coordenacao: [
     '/coordenacao',
@@ -43,6 +44,7 @@ const CAMINHOS = {
     '/coordenacao/comunicados',
     '/coordenacao/premiacao',
     '/coordenacao/relatorios',
+    '/coordenacao/premissas',
   ],
 } as const;
 
@@ -76,10 +78,23 @@ describe('menu em categorias (spec 011, US6, FR-017, SC-007)', () => {
       MENUS.coordenacao.grupos.map((g) => [g.titulo, g.itens.map((i) => i.rotulo)]),
     );
     expect(rotulos).toEqual({
-      Preparação: ['Edições', 'Cursos e turmas', 'Organização', 'Equipes', 'Encontros'],
+      Preparação: [
+        'Edições',
+        'Premissas em validação',
+        'Cursos e turmas',
+        'Organização',
+        'Equipes',
+        'Encontros',
+      ],
       'Durante os encontros': ['Presença', 'Avaliações', 'Prova oficial', 'Ocorrências'],
       Resultado: ['Ranking', 'Revisões', 'Premiação'],
       Comunicação: ['Comunicados', 'Relatórios'],
     });
+  });
+
+  it('premissas em validação (spec 015): docente em Comunicação; aluno não vê', () => {
+    const comunicacao = MENUS.docente.grupos.find((g) => g.titulo === 'Comunicação');
+    expect(comunicacao?.itens.map((i) => i.rotulo)).toContain('Premissas em validação');
+    expect(itensDoMenu('aluno').some((i) => i.caminho.includes('premissas'))).toBe(false);
   });
 });

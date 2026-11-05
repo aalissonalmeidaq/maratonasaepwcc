@@ -51,7 +51,7 @@ describe('gerarCsv (R5, FR-010, SC-005)', () => {
     expect(grande.slice(1).split('\r\n')[1]).toBe('B;1234,5;;');
   });
 
-  it('data e hora em DD/MM/AAAA HH:MM no horário de Brasília', () => {
+  it('data e hora em DD/MM/AAAA HH:MM no horário de Juazeiro do Norte (America/Fortaleza)', () => {
     const csv = gerarCsv(
       relatorio([
         { equipe: 'A', total: 0, recebidaEm: '2026-11-02T02:05:00Z', presente: true },
@@ -92,7 +92,7 @@ describe('gerarCsv (R5, FR-010, SC-005)', () => {
 });
 
 describe('nomeDoArquivo', () => {
-  it('usa maratona-<tipo>-<AAAA-MM-DD>.csv com a data de Brasília', () => {
+  it('usa maratona-<tipo>-<AAAA-MM-DD>.csv com a data de Juazeiro do Norte', () => {
     expect(nomeDoArquivo('pontos', new Date('2026-11-02T12:00:00Z'))).toBe(
       'maratona-pontos-2026-11-02.csv',
     );

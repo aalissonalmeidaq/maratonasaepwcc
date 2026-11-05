@@ -14,6 +14,7 @@ export const telasPrincipais = [
       '/docente/encontros',
       '/docente/presenca',
       '/docente/avaliacoes',
+      '/docente/premissas',
     ],
   },
   {
@@ -25,6 +26,7 @@ export const telasPrincipais = [
       '/coordenacao/edicoes',
       '/coordenacao/presenca',
       '/coordenacao/avaliacoes',
+      '/coordenacao/premissas',
     ],
   },
 ];

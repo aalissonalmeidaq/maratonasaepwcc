@@ -42,6 +42,18 @@ describe('mensagens de erro do servidor', () => {
     ).toBe('O término deve ser depois do início.');
   });
 
+  it('conflito de concorrência (40001) repassa a explicação do servidor', () => {
+    expect(
+      mensagemDeErro({
+        code: '40001',
+        message:
+          'Esta premissa foi respondida por outra pessoa. Veja a resposta atual antes de registrar.',
+      }),
+    ).toBe(
+      'Esta premissa foi respondida por outra pessoa. Veja a resposta atual antes de registrar.',
+    );
+  });
+
   it('permissão negada vira mensagem clara', () => {
     expect(
       mensagemDeErro(pg('42501', 'new row violates row-level security policy for table "cursos"')),

@@ -16,6 +16,7 @@ const grupos = [
       '/docente/encontros',
       '/docente/presenca',
       '/docente/avaliacoes',
+      '/docente/premissas',
     ],
   },
   {
@@ -27,6 +28,7 @@ const grupos = [
       '/coordenacao/edicoes',
       '/coordenacao/presenca',
       '/coordenacao/avaliacoes',
+      '/coordenacao/premissas',
     ],
   },
 ];
