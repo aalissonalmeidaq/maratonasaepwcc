@@ -175,6 +175,9 @@ function DetalheDaEdicao({ edicao }: { edicao: EdicaoGerida }) {
           edicao={edicao}
           bloqueio={bloqueio}
           onAtivar={gravar(() => organizacao.ativarEdicao(edicao.id))}
+          onDefinirRegulamentoPublico={(publico) =>
+            gravar(() => organizacao.definirRegulamentoPublico(edicao.id, publico))()
+          }
           onCarregarPendencias={() => organizacao.pendenciasDaEdicao(edicao.id)}
           onEncerrar={(j) => gravar(() => organizacao.encerrarEdicao(edicao.id, j))()}
         />

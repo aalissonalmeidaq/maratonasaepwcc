@@ -10,13 +10,17 @@ export default tseslint.config(
   {
     ignores: [
       'dist',
+      'dist-e2e-*/**',
       'dev-dist',
       'coverage',
       'playwright-report',
       'test-results',
+      'test-results-*/**',
       'docs',
       '.specify',
       '.claude',
+      '.agents',
+      '.impeccable',
       'supabase',
     ],
   },

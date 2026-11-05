@@ -453,3 +453,11 @@ Unidade, cursos e volume de usuários; forma de login (institucional?); hospedag
 autorização e prazo da nota oficial e sua escala; formatos e limites de arquivo; regra para
 trios, presença parcial e turmas mistas; quem pode reabrir avaliação; retenção de dados e
 política para menores.
+
+## Homologação de acessibilidade e instalação — spec 014
+
+O roteiro `docs/acessibilidade/roteiro-leitor-de-tela.md` cobre as telas principais dos três
+perfis e está disponível para a unidade executar com NVDA e TalkBack. Execução em aparelhos
+físicos, inclusive instalação Safari/iOS, permanece não executada pelo agente. Registrar
+versões, aparelho, executor, resultados e retestes antes de declarar homologação manual.
+Automação Chromium e emulação de viewport não substituem leitores de tela ou iPhone físico.

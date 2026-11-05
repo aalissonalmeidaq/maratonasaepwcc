@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { areaInicial } from '@/modules/acesso';
 import { CAMINHO_DO_DESTINO, useAuth, type Sessao } from '@/modules/auth';
 import { contasDemo } from '@/modules/demo';
+import { useOnline } from '@/shared/pwa/useOnline';
 import {
   Alert,
   Brand,
@@ -30,6 +31,7 @@ const esquemaEntrada = z.object({
 type Entrada = z.infer<typeof esquemaEntrada>;
 
 function FormularioEntrada() {
+  const online = useOnline();
   const { entrar } = useAuth();
   const [erro, setErro] = useState<string | null>(null);
   const [senhaVisivel, setSenhaVisivel] = useState(false);
@@ -99,7 +101,13 @@ function FormularioEntrada() {
         </div>
       </div>
       {erro && <Alert tom="erro" titulo={erro} anunciar />}
-      <Button type="submit" icone="entrar" carregando={isSubmitting} larguraTotal>
+      <Button
+        type="submit"
+        icone="entrar"
+        disabled={!online}
+        carregando={isSubmitting}
+        larguraTotal
+      >
         Entrar
       </Button>
     </form>
@@ -198,6 +206,7 @@ const PILARES: { rotulo: string; icone: NomeIcone }[] = [
 ];
 
 export function EntradaPage() {
+  const online = useOnline();
   const { sessao, modo, carregando } = useAuth();
   if (carregando)
     return (
@@ -286,7 +295,19 @@ export function EntradaPage() {
                   ? 'Escolha um perfil fictício. Não é necessário informar e-mail ou senha.'
                   : 'Acesse sua área para acompanhar as atividades da Maratona.'}
               </p>
-              {modo === 'demo' && <EntradaDemo />}
+              {!online && (
+                <Alert
+                  tom="info"
+                  titulo="Sem conexão: entrar exige internet. O regulamento público continua disponível se você já o abriu antes."
+                />
+              )}
+              {modo === 'demo' && online && <EntradaDemo />}
+              <Link
+                to="/regulamento"
+                className="mt-4 inline-flex min-h-11 items-center font-semibold text-link underline underline-offset-4"
+              >
+                Regulamento da Maratona
+              </Link>
               {modo === 'supabase' && <FormularioEntrada />}
               {modo === 'nao-configurado' && (
                 <Alert tom="erro" titulo="Acesso indisponível">

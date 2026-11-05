@@ -78,13 +78,17 @@ export function EstadoDaEdicao({
   onCarregarPendencias,
   onEncerrar,
   bloqueio,
+  onDefinirRegulamentoPublico,
 }: {
   edicao: EdicaoGerida;
   onAtivar: () => Promise<unknown>;
   onCarregarPendencias: () => Promise<PendenciasDaEdicao>;
   onEncerrar: (justificativa: string) => Promise<unknown>;
   bloqueio?: string;
+  onDefinirRegulamentoPublico?: (publico: boolean) => Promise<unknown>;
 }) {
+  const publicacao = useEnvio();
+  const [retirar, setRetirar] = useState(false);
   const ativacao = useEnvio();
   const [aberto, setAberto] = useState(false);
   const [pendencias, setPendencias] = useState<PendenciasDaEdicao | null>(null);
@@ -148,6 +152,44 @@ export function EstadoDaEdicao({
 
   return (
     <div className="flex flex-col gap-3">
+      {edicao.estado === 'ativa' && onDefinirRegulamentoPublico && (
+        <section aria-label="Regulamento público" className="flex flex-col items-start gap-3">
+          <h3 className="font-semibold">Regulamento público</h3>
+          <p>{edicao.regulamentoPublico ? 'Publicado na página pública' : 'Não publicado'}</p>
+          <Button
+            variante="secundario"
+            disabled={Boolean(bloqueio)}
+            carregando={publicacao.enviando}
+            onClick={() => {
+              if (edicao.regulamentoPublico) setRetirar(true);
+              else
+                void publicacao.enviar(
+                  () => onDefinirRegulamentoPublico(true),
+                  'Regulamento publicado.',
+                );
+            }}
+          >
+            {edicao.regulamentoPublico ? 'Retirar regulamento' : 'Publicar regulamento'}
+          </Button>
+          <RetornoEnvio estado={publicacao.estado} />
+          {bloqueio && <p className="text-sm text-text-secondary">{bloqueio}</p>}
+          <ConfirmDialog
+            aberto={retirar}
+            titulo="Retirar regulamento?"
+            descricao="A edição deixará de aparecer na página pública na próxima visita com internet."
+            rotuloConfirmar="Retirar regulamento"
+            carregando={publicacao.enviando}
+            onCancelar={() => setRetirar(false)}
+            onConfirmar={() => {
+              void publicacao
+                .enviar(() => onDefinirRegulamentoPublico(false), 'Regulamento retirado.')
+                .then((ok) => {
+                  if (ok) setRetirar(false);
+                });
+            }}
+          />
+        </section>
+      )}
       {edicao.estado === 'rascunho' ? (
         <>
           <p className="text-sm text-text-secondary">

@@ -66,19 +66,19 @@ describe('PainelCoordenacao (US3, FR-004, FR-005)', () => {
 
     const a = screen.getByRole('region', { name: '3º ano A' });
     expect(within(a).getByText('Categoria A')).toBeInTheDocument();
-    expect(within(a).getByRole('link', { name: 'Componentes sem registro: 4' })).toHaveAttribute(
+    expect(within(a).getByRole('link', { name: /Componentes sem registro\s*4/ })).toHaveAttribute(
       'href',
       '/coordenacao/ranking',
     );
-    expect(within(a).getByRole('link', { name: 'Prova oficial pendente: 0' })).toHaveAttribute(
+    expect(within(a).getByRole('link', { name: /Prova oficial pendente\s*0/ })).toHaveAttribute(
       'href',
       '/coordenacao/prova-oficial',
     );
-    expect(within(a).getByRole('link', { name: 'Ocorrências sem decisão: 1' })).toHaveAttribute(
+    expect(within(a).getByRole('link', { name: /Ocorrências sem decisão\s*1/ })).toHaveAttribute(
       'href',
       '/coordenacao/ocorrencias',
     );
-    expect(within(a).getByRole('link', { name: 'Revisões abertas: 2' })).toHaveAttribute(
+    expect(within(a).getByRole('link', { name: /Revisões abertas\s*2/ })).toHaveAttribute(
       'href',
       '/coordenacao/revisoes',
     );

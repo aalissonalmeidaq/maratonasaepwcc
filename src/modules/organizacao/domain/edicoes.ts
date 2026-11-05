@@ -4,6 +4,7 @@ export type EstadoEdicao = Edicao['estado'];
 
 /** Edição que a pessoa coordena, como devolvida por `edicoes_que_coordeno` (spec 010). */
 export interface EdicaoGerida {
+  regulamentoPublico: boolean;
   id: string;
   nome: string;
   inicio: string | null;

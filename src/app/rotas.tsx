@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react';
+import { lazy as criarLazy, Suspense } from 'react';
+import { useOnline } from '@/shared/pwa/useOnline';
 import { Route, Routes } from 'react-router';
 import {
   EsqueciSenhaPage,
@@ -10,7 +11,31 @@ import {
 import { LimiteCarregamento } from './layout/LimiteCarregamento';
 import { AguardandoPermissaoPage, EntradaPage, NaoEncontradaPage } from './paginas/comum';
 
+/** Não memoriza uma rejeição de import causada pela falta de rede. */
+const lazy: typeof criarLazy = (carregar) =>
+  criarLazy(async () => {
+    try {
+      return await carregar();
+    } catch (erro) {
+      if (navigator.onLine) throw erro;
+      await new Promise<void>((resolve) =>
+        window.addEventListener('online', () => resolve(), { once: true }),
+      );
+      return carregar();
+    }
+  });
+function CarregandoArea() {
+  const online = useOnline();
+  return (
+    <div role="status" className="p-6 text-text-secondary">
+      {online
+        ? 'Carregando sua área…'
+        : 'Sem conexão: esta tela precisa de internet para carregar.'}
+    </div>
+  );
+}
 const AppShell = lazy(() => import('./layout/AreaAutenticada'));
+const RegulamentoPublicoPage = lazy(() => import('./paginas/RegulamentoPublicoPage'));
 const CoordenacaoCadastroPage = lazy(() =>
   import('./paginas/edicoes').then((modulo) => ({ default: modulo.CoordenacaoCadastroPage })),
 );
@@ -134,19 +159,14 @@ const CoordenacaoEncontrosPage = lazy(() =>
 export function AppRotas() {
   return (
     <LimiteCarregamento>
-      <Suspense
-        fallback={
-          <div role="status" className="p-6 text-text-secondary">
-            Carregando sua área…
-          </div>
-        }
-      >
+      <Suspense fallback={<CarregandoArea />}>
         <Routes>
           <Route path="/" element={<RedirecionarParaPainel />} />
           <Route path="/primeiro-acesso" element={<PrimeiroAcessoPage />} />
           <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
           <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
           <Route path="/entrar" element={<EntradaPage />} />
+          <Route path="/regulamento" element={<RegulamentoPublicoPage />} />
           <Route path="/aguardando-permissao" element={<AguardandoPermissaoPage />} />
 
           <Route element={<RotaProtegida area="aluno" />}>

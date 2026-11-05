@@ -1,6 +1,9 @@
 # Dependências e builds
 node_modules
 dist
+dist-e2e-pwa/
+dist-e2e-supabase-pwa/
+dist-e2e-atualizacao-*/
 dev-dist
 coverage
 *.tsbuildinfo
@@ -8,6 +11,7 @@ coverage
 # Testes
 playwright-report
 test-results
+test-results-*/
 blob-report
 
 # Ambiente — NUNCA versionar credenciais

@@ -117,6 +117,7 @@ export function criarEdicoesDemo(coordena: () => boolean): MetodosDeEdicao {
     async edicoesQueCoordeno() {
       exigirCoordenacao();
       return edicoesDemo(true).map((e): EdicaoGerida => ({
+        regulamentoPublico: e.estado === 'ativa',
         id: e.id,
         nome: e.nome,
         inicio: e.inicio,
