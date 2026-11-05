@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/shared/ui';
+import { appInstalado } from './instalacao';
 
 interface EventoInstalacao extends Event {
   prompt: () => Promise<void>;
@@ -27,7 +28,7 @@ export function BotaoInstalar() {
     };
   }, []);
 
-  if (!evento) return null;
+  if (!evento || appInstalado()) return null;
   return (
     <Button
       variante="secundario"

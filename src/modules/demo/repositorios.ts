@@ -36,6 +36,7 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     .map((nome, i) => ({ id: `amb-${i + 1}`, nome, observacoes: null }));
 
   const organizacao: RepositorioOrganizacao = {
+    definirRegulamentoPublico: recusar,
     async edicoes() {
       return edicoesDemo(coordena(), eu()?.papeis ?? []);
     },

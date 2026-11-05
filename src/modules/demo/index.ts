@@ -8,3 +8,4 @@ export {
   type RankingDaCategoria,
 } from './consultas';
 export { criarRepositoriosDemo } from './repositorios';
+export { repositorioPublicoDemo } from './publico';

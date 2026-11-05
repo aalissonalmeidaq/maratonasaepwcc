@@ -13,6 +13,19 @@ const dadosDaEdicao = (e: EntradaEdicao) => ({
 
 export function criarRepositorioOrganizacaoSupabase(sb: SupabaseClient): RepositorioOrganizacao {
   return {
+    async definirRegulamentoPublico(id, publico) {
+      const resposta: unknown = verificar(
+        await sb.rpc('definir_regulamento_publico', { p_id: id, p_publico: publico }),
+      );
+      if (
+        !resposta ||
+        typeof resposta !== 'object' ||
+        !('regulamentoPublico' in resposta) ||
+        typeof resposta.regulamentoPublico !== 'boolean'
+      )
+        throw new Error('Resposta de publicação inválida. Tente novamente.');
+      return { regulamentoPublico: resposta.regulamentoPublico };
+    },
     async edicoes() {
       const dados = verificar(
         await sb

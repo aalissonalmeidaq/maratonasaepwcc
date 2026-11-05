@@ -6,6 +6,7 @@ import type { EdicaoGerida } from '../domain/edicoes';
 import { EstadoDaEdicao } from './EstadoDaEdicao';
 
 const base: EdicaoGerida = {
+  regulamentoPublico: false,
   id: 'e1',
   nome: 'Maratona 2027',
   inicio: '2027-03-01',
@@ -43,6 +44,51 @@ const renderizarEncerrada = (edicao: EdicaoGerida) =>
   );
 
 describe('EstadoDaEdicao (US5, FR-010–012)', () => {
+  it('retirada exige confirmação e não permite publicar quando bloqueado', async () => {
+    const retirar = vi.fn().mockResolvedValue({ regulamentoPublico: false });
+    const { rerender } = render(
+      <EstadoDaEdicao
+        edicao={{ ...base, estado: 'ativa', regulamentoPublico: true }}
+        onAtivar={vi.fn()}
+        onCarregarPendencias={vi.fn()}
+        onEncerrar={vi.fn()}
+        onDefinirRegulamentoPublico={retirar}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Retirar regulamento' }));
+    expect(retirar).not.toHaveBeenCalled();
+    await userEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Retirar regulamento' }),
+    );
+    expect(retirar).toHaveBeenCalledWith(false);
+    rerender(
+      <EstadoDaEdicao
+        edicao={{ ...base, estado: 'ativa', regulamentoPublico: false }}
+        bloqueio="Sem conexão"
+        onAtivar={vi.fn()}
+        onCarregarPendencias={vi.fn()}
+        onEncerrar={vi.fn()}
+        onDefinirRegulamentoPublico={retirar}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Publicar regulamento' })).toBeDisabled();
+  });
+  it('publica somente após a confirmação do servidor e mostra recusa sem sucesso', async () => {
+    const publicar = vi.fn().mockRejectedValue(new Error('Publicação recusada pelo servidor.'));
+    render(
+      <EstadoDaEdicao
+        edicao={{ ...base, estado: 'ativa', regulamentoPublico: false }}
+        onAtivar={vi.fn()}
+        onCarregarPendencias={vi.fn()}
+        onEncerrar={vi.fn()}
+        onDefinirRegulamentoPublico={publicar}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Publicar regulamento' }));
+    expect(publicar).toHaveBeenCalledWith(true);
+    expect(await screen.findByText('Publicação recusada pelo servidor.')).toBeInTheDocument();
+    expect(screen.queryByText('Regulamento publicado.')).not.toBeInTheDocument();
+  });
   it('em preparação: ativa só depois da resposta e mostra o que falta quando recusado', async () => {
     const usuario = userEvent.setup();
     const onAtivar = vi

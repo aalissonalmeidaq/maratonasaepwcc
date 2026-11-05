@@ -4,6 +4,13 @@ import { Button } from '@/shared/ui';
 /** Preserva uma saída utilizável se uma área ainda não carregada falhar na rede. */
 export class LimiteCarregamento extends Component<{ children: ReactNode }, { falhou: boolean }> {
   override state = { falhou: false };
+  private retomar = () => this.setState({ falhou: false });
+  override componentDidMount() {
+    window.addEventListener('online', this.retomar);
+  }
+  override componentWillUnmount() {
+    window.removeEventListener('online', this.retomar);
+  }
 
   static getDerivedStateFromError() {
     return { falhou: true };
@@ -15,7 +22,9 @@ export class LimiteCarregamento extends Component<{ children: ReactNode }, { fal
       <main className="mx-auto max-w-md p-6">
         <h1 className="text-xl font-bold text-text">Não foi possível abrir esta área</h1>
         <p role="alert" className="my-4 text-text-secondary">
-          Verifique sua conexão e recarregue a página para tentar novamente.
+          {navigator.onLine
+            ? 'Verifique sua conexão e recarregue a página para tentar novamente.'
+            : 'Sem conexão: esta tela precisa de internet para carregar.'}
         </p>
         <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
       </main>

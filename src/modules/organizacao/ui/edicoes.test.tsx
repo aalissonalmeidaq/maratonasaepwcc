@@ -9,6 +9,7 @@ import { ListaEdicoes } from './ListaEdicoes';
 const edicoes: EdicaoGerida[] = [
   {
     id: 'e1',
+    regulamentoPublico: false,
     nome: 'Maratona 2026',
     inicio: '2026-03-02',
     fim: '2026-11-27',
@@ -17,6 +18,7 @@ const edicoes: EdicaoGerida[] = [
   },
   {
     id: 'e2',
+    regulamentoPublico: false,
     nome: 'Maratona 2027',
     inicio: null,
     fim: null,
@@ -25,6 +27,7 @@ const edicoes: EdicaoGerida[] = [
   },
   {
     id: 'e3',
+    regulamentoPublico: false,
     nome: 'Maratona 2025',
     inicio: '2025-03-03',
     fim: '2025-11-28',
@@ -46,7 +49,7 @@ describe('ListaEdicoes (US1, FR-018)', () => {
     expect(screen.getAllByText(/Regras: v1/)).toHaveLength(2);
     await userEvent.click(screen.getByRole('button', { name: 'Gerir: Maratona 2027' }));
     expect(onEscolher).toHaveBeenCalledWith('e2');
-    expect(screen.getByRole('button', { name: 'Gerir: Maratona 2026' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Em gestão: Maratona 2026' })).toHaveAttribute(
       'aria-current',
       'true',
     );

@@ -32,7 +32,7 @@ export function ListaEdicoes({
             type="button"
             onClick={() => onEscolher(e.id)}
             aria-current={e.id === escolhidaId ? 'true' : undefined}
-            aria-label={`Gerir: ${e.nome}`}
+            aria-label={`${e.id === escolhidaId ? 'Em gestão' : 'Gerir'}: ${e.nome}`}
             className="min-h-11 rounded-md border border-border px-4 text-sm font-semibold text-link hover:bg-surface-muted aria-[current=true]:bg-blue-600/10"
           >
             {e.id === escolhidaId ? 'Em gestão' : 'Gerir'}

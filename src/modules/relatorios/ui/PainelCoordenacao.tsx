@@ -33,7 +33,6 @@ function Turma({ c }: { c: TurmaDoPainelCoordenacao }) {
           <li key={i.rotulo}>
             <Link
               to={i.para}
-              aria-label={`${i.rotulo}: ${i.valor}`}
               className="group flex min-h-11 items-center justify-between gap-3 rounded-md px-2 transition-colors hover:bg-surface-muted"
             >
               <span

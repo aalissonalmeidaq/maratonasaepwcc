@@ -79,6 +79,7 @@ export interface Pessoa {
 }
 
 export interface RepositorioOrganizacao {
+  definirRegulamentoPublico(id: string, publico: boolean): Promise<{ regulamentoPublico: boolean }>;
   edicoes(): Promise<Edicao[]>;
   cursos(edicaoId: string): Promise<Curso[]>;
   /** Turmas visíveis para a pessoa atual (a RLS filtra no servidor). */

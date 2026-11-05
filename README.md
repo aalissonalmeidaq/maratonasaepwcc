@@ -11,6 +11,13 @@ mentor SAEP e estudantes, no computador, tablet ou celular.
 
 ## Sumário
 
+Na spec 014, a entrada oferece **Regulamento da Maratona** (`/regulamento`), sem login.
+Somente edições ativas cujo regulamento foi publicado pela coordenação aparecem. Após uma
+gravação local bem-sucedida, o conteúdo público abre offline com a data da cópia; falha ao salvar
+mantém a leitura online e exibe aviso. Dados autenticados não entram no cache do service worker.
+O [guia de validação](specs/014-pwa-acessibilidade/quickstart.md) reúne os testes e o
+[roteiro de leitor de tela](docs/acessibilidade/roteiro-leitor-de-tela.md) aguarda execução pela unidade.
+
 - [Arquitetura](#arquitetura) · [Pré-requisitos](#pré-requisitos) · [Instalação](#instalação)
 - [Variáveis de ambiente](#variáveis-de-ambiente) · [Executar](#executar-a-aplicação)
 - [Demonstração](#telas-de-demonstração-dados-fictícios) · [Supabase local](#supabase-local)
@@ -194,6 +201,8 @@ componentes `BannerDestaque`, `CardDestaque` e `ProgressoCircular`. Arquivos avu
 - Instalável quando o navegador oferece (botão "Instalar aplicativo"); no iOS use "Adicionar à
   Tela de Início". O uso no navegador continua completo.
 - Cache apenas do shell estático; **nenhum** dado do Supabase é armazenado pelo service worker.
+- A cópia validada do regulamento público fica separadamente no navegador, identificada por
+  ambiente/projeto e data. Ela não inclui conteúdo de turma ou respostas autenticadas.
 - Sem conexão: aviso "Você está sem conexão"; envios e registros ficam indisponíveis.
 - Nova versão: aviso "Atualizar agora" — nunca recarrega sozinho.
 - Fora do MVP: escrita offline com sincronização. Ver [ADR 0005](docs/adr/0005-pwa-politica-de-cache.md).

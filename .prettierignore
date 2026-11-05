@@ -1,9 +1,11 @@
 dist
+dist-e2e-*/
 dev-dist
 coverage
 node_modules
 playwright-report
 test-results
+test-results-*/
 docs/referencias
 docs/VETORIZADAS CLAUDE
 .specify

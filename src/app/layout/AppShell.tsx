@@ -3,7 +3,7 @@ import { Outlet } from 'react-router';
 import { ROTULO_PAPEL, papeisDaArea, type Area } from '@/modules/acesso';
 import { useAuth } from '@/modules/auth';
 import { ContadorConvites } from '@/modules/duplas';
-import { BotaoInstalar } from '@/shared/pwa';
+import { BotaoInstalar, OrientacaoInstalacao } from '@/shared/pwa';
 import { Brand, Button, Icon, MarcaSenai, PadraoGrafico, cx } from '@/shared/ui';
 import { ContadorAvisos } from '@/modules/resultado';
 import { SeletorEdicao, edicaoPadrao } from '@/modules/organizacao';
@@ -376,6 +376,7 @@ export function AppShell({ area }: { area: Area }) {
         <div className="relative z-10 mt-3 border-t border-white/15 pt-3">
           <div className="mb-1.5">
             <BotaoInstalar />
+            <OrientacaoInstalacao />
           </div>
           <button
             type="button"
@@ -434,7 +435,7 @@ export function AppShell({ area }: { area: Area }) {
         >
           {/* Barra superior */}
           <header className="sticky top-0 z-(--z-header) border-b border-border bg-surface/95 backdrop-blur">
-            <div className="flex min-h-16 items-center gap-3 px-4 sm:px-6">
+            <div className="flex min-h-16 flex-wrap items-center gap-3 px-4 py-2 sm:px-6">
               <button
                 ref={botaoMenu}
                 type="button"
@@ -457,6 +458,7 @@ export function AppShell({ area }: { area: Area }) {
               </div>
               <div className="hidden items-center gap-2 lg:flex">
                 <BotaoInstalar />
+                <OrientacaoInstalacao />
                 <div className="text-right">
                   <p className="text-sm font-semibold text-text">{sessao?.nome}</p>
                   {papel && <p className="text-xs text-text-secondary">{ROTULO_PAPEL[papel]}</p>}

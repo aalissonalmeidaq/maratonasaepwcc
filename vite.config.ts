@@ -53,7 +53,15 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  server: {
+    // Relatórios e builds dos testes não devem recarregar uma jornada em andamento.
+    watch: {
+      ignored: ['**/dist-e2e-*/**', '**/test-results*/**', '**/playwright-report/**'],
+    },
+  },
   test: {
+    // Cada arquivo cria um jsdom; limitar concorrência evita saturar a máquina na suíte completa.
+    maxWorkers: 4,
     environment: 'jsdom',
     globals: false,
     setupFiles: ['./src/test/setup.ts'],
