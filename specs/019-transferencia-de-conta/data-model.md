@@ -22,17 +22,18 @@ Registro imutável de cada transferência. RLS ligada; leitura só do master; es
 
 ## Tabelas alteradas (só dados, sem mudança de estrutura)
 
-| Tabela            | Efeito de uma transferência                                                                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| `perfis`          | `unidade_id` passa para a unidade de destino (único caminho: a RPC)                                            |
-| `funcoes_unidade` | todas as linhas da conta: `ativa = false`, `desativada_com_conta = false`; nenhuma apagada                     |
-| `atribuicoes`     | todas as linhas da conta (qualquer edição, inclusive encerradas e derivadas): `ativo = false`; nenhuma apagada |
+| Tabela            | Efeito de uma transferência                                                                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `perfis`          | `unidade_id` passa para a unidade de destino (único caminho: a RPC)                                                                                            |
+| `funcoes_unidade` | todas as linhas da conta: `ativa = false`, `desativada_com_conta = false`; nenhuma apagada                                                                     |
+| `atribuicoes`     | linhas diretas da conta (qualquer edição, inclusive encerradas): `ativo = false`; as derivadas de mentor acompanham pela trigger de sincronia; nenhuma apagada |
 
 ## Funções
 
 | Objeto                                                  | Mudança                                                                                                                                           |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app.proteger_unidade_do_perfil()`                      | substituída: aceita a mudança de `unidade_id` apenas com o marcador de transação `app.transferencia_em_curso = 'on'`; fora disso recusa como hoje |
+| `app.garantir_coordenacao_ativa()`                      | substituída: ignora a regra quando `app.transferencia_em_curso = 'on'` (a RPC já validou as edições não encerradas)                               |
 | `public.transferir_conta(uuid, uuid, uuid, uuid, text)` | nova (só master)                                                                                                                                  |
 | `public.equipe_de_unidade_da_rede(uuid)`                | nova (só master)                                                                                                                                  |
 

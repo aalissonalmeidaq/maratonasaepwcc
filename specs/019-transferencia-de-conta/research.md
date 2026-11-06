@@ -16,9 +16,16 @@ Hoje o gatilho `perfis_unidade_fixa` (migration 016) recusa qualquer mudança de
 
 ## R2 — O que acontece com funções e vínculos
 
-- `atribuicoes`: todas as linhas da conta (qualquer papel, qualquer edição, inclusive encerradas e
-  as derivadas de mentor) passam a `ativo = false`. Nada é apagado. O gatilho
-  `validar_atribuicao_na_unidade` retorna cedo quando `ativo` é falso, então a inativação é segura.
+- `atribuicoes`: as linhas **diretas** da conta (`origem_id is null`; qualquer papel, qualquer edição,
+  inclusive encerradas) passam a `ativo = false`. As derivadas de mentor **não** são alteradas
+  diretamente (a trigger `proteger_derivadas` recusa); elas acompanham pela trigger
+  `sincronizar_mentor_do_curso`, que replica o `ativo` do vínculo ao curso. Nada é apagado. O
+  teste confere que não resta nenhum vínculo ativo, derivado ou não. O gatilho
+  `validar_atribuicao_na_unidade` retorna cedo quando `ativo` é falso.
+- **Última coordenação**: a trigger `garantir_coordenacao_ativa` recusa desativar a última coordenação
+  de qualquer edição, inclusive encerrada. A migration substitui essa função para ignorar o caso
+  quando `app.transferencia_em_curso = 'on'`: as edições não encerradas já foram validadas antes
+  pela RPC (recusa "Indique outra coordenação antes") e, nas encerradas, o vínculo vira histórico.
 - `funcoes_unidade`: todas as linhas da conta passam a `ativa = false` e `desativada_com_conta =
 false` (assim `reativar_membro` não as reativa no destino). As linhas permanecem. Como a tabela não
   tem coluna de unidade, o contexto de qual unidade eram fica no registro da transferência

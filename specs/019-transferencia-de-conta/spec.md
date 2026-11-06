@@ -29,7 +29,7 @@ no destino a conta chega sem funções e a gestão do destino as define."
 ### User Story 1 - O master transfere uma conta de equipe (Priority: P1)
 
 Uma pessoa da equipe (por exemplo, uma docente) passa a trabalhar em outra unidade. O master abre
-a lista de contas da rede, escolhe a conta, a unidade de destino, escreve a justificativa e confirma.
+a equipe da unidade de origem, escolhe a conta, a unidade de destino, escreve a justificativa e confirma.
 A conta passa a pertencer à unidade de destino, sem funções e sem acesso ao que era da origem.
 
 **Why this priority**: sem isso, mudar de unidade exige desativar a conta e criar outra, perdendo a
@@ -116,6 +116,8 @@ antigos existem, inativos, na origem.
 - Unidade de destino desativada depois da transferência: a conta passa a ser recusada em tudo, como
   qualquer conta de unidade desativada.
 - Conta desativada: a transferência é recusada (reativar antes).
+- Coordenadora única de uma edição **encerrada**: a transferência é permitida (a regra de "última
+  coordenação" vale só para edições não encerradas), e o vínculo passa a inativo como histórico.
 - Conta transferida de volta à unidade de origem depois: segue as mesmas regras; os vínculos antigos
   continuam inativos (não são reativados sozinhos).
 
@@ -173,13 +175,15 @@ antigos existem, inativos, na origem.
   destino até a gestão do destino atribuir funções (conferido nos testes de isolamento).
 - **SC-004**: 0 registros são apagados na origem em uma transferência (contagem antes e depois igual,
   com os ativos passando a inativos).
-- **SC-005**: Cada transferência gera exatamente 1 registro de auditoria com os cinco dados exigidos.
+- **SC-005**: Cada transferência gera exatamente 1 registro de auditoria da transferência (tabela
+  própria, com autor, horário, origem, destino e justificativa), além das linhas de auditoria das
+  funções e dos vínculos inativados.
 - **SC-006**: A gestão e as contas da origem leem o histórico da origem depois da transferência com o
   mesmo resultado de antes (conferido por comparação nos testes).
 
 ## Assumptions
 
-- A tela fica na área do master, na lista de contas da rede (Rede), reaproveitando os padrões de
+- A tela fica na área do master, na lista de equipe da unidade (Rede › Unidades), reaproveitando os padrões de
   confirmação com justificativa já usados para desativações.
 - "Conta de equipe" é a conta que tem ou teve função de gestão, coordenação, docente, mentor ou
   analista na unidade; estudantes são identificados pelo vínculo de aluno e ficam de fora.
