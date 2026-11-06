@@ -66,7 +66,11 @@ export default defineConfig({
     globals: false,
     setupFiles: ['./src/test/setup.ts'],
     // Código compartilhado das Edge Functions usa só APIs web (crypto, fetch): testável aqui.
-    include: ['src/**/*.test.{ts,tsx}', 'supabase/functions/_shared/**/*.test.ts'],
+    include: [
+      'src/**/*.test.{ts,tsx}',
+      'supabase/functions/_shared/**/*.test.ts',
+      'scripts/ci/**/*.test.ts',
+    ],
     css: false,
     restoreMocks: true,
   },

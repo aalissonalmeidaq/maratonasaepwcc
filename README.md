@@ -9,6 +9,14 @@ mentor SAEP e estudantes, no computador, tablet ou celular.
 > reais. Regras de pontuação aguardam o regulamento aprovado. Veja
 > [docs/decisoes-e-pendencias.md](docs/decisoes-e-pendencias.md).
 
+[![CI](https://github.com/aalissonalmeidaq/maratonasaepwcc/actions/workflows/ci.yml/badge.svg)](https://github.com/aalissonalmeidaq/maratonasaepwcc/actions/workflows/ci.yml)
+
+**Integração contínua (spec 017):** toda proposta de mudança para o `main` roda automaticamente
+as verificações `qualidade`, `banco`, `jornadas-demo` e `jornadas-supabase` (as mesmas dos
+comandos abaixo, com Supabase local efêmero e sem segredos). Como ler os resultados, baixar os
+traços de falha e exigir as verificações antes de mesclar:
+[docs/operacao-e-homologacao.md](docs/operacao-e-homologacao.md#integração-contínua-spec-017).
+
 ## Sumário
 
 Na spec 014, a entrada oferece **Regulamento da Maratona** (`/regulamento`), sem login.
