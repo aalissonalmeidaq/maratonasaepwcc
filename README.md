@@ -31,10 +31,7 @@ gestão (sem ver dados de estudantes), a **gestão** monta a equipe e cria ediç
 lê painéis e relatórios. O isolamento entre unidades é por RLS. O primeiro master vem do comando
 `select app.promover_master('<e-mail>')` (veja `docs/operacao-e-homologacao.md`).
 
-Na spec 015, a tela **Premissas em validação** (`/master/premissas`; leitura em `/gestao`, `/coordenacao` e `/docente`): as
-escolhas que o sistema adotou sem decisão da unidade (P01–P32), para registrar "Confirmada" ou
-"Precisa mudar" com justificativa, histórico e auditoria; desde a spec 016 só o master responde e os demais leem. Exporta CSV e
-imprime. Responder não muda regras: cada mudança vira uma spec. Datas usam `America/Fortaleza`.
+As premissas do projeto (P01–P32) ficam em [docs/premissas.md](docs/premissas.md), fora do site (spec 018).
 
 - [Arquitetura](#arquitetura) · [Pré-requisitos](#pré-requisitos) · [Instalação](#instalação)
 - [Variáveis de ambiente](#variáveis-de-ambiente) · [Executar](#executar-a-aplicação)

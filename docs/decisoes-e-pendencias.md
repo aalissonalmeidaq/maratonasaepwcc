@@ -1,10 +1,10 @@
 # Decisões, premissas e pendências
 
-Atualizado em 2026-11-06. Hoje nenhum item está em validação; os que estiverem ficam marcados **[Pnn — em validação]** no catálogo "Premissas em
-validação" (o master registra "Confirmada" ou "Precisa mudar"). Itens **[Pnn — decidida em
-06/11/2026]** foram decididos pelo projeto, sem spec nova: o que o sistema usa passou a ser regra
-(migrations `20261111120000_premissas_decididas.sql` e `20261113120000_premissas_restantes.sql`; a premissa fica no catálogo como resolvida).
-Itens já decididos por spec citam a spec que os resolveu.
+Atualizado em 2026-11-06. As premissas (P01–P32) deixaram de ser tratadas no site (spec 018) e
+vivem em [premissas.md](premissas.md), com tema, pergunta, o que o sistema usa, onde afeta e a
+resolução de cada uma. Itens **[Pnn — decidida em 06/11/2026]** foram decididos pelo projeto, sem
+spec nova: o que o sistema usa passou a ser regra. Itens já decididos por spec citam a spec que os
+resolveu.
 
 **Todas as 32 premissas estão resolvidas** (P25 pela spec 016; as outras 31 por decisão do
 projeto, a última rodada em 06/11/2026 a pedido do usuário). Resolver não encerra o trabalho
@@ -317,8 +317,8 @@ foi verificado; o restante é da unidade.
   varre o catálogo e falha se uma tabela ou RPC nova ficar sem a guarda. `minha_conta` continua
   respondendo para a conta saber que está desativada.
 - **Regulamento público:** cada edição mostra "Unidade: <nome>".
-- **Premissas:** passam a ser respondidas **só pelo master**; gestão, coordenação, docentes e
-  mentores leem; o aviso de pendências está no início do master. **P25 resolvida** (várias unidades).
+- **Premissas:** **P25 resolvida** (várias unidades). A tela e o fluxo de resposta pelo master foram
+  retirados do site pela spec 018.
 - **Seed local:** uma só unidade (a inicial, "SENAI Juazeiro do Norte"); `master@`, `gestao@` e
   `analista@exemplo.invalid`. A segunda unidade só nasce pelas telas ou dentro dos testes.
 - **Salvaguarda:** com duas ou mais unidades, gravar sem informar a unidade é recusado
@@ -326,7 +326,19 @@ foi verificado; o restante é da unidade.
 - **Pendências desta spec:** nome oficial das unidades além da inicial e quem será o primeiro master
   em produção dependem da unidade/da rede **[validar]**.
 
-## 6.13 Spec 015 — premissas em validação (implementada em 2026-11-05)
+## 6.15 Spec 018 — premissas fora do site (implementada em 2026-11-06)
+
+- Decisão do usuário: as premissas não são tratadas no site, e sim no desenvolvimento. Saíram a tela
+  "Premissas em validação", as quatro rotas, os itens de menu (e os grupos "Sistema"), o aviso do
+  master, o módulo `src/modules/premissas`, as RPCs `premissas_em_validacao` e `responder_premissa` e
+  as tabelas `premissas` e `respostas_premissas` (migration `20261114120000_remover_premissas.sql`;
+  só havia respostas de teste, apagadas com a tabela).
+- O registro das 32 premissas está em [premissas.md](premissas.md). Todas resolvidas (P25 pela
+  spec 016; as outras 31 por decisão do projeto). Se surgir premissa nova, ela entra nesse
+  documento e vira spec quando mudar regra.
+- As linhas da auditoria geral sobre `respostas_premissas` ficam como histórico.
+
+## 6.13 Spec 015 — premissas em validação (implementada em 2026-11-05; tela retirada pela spec 018)
 
 - Implementação: migrations `20261109120000_premissas_em_validacao.sql` (catálogo P01–P32,
   respostas só de inserção e auditadas, RPCs `premissas_em_validacao` e `responder_premissa`) e

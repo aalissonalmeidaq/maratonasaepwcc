@@ -44,7 +44,7 @@ export function mensagemDeErro(erro: unknown): string {
         ? 'Você não tem permissão para esta operação.'
         : erro.message;
     case '40001':
-      // Conflito de concorrência: o servidor explica o que mudou (ex.: premissa já respondida).
+      // Conflito de concorrência: o servidor explica o que mudou (ex.: registro alterado por outra pessoa).
       return (
         erro.message ||
         'Os dados mudaram desde que a tela foi carregada. Recarregue e tente de novo.'

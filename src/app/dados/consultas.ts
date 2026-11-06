@@ -357,14 +357,6 @@ export function useComunicadosQueGerencio(edicaoId?: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Premissas em validação (spec 015): da instalação, não da edição; permissão no servidor.
-// ---------------------------------------------------------------------------
-export function usePremissas() {
-  const r = useRepositorios();
-  return useResultado('premissas', [], true, () => r.premissas.premissas());
-}
-
-// ---------------------------------------------------------------------------
 // Rede (spec 016): unidades e masters, só para o master (o servidor recusa os demais).
 // ---------------------------------------------------------------------------
 export function useUnidades() {

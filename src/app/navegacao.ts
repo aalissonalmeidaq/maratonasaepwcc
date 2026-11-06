@@ -186,12 +186,6 @@ export const MENUS: Record<Area, MenuDaArea> = {
             icone: 'relatorio',
             descricao: 'Exportação CSV das turmas',
           },
-          {
-            rotulo: 'Premissas em validação',
-            caminho: '/docente/premissas',
-            icone: 'checklist',
-            descricao: 'Premissas e respostas do master',
-          },
         ],
       },
     ],
@@ -213,12 +207,6 @@ export const MENUS: Record<Area, MenuDaArea> = {
             caminho: '/coordenacao/edicoes',
             icone: 'gestao',
             descricao: 'Criar, ativar e encerrar edições',
-          },
-          {
-            rotulo: 'Premissas em validação',
-            caminho: '/coordenacao/premissas',
-            icone: 'checklist',
-            descricao: 'Respostas do master às premissas',
           },
           {
             rotulo: 'Cursos e turmas',
@@ -346,18 +334,6 @@ export const MENUS: Record<Area, MenuDaArea> = {
           },
         ],
       },
-      {
-        titulo: 'Sistema',
-        icone: 'checklist',
-        itens: [
-          {
-            rotulo: 'Premissas em validação',
-            caminho: '/master/premissas',
-            icone: 'checklist',
-            descricao: 'Decisões do sistema',
-          },
-        ],
-      },
     ],
   },
   gestao: {
@@ -383,18 +359,6 @@ export const MENUS: Record<Area, MenuDaArea> = {
             caminho: '/gestao/edicoes',
             icone: 'gestao',
             descricao: 'Criar edições e indicar a coordenação',
-          },
-        ],
-      },
-      {
-        titulo: 'Sistema',
-        icone: 'checklist',
-        itens: [
-          {
-            rotulo: 'Premissas em validação',
-            caminho: '/gestao/premissas',
-            icone: 'checklist',
-            descricao: 'Decisões do sistema (leitura)',
           },
         ],
       },

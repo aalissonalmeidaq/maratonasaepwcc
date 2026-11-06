@@ -1,5 +1,7 @@
 # Feature Specification: Premissas em validação
 
+> **Nota (spec 018):** a tela, as RPCs e as tabelas de premissas foram retiradas do site; o registro das premissas vive em `docs/premissas.md`.
+
 **Feature Branch**: `015-premissas-em-validacao`
 **Created**: 2026-11-05
 **Status**: Draft
