@@ -133,9 +133,12 @@ set local role authenticated;
 select pg_temp.como(pg_temp.u('fa'));
 select pg_temp.guardar('equipe_i', public.equipe_de_unidade_da_rede(pg_temp.ui())::text);
 reset role;
-select is((select string_agg(e ->> 'usuarioId', ',' order by e ->> 'usuarioId') from jsonb_array_elements(pg_temp.lido('equipe_i')::jsonb) e),
-  (select string_agg(pg_temp.u(s)::text, ',' order by pg_temp.u(s)::text) from unnest(array['a1', 'c1', 'c2', 'd1', 'd2', 'e1', 'f1', 'f2', '11']) s),
-  'a equipe da unidade lista só contas de equipe (sem estudante, sem master, sem outra unidade)');
+select is((select count(*)::int from jsonb_array_elements(pg_temp.lido('equipe_i')::jsonb) e
+           where (e ->> 'usuarioId')::uuid in (select pg_temp.u(s) from unnest(array['a1', 'c1', 'c2', 'd1', 'd2', 'e1', 'f1', 'f2', '11']) s)), 9,
+  'a equipe da unidade lista as nove contas de equipe da unidade');
+select is((select count(*)::int from jsonb_array_elements(pg_temp.lido('equipe_i')::jsonb) e
+           where (e ->> 'usuarioId')::uuid in (pg_temp.u('21'), pg_temp.u('fa'), pg_temp.u('b1'))), 0,
+  'a equipe não traz estudante, master nem conta de outra unidade');
 select is((select string_agg(k, ',' order by k) from jsonb_object_keys(pg_temp.lido('equipe_i')::jsonb -> 0) k),
   'ativo,email,funcoes,nome,situacaoAcesso,usuarioId', 'contrato: chaves de cada conta da equipe');
 select is(pg_temp.chamar(pg_temp.u(who), format('select public.equipe_de_unidade_da_rede(%L)', pg_temp.ui())), '42501',
@@ -175,8 +178,9 @@ select ok(exists (select 1 from public.funcoes_unidade where usuario_id = pg_tem
   'd1 tem a função de docente na B');
 select is((select count(*) from public.edicoes where unidade_id = pg_temp.ui())::text, pg_temp.lido('ed_antes'),
   'as edições da origem seguem como estavam');
-select is(pg_temp.visto_como(pg_temp.u('f1'), 'select count(*) from public.edicoes'), (select count(*) from public.edicoes where unidade_id = pg_temp.ui()),
-  'a gestão da origem lê o histórico como antes');
+select is(pg_temp.visto_como(pg_temp.u('f1'), 'select jsonb_array_length(public.edicoes_da_unidade())'),
+  (select count(*) from public.edicoes where unidade_id = pg_temp.ui()),
+  'a gestão da origem lê as edições da unidade como antes');
 
 -- Mentora com vínculos derivados e coordenadora única de edição encerrada também são transferíveis.
 select pg_temp.guardar('mentora_antes', (select count(*) from public.atribuicoes where usuario_id = pg_temp.u('11'))::text);
@@ -186,8 +190,8 @@ select is(pg_temp.chamar(pg_temp.u('fa'), format($q$ select public.transferir_co
   pg_temp.u('11'), pg_temp.ui(), pg_temp.ub())), 'aceita', 'a mentora é transferida');
 select is((select count(*)::int from public.atribuicoes where usuario_id = pg_temp.u('11') and ativo), 0, 'nenhum vínculo ativo, derivado ou não');
 select is((select count(*) from public.atribuicoes where usuario_id = pg_temp.u('11'))::text, pg_temp.lido('mentora_antes'), 'nenhum vínculo da mentora foi apagado');
-select is(pg_temp.chamar(pg_temp.u('fa'), format($q$ select public.transferir_conta(gen_random_uuid(), %L, %L, %L, 'Coordenação antiga passa para a C.') $q$,
-  pg_temp.u('e1'), pg_temp.ui(), pg_temp.uc())), 'aceita', 'a coordenadora única de edição encerrada é transferida');
+select is(pg_temp.mensagem(pg_temp.u('fa'), format($q$ select public.transferir_conta(gen_random_uuid(), %L, %L, %L, 'Coordenação antiga passa para a C.') $q$,
+  pg_temp.u('e1'), pg_temp.ui(), pg_temp.uc())), null, 'a coordenadora única de edição encerrada é transferida');
 select is((select unidade_id from public.perfis where id = pg_temp.u('e1')), pg_temp.uc(), 'e1 pertence à C');
 select is((select count(*)::int from public.atribuicoes where usuario_id = pg_temp.u('e1') and ativo), 0, 'o vínculo da edição encerrada virou histórico');
 

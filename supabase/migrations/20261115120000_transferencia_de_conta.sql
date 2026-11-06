@@ -73,3 +73,97 @@ begin
   return coalesce(new, old);
 end;
 $$;
+
+-- Edição encerrada é só leitura (spec 010). A transferência é a única exceção, e só para vínculos
+-- (`atribuicoes`): precisam ficar inativos para a pessoa não manter acesso ao que era da origem;
+-- a linha continua existindo como histórico.
+create or replace function app.bloquear_edicao_encerrada()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare
+  v_coluna text := tg_argv[0];
+  v_edicoes uuid[];
+begin
+  if tg_table_name = 'atribuicoes' and tg_op = 'UPDATE'
+     and coalesce(current_setting('app.transferencia_em_curso', true), '') = 'on' then
+    return new;
+  end if;
+  v_edicoes := array_remove(array[
+    case when tg_op <> 'DELETE' then app.edicao_pela_coluna(v_coluna, (to_jsonb(new) ->> v_coluna)::uuid) end,
+    case when tg_op <> 'INSERT' then app.edicao_pela_coluna(v_coluna, (to_jsonb(old) ->> v_coluna)::uuid) end], null);
+  if exists (select 1 from public.edicoes where id = any (v_edicoes) and estado = 'encerrada') then
+    raise exception 'A edição está encerrada; os dados só podem ser lidos.' using errcode = '23514';
+  end if;
+  return coalesce(new, old);
+end;
+$$;
+
+-- -----------------------------------------------------------------------------
+-- Parte 2 — equipe da unidade para o master escolher a conta e transferência (caminho feliz)
+-- -----------------------------------------------------------------------------
+create function public.equipe_de_unidade_da_rede(p_unidade uuid)
+returns jsonb language plpgsql stable security definer set search_path = '' as $$
+begin
+  perform app.exigir_conta_ativa();
+  perform app.exigir_master();
+  return coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'usuarioId', p.id, 'nome', p.nome, 'email', au.email,
+      'funcoes', coalesce((select jsonb_agg(f.funcao order by f.funcao::text) from public.funcoes_unidade f
+                           where f.usuario_id = p.id and f.ativa), '[]'::jsonb),
+      'situacaoAcesso', app.situacao_do_acesso(p.id), 'ativo', p.ativo) order by p.nome, p.id)
+    from public.perfis p join auth.users au on au.id = p.id
+    where p.unidade_id = p_unidade
+      and exists (select 1 from public.funcoes_unidade f where f.usuario_id = p.id)
+      and not exists (select 1 from public.atribuicoes a where a.usuario_id = p.id and a.papel = 'aluno')), '[]'::jsonb);
+end;
+$$;
+
+create function public.transferir_conta(p_chave uuid, p_usuario uuid, p_unidade_origem uuid,
+                                        p_unidade_destino uuid, p_justificativa text)
+returns uuid language plpgsql security definer set search_path = '' as $$
+declare
+  v_id uuid;
+  v_perfil public.perfis%rowtype;
+  v_justificativa text := btrim(coalesce(p_justificativa, ''));
+  v_funcoes jsonb;
+  v_vinculos integer;
+begin
+  perform app.exigir_conta_ativa();
+  perform app.exigir_master();
+  -- Repetição do mesmo pedido: devolve a transferência já feita, sem alterar nada.
+  select id into v_id from public.transferencias_de_conta where chave_envio = p_chave;
+  if found then
+    return v_id;
+  end if;
+  -- Trava a conta e relê a unidade (uma transferência concorrente já pode ter mudado).
+  select * into v_perfil from public.perfis where id = p_usuario for update;
+  if not found or v_perfil.unidade_id is distinct from p_unidade_origem then
+    raise exception 'Esta conta não é da unidade de origem.' using errcode = '23514';
+  end if;
+
+  select coalesce(jsonb_agg(f.funcao order by f.funcao::text), '[]'::jsonb) into v_funcoes
+  from public.funcoes_unidade f where f.usuario_id = p_usuario;
+  select count(*) into v_vinculos from public.atribuicoes where usuario_id = p_usuario and ativo;
+
+  perform set_config('app.justificativa', v_justificativa, true);
+  perform set_config('app.transferencia_em_curso', 'on', true);
+  -- Vínculos diretos; as derivadas de mentor acompanham pela trigger de sincronia.
+  update public.atribuicoes set ativo = false
+  where usuario_id = p_usuario and ativo and origem_id is null;
+  update public.funcoes_unidade set ativa = false, desativada_com_conta = false
+  where usuario_id = p_usuario and (ativa or desativada_com_conta);
+  update public.perfis set unidade_id = p_unidade_destino where id = p_usuario;
+  insert into public.transferencias_de_conta (chave_envio, usuario_id, unidade_origem, unidade_destino,
+                                              justificativa, funcoes_anteriores, vinculos_encerrados)
+  values (p_chave, p_usuario, p_unidade_origem, p_unidade_destino, v_justificativa, v_funcoes, v_vinculos)
+  returning id into v_id;
+  perform set_config('app.transferencia_em_curso', 'off', true);
+  perform set_config('app.justificativa', '', true);
+  return v_id;
+end;
+$$;
+
+revoke all on function public.equipe_de_unidade_da_rede(uuid), public.transferir_conta(uuid, uuid, uuid, uuid, text)
+  from public, anon;
+grant execute on function public.equipe_de_unidade_da_rede(uuid), public.transferir_conta(uuid, uuid, uuid, uuid, text)
+  to authenticated;
