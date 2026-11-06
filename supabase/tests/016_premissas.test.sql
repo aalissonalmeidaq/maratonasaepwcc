@@ -17,11 +17,11 @@ select enum_has_labels('public', 'decisao_premissa', array['confirmada', 'precis
 select is((select string_agg(codigo, ',' order by codigo) from public.premissas),
   (select string_agg('P' || lpad(n::text, 2, '0'), ',' order by n) from generate_series(1, 32) n),
   'FR-002: catálogo com exatamente P01–P32');
-select is((select string_agg(codigo, ',' order by codigo) from public.premissas where resolvida_por is null),
-  'P01,P02,P06,P08,P13,P32', 'em aberto: identidade visual, premiação e e-mails (dependem da unidade)');
+select is((select count(*)::int from public.premissas where resolvida_por is null), 0,
+  'todas as premissas vêm resolvidas (spec 016 e decisões do projeto de 06/11/2026)');
 select is((select resolvida_por from public.premissas where codigo = 'P25'), 'spec 016', 'P25 resolvida pela spec 016 (multiunidade)');
-select is((select count(*)::int from public.premissas where resolvida_por = 'decisão do projeto de 06/11/2026'), 25,
-  'as demais foram decididas pelo projeto em 06/11/2026');
+select is((select count(*)::int from public.premissas where resolvida_por = 'decisão do projeto de 06/11/2026'), 31,
+  'as demais 31 foram decididas pelo projeto em 06/11/2026');
 select is((select string_agg(codigo || ':' || tema, ',' order by codigo) from public.premissas
            where codigo in ('P01', 'P08', 'P09', 'P19', 'P20', 'P24', 'P25', 'P28', 'P29', 'P31', 'P32')),
   'P01:Identidade visual,P08:Identidade visual,P09:Pontuação,P19:Pontuação,P20:Equipes e atividades,'
@@ -33,6 +33,9 @@ select ok(not has_table_privilege(r, t, p), format('%s sem %s em %s', r, p, t))
 from unnest(array['anon', 'authenticated']) r,
      unnest(array['public.premissas', 'public.respostas_premissas']) t,
      unnest(array['select', 'insert', 'update', 'delete']) p;
+
+-- Para exercitar leitura e resposta, o teste reabre seis premissas na transação (rollback no fim).
+update public.premissas set resolvida_por = null where codigo in ('P01', 'P02', 'P06', 'P08', 'P13', 'P32');
 
 -- ===========================================================================
 -- Cenário fictício: E encerrada (c1 só coordena E), F ativa (c2 coordena; d1 docente; b1 mentor;

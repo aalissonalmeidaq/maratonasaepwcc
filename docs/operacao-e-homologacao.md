@@ -4,9 +4,13 @@
 
 ## Premissas em validação (spec 015)
 
-- Antes de usar dados reais, a coordenação responde às premissas P01–P32 na tela "Premissas em
-  validação" (aceite do PRD §16). "Precisa mudar" não altera o sistema: abrir uma spec para cada
-  mudança. A lista pode ser exportada em CSV ou impressa para a reunião.
+- As 32 premissas (P01–P32) estão resolvidas: P25 pela spec 016 e as demais por decisão do projeto
+  (06/11/2026). A tela "Premissas em validação" segue como registro, exportável em CSV ou
+  imprimível. Se uma nova premissa entrar no catálogo, o **master** responde "Confirmada" ou
+  "Precisa mudar"; "Precisa mudar" não altera o sistema: abrir uma spec para cada mudança.
+- **Antes de usar dados reais, na implantação** (fora do sistema): configurar o provedor e o remetente
+  de e-mail da unidade (P32; ver "Preparar homologação"), preencher a premiação de cada edição (P13)
+  e fazer a conferência visual e institucional da identidade (P01, P02, P06, P08).
 - Respostas são só de inserção e ficam na auditoria (`respostas_premissas`).
 - Datas de relatórios, painéis e o corte de "encontro realizado" usam `America/Fortaleza`.
 

@@ -1,16 +1,24 @@
 # Decisões, premissas e pendências
 
-Atualizado em 2026-11-06. Itens marcados **[Pnn — em validação]** estão no catálogo "Premissas em
+Atualizado em 2026-11-06. Hoje nenhum item está em validação; os que estiverem ficam marcados **[Pnn — em validação]** no catálogo "Premissas em
 validação" (o master registra "Confirmada" ou "Precisa mudar"). Itens **[Pnn — decidida em
 06/11/2026]** foram decididos pelo projeto, sem spec nova: o que o sistema usa passou a ser regra
-(migration `20261111120000_premissas_decididas.sql`; a premissa fica no catálogo como resolvida).
+(migrations `20261111120000_premissas_decididas.sql` e `20261113120000_premissas_restantes.sql`; a premissa fica no catálogo como resolvida).
 Itens já decididos por spec citam a spec que os resolveu.
 
-**Em aberto (6), porque dependem de fato externo ou de conferência da unidade:** P01, P02, P06 e
-P08 (fidelidade e confirmação da identidade visual), P13 (valores, quantidade, validade e entrega
-da premiação) e P32 (provedor e remetente dos e-mails).
+**Todas as 32 premissas estão resolvidas** (P25 pela spec 016; as outras 31 por decisão do
+projeto, a última rodada em 06/11/2026 a pedido do usuário). Resolver não encerra o trabalho
+fora do sistema; o que ainda depende da unidade na **implantação** é:
 
-**Conferência técnica das seis em aberto (2026-11-06):** o que dá para verificar no repositório
+- **P13 — premiação:** valores, quantidade, validade e entrega são preenchidos pela coordenação
+  em cada edição; o sistema não define nenhum valor.
+- **P32 — e-mails:** o provedor e o remetente da unidade precisam ser configurados na implantação
+  (`docs/operacao-e-homologacao.md`); sem isso, convites e recuperação de senha não saem em
+  produção.
+- **P01, P02, P06, P08 — identidade visual:** a conferência visual das pranchas e a confirmação
+  institucional da fonte são feitas pela unidade na homologação; qualquer ajuste vira spec.
+
+**Conferência técnica dessas seis (2026-11-06):** o que dá para verificar no repositório
 foi verificado; o restante é da unidade.
 
 | Premissa | Verificado                                                                                                            | Falta da unidade                             |
@@ -24,16 +32,16 @@ foi verificado; o restante é da unidade.
 
 ## 1. Documentos e ativos
 
-| Item                                                                                   | Situação                                                                                                                                                                                                                                                                |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PRD, Documento de Visão, Design System, `tokens_maratona.css`                          | Encontrados em `docs/referencias/` e usados                                                                                                                                                                                                                             |
-| SVGs da marca Maratona (horizontal, branca, negativo, cinza, preta, vertical, símbolo) | Encontrados em `docs/referencias/identidade visual/`; copiados sem alteração para `public/brand/`                                                                                                                                                                       |
-| Pranchas PNG (paleta, tipografia, ícones, interface, mockups)                          | Usadas como referência visual; dados ilustrativos ignorados                                                                                                                                                                                                             |
-| `docs/VETORIZADAS CLAUDE/`                                                             | Versão anterior dos SVGs (prefixo `saep-`), arquivos diferentes dos de `referencias/`. Usamos os de `referencias/` (mais recentes). **[P01 — em validação]** qual é a versão aprovada                                                                                   |
-| **Projeto pedagógico / livro de regras / regulamento**                                 | **AUSENTE.** Regras implementadas a partir do PRD e das instruções do usuário, versão `piloto-2026.0-a-confirmar`                                                                                                                                                       |
-| **Marca SENAI Ceará** (colorida e totalmente branca)                                   | Disponíveis em `public/brand/`: `senai-ceara-colorido.svg` para fundo claro (arquivo `logo-senai.svg` indicado pelo usuário em 30/10/2026, copiado sem alteração) e `senai-ceara-branco.svg` para fundo escuro.                                                         |
-| **Ícones do projeto em SVG individual**                                                | **Vetorizados (2026-10-29)**: 118 ícones redesenhados à mão a partir da prancha em `src/shared/ui/icones/dados.ts`; arquivos em `docs/icones/svg` e galeria em `docs/icones/galeria.html`. Não é rastreio automático: **[P02 — em validação]** fidelidade com a unidade |
-| Licença/arquivos de fonte                                                              | Montserrat (SIL OFL) via `@fontsource`, auto-hospedada. **[P08 — em validação]** confirmação institucional                                                                                                                                                              |
+| Item                                                                                   | Situação                                                                                                                                                                                                                                                                          |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PRD, Documento de Visão, Design System, `tokens_maratona.css`                          | Encontrados em `docs/referencias/` e usados                                                                                                                                                                                                                                       |
+| SVGs da marca Maratona (horizontal, branca, negativo, cinza, preta, vertical, símbolo) | Encontrados em `docs/referencias/identidade visual/`; copiados sem alteração para `public/brand/`                                                                                                                                                                                 |
+| Pranchas PNG (paleta, tipografia, ícones, interface, mockups)                          | Usadas como referência visual; dados ilustrativos ignorados                                                                                                                                                                                                                       |
+| `docs/VETORIZADAS CLAUDE/`                                                             | Versão anterior dos SVGs (prefixo `saep-`), arquivos diferentes dos de `referencias/`. Usamos os de `referencias/` (mais recentes). **[P01 — decidida em 06/11/2026]** qual é a versão aprovada                                                                                   |
+| **Projeto pedagógico / livro de regras / regulamento**                                 | **AUSENTE.** Regras implementadas a partir do PRD e das instruções do usuário, versão `piloto-2026.0-a-confirmar`                                                                                                                                                                 |
+| **Marca SENAI Ceará** (colorida e totalmente branca)                                   | Disponíveis em `public/brand/`: `senai-ceara-colorido.svg` para fundo claro (arquivo `logo-senai.svg` indicado pelo usuário em 30/10/2026, copiado sem alteração) e `senai-ceara-branco.svg` para fundo escuro.                                                                   |
+| **Ícones do projeto em SVG individual**                                                | **Vetorizados (2026-10-29)**: 118 ícones redesenhados à mão a partir da prancha em `src/shared/ui/icones/dados.ts`; arquivos em `docs/icones/svg` e galeria em `docs/icones/galeria.html`. Não é rastreio automático: **[P02 — decidida em 06/11/2026]** fidelidade com a unidade |
+| Licença/arquivos de fonte                                                              | Montserrat (SIL OFL) via `@fontsource`, auto-hospedada. **[P08 — decidida em 06/11/2026]** confirmação institucional                                                                                                                                                              |
 
 ## 2. Divergências registradas
 
@@ -55,10 +63,10 @@ foi verificado; o restante é da unidade.
   identidade visual da aplicação.
 - **Padrões gráficos** (prancha 08) recriados em SVG em `src/shared/ui/padroes/dados.ts`;
   arquivos em `docs/padroes/svg` e galeria em `docs/padroes/galeria.html` (`npm run padroes`).
-  **[P06 — em validação]**
+  **[P06 — decidida em 06/11/2026]**
 - **13 ícones** das pranchas "Navegação e conta", "Maratona e aprendizagem" e "Avaliação e
   administração" acrescentados, mais o ícone "Salvar" criado no mesmo estilo em 2026-10-30
-  (118 no total, conferidos em 2026-11-06). **[P02 — em validação]**
+  (118 no total, conferidos em 2026-11-06). **[P02 — decidida em 06/11/2026]**
 - **Paleta da prancha × tokens em uso:** azul-marinho `#0B2D6B` × `#062457`; amarelo `#FFC02E` ×
   `#FFB820`; borda sutil `#E6EBF2` × `#DCE5EF`. Os padrões gráficos usam a paleta da prancha; os
   tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[P03 — decidida em 06/11/2026]**
@@ -78,7 +86,7 @@ foi verificado; o restante é da unidade.
 | Desempate "questões e prova oficial" | Soma do componente objetivo (30) de todos os encontros                                                                    |
 | Prova oficial                        | Encontro em que o componente objetivo é a prova; realização "pendente" também deixa o resultado pendente                  |
 | Pedido de revisão                    | 24 h, exceção registrada pela coordenação (spec 007, §6.5)                                                                |
-| Premiação                            | Itens registrados como configuração; valores, quantidade, validade e entrega **[P13 — em validação]**                     |
+| Premiação                            | Itens registrados como configuração; valores, quantidade, validade e entrega **[P13 — decidida em 06/11/2026]**           |
 | Cronograma                           | Nada fixado no código; demo usa datas relativas ao dia atual                                                              |
 
 ## 4. Decisões técnicas (ver `docs/adr/`)
@@ -103,7 +111,7 @@ foi verificado; o restante é da unidade.
   por CSV com prévia. **Implementados em 2026-10-30:** convite de 7 dias, situação de acesso com
   reenvio e importação CSV (ADR 0009). Rotas `/primeiro-acesso`, `/esqueci-senha` e
   `/redefinir-senha` e o link "Esqueci minha senha" na entrada também concluídos. **Pendente:**
-  provedor de e-mail da produção e SMTP do Auth **[P32 — em validação]**.
+  provedor de e-mail da produção e SMTP do Auth **[P32 — decidida em 06/11/2026]**.
 - Criação de edições: resolvida na spec 010 (seção 6.8); só a primeira edição de uma instalação
   continua criada pela administração do banco.
 - Ícones PWA gerados a partir de `maratona-simbolo.svg` com fundo branco no maskable. **[P07 — decidida em 06/11/2026]**

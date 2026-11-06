@@ -129,7 +129,11 @@ export function PremissasPage({
       </div>
 
       {visiveis.length === 0 ? (
-        <EmptyState titulo="Nenhuma premissa com esses filtros." icone="filtros" />
+        catalogo.premissas.some((x) => !x.resolvidaPor) ? (
+          <EmptyState titulo="Nenhuma premissa com esses filtros." icone="filtros" />
+        ) : (
+          <EmptyState titulo="Todas as premissas estão resolvidas." icone="checklist" />
+        )
       ) : (
         agruparPorTema(visiveis).map((grupo) => (
           <section key={grupo.tema} className="flex flex-col gap-3" aria-label={grupo.tema}>
@@ -146,7 +150,7 @@ export function PremissasPage({
       {resolvidas.length > 0 && (
         <section aria-labelledby={idResolvidas} className="flex flex-col gap-3">
           <h2 id={idResolvidas} className="font-display text-xl font-semibold text-text">
-            Resolvidas por especificações
+            Resolvidas
           </h2>
           <details className="group">
             <summary className="cursor-pointer text-sm font-semibold text-link">

@@ -1,8 +1,8 @@
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 
-// Spec 015 — premissas em validação com o Supabase local. As respostas são só de inserção: o
-// teste não depende da situação inicial (cada resposta usa a atual como base).
+// Spec 015/016 — premissas em validação com o Supabase local. Todas vêm resolvidas (decisões do
+// projeto): o fluxo de resposta e a concorrência são cobertos pelo pgTAP (016_premissas).
 
 async function entrar(browser: Browser, email: string): Promise<Page> {
   const page = await (await browser.newContext()).newPage();
@@ -14,62 +14,47 @@ async function entrar(browser: Browser, email: string): Promise<Page> {
   return page;
 }
 
-function cartao(page: Page, codigo: string) {
-  return page.getByRole('article').filter({ has: page.getByText(codigo, { exact: true }) });
-}
-
-async function responder(page: Page, codigo: string, decisao: string, justificativa: string) {
-  const c = cartao(page, codigo);
-  await c.getByRole('button', { name: `Responder ${codigo}` }).click();
-  await c.getByRole('radio', { name: decisao }).check();
-  await c.getByRole('textbox').fill(justificativa);
-  await c.getByRole('button', { name: 'Registrar resposta' }).click();
-  return c;
-}
-
-test('master responde; coordenação e docente leem; resposta concorrente recebe o aviso', async ({
+test('master, coordenação e docente leem as premissas resolvidas; o servidor recusa responder', async ({
   browser,
 }) => {
-  const a = await entrar(browser, 'master@exemplo.invalid');
-  const b = await entrar(browser, 'master@exemplo.invalid');
-  for (const p of [a, b]) {
-    await p.goto('/master/premissas');
+  for (const email of [
+    'master@exemplo.invalid',
+    'coordenacao@exemplo.invalid',
+    'docente@exemplo.invalid',
+  ]) {
+    const pagina = await entrar(browser, email);
+    const area = email.startsWith('master')
+      ? 'master'
+      : email.startsWith('coordenacao')
+        ? 'coordenacao'
+        : 'docente';
+    await pagina.goto(`/${area}/premissas`);
     await expect(
-      p.getByRole('heading', { level: 1, name: 'Premissas em validação' }),
+      pagina.getByRole('heading', { level: 1, name: 'Premissas em validação' }),
     ).toBeVisible();
+    await expect(pagina.getByText('Todas as premissas estão resolvidas.')).toBeVisible();
+    await pagina.getByText('Mostrar 32 premissas').click();
+    await expect(pagina.getByRole('article')).toHaveCount(32);
+    await expect(pagina.getByRole('button', { name: /^Responder/ })).toHaveCount(0);
   }
 
-  // "Confirmada" pela aba A; a aba B ainda mostra a situação anterior.
-  const p06 = await responder(a, 'P06', 'Confirmada', 'Convites sem prazo atendem à turma.');
-  await expect(p06.getByText('Resposta registrada.')).toBeVisible();
-  await expect(p06.getByText(/Confirmada por Master \(fictício\)/)).toBeVisible();
-
-  const desatualizada = await responder(
-    b,
-    'P06',
-    'Precisa mudar',
-    'Convites devem expirar em 7 dias.',
-  );
-  await expect(desatualizada.getByRole('alert')).toContainText('respondida por outra pessoa');
-  await expect(desatualizada.getByText(/Confirmada por Master \(fictício\)/)).toBeVisible();
-
-  // "Precisa mudar" com histórico.
-  const p08 = await responder(a, 'P08', 'Precisa mudar', 'Nomes de equipe precisam de revisão.');
-  await expect(p08.getByText('Resposta registrada.')).toBeVisible();
-  await expect(p08.getByText(/O sistema segue a premissa em uso/).first()).toBeVisible();
-
-  // Coordenação lê a resposta sem formulário (spec 016, FR-013).
-  const c = await entrar(browser, 'coordenacao@exemplo.invalid');
-  await c.goto('/coordenacao/premissas');
-  await expect(cartao(c, 'P08').getByText('Nomes de equipe precisam de revisão.')).toBeVisible();
-  await expect(c.getByRole('button', { name: /^Responder/ })).toHaveCount(0);
-
-  // Docente lê a resposta sem formulário.
-  const d = await entrar(browser, 'docente@exemplo.invalid');
-  await d.goto('/docente/premissas');
-  const p08Docente = cartao(d, 'P08');
-  await expect(p08Docente.getByText('Nomes de equipe precisam de revisão.')).toBeVisible();
-  await expect(d.getByRole('button', { name: /^Responder/ })).toHaveCount(0);
+  // Todas resolvidas: nem o master consegue registrar resposta (a regra vale no servidor).
+  const sb = createClient(process.env.E2E_SUPABASE_URL!, process.env.E2E_SUPABASE_ANON_KEY!, {
+    auth: { persistSession: false },
+  });
+  await sb.auth.signInWithPassword({
+    email: 'master@exemplo.invalid',
+    password: 'senha-local-123',
+  });
+  const leitura = await sb.rpc('premissas_em_validacao');
+  expect(leitura.error).toBeNull();
+  const resposta = await sb.rpc('responder_premissa', {
+    p_codigo: 'P01',
+    p_decisao: 'confirmada',
+    p_justificativa: 'Tentativa de resposta a premissa resolvida.',
+    p_resposta_base: null,
+  });
+  expect(resposta.error?.code).toBe('23514');
 });
 
 test('estudante: sem item no menu e recusado no servidor', async ({ page }) => {

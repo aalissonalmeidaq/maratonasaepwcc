@@ -84,7 +84,7 @@ describe('PremissasPage (spec 015, US1)', () => {
       'Pontuação',
       'Equipes e atividades',
       'Identidade visual',
-      'Resolvidas por especificações',
+      'Resolvidas',
     ]);
   });
 
@@ -111,9 +111,20 @@ describe('PremissasPage (spec 015, US1)', () => {
 
   it('resolvidas ficam numa seção à parte, recolhida', () => {
     renderizar();
-    const secao = screen.getByRole('region', { name: 'Resolvidas por especificações' });
+    const secao = screen.getByRole('region', { name: 'Resolvidas' });
     expect(within(secao).getByText(/Premissa antiga\?/)).toBeInTheDocument();
     expect(within(secao).getByText(/Resolvida pela spec 016/)).toBeInTheDocument();
+  });
+
+  it('sem nenhuma pendente, diz que todas estão resolvidas', () => {
+    renderizar({
+      catalogo: {
+        ...catalogo,
+        premissas: catalogo.premissas.map((p) => ({ ...p, resolvidaPor: 'decisão do projeto' })),
+      },
+    });
+    expect(screen.getByText('Todas as premissas estão resolvidas.')).toBeInTheDocument();
+    expect(screen.queryByText('Nenhuma premissa com esses filtros.')).not.toBeInTheDocument();
   });
 
   it('sem podeResponder não há botão "Responder"', () => {

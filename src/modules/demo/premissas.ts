@@ -325,38 +325,9 @@ export const CATALOGO_PREMISSAS: ItemDoCatalogo[] = [
   ),
 ];
 
-const RESOLVIDAS_PELO_PROJETO = new Set([
-  'P03',
-  'P04',
-  'P05',
-  'P07',
-  'P09',
-  'P10',
-  'P11',
-  'P12',
-  'P14',
-  'P15',
-  'P16',
-  'P17',
-  'P18',
-  'P19',
-  'P20',
-  'P21',
-  'P22',
-  'P23',
-  'P24',
-  'P26',
-  'P27',
-  'P28',
-  'P29',
-  'P30',
-  'P31',
-]);
-
-/** Resolvida por spec (P25) ou por decisão do projeto; as demais seguem em aberto, como no banco. */
-function resolvidaPor(codigo: string): string | null {
-  if (codigo === 'P25') return 'spec 016';
-  return RESOLVIDAS_PELO_PROJETO.has(codigo) ? 'decisão do projeto de 06/11/2026' : null;
+/** Resolvida por spec (P25) ou por decisão do projeto (todas as demais), como no banco. */
+function resolvidaPor(codigo: string): string {
+  return codigo === 'P25' ? 'spec 016' : 'decisão do projeto de 06/11/2026';
 }
 
 const RESPOSTAS_FICTICIAS: Record<string, Resposta[]> = {
