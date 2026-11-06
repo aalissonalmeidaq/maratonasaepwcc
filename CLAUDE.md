@@ -9,5 +9,6 @@
 - Segurança no banco: toda tabela nova tem RLS + teste pgTAP em `supabase/tests/`.
 - Nunca use `service_role`/segredos no frontend; nunca conecte bancos remotos nem rode seed fora do local.
 - Não marque envio/registro como concluído sem resposta do servidor; nada autenticado no cache do SW.
+- A CI (`.github/workflows/ci.yml`) roda esses mesmos portões em toda proposta para o `main`; as verificações obrigatórias (`qualidade`, `banco`, `jornadas-demo`, `jornadas-supabase`) estão em `docs/operacao-e-homologacao.md`.
 - Antes de concluir: `npm run verify`, `npm run test:e2e` e, com Docker, `npm run test:db`.
 - Portas do Supabase local: 5442x (outro projeto da máquina usa as padrão).

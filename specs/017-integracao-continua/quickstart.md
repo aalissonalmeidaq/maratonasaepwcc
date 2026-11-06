@@ -1,0 +1,69 @@
+# Guia de validação: integração contínua
+
+## Pré-requisitos
+
+- Branch `017-integracao-continua` publicada e uma proposta aberta para o `main`.
+- Para reproduzir localmente: Node 22, Docker e Supabase CLI 2.118.0 (como no README).
+
+## 1. Teste da estrutura do fluxo (local, sem rede)
+
+```bash
+npm run test -- scripts/ci/fluxo.test.ts
+```
+
+Esperado: aprovado; falha se alguém remover um job, um limite de tempo, trocar um comando ou
+introduzir segredo/`pull_request_target`.
+
+## 2. Cada verificação, na máquina de quem desenvolve
+
+| Verificação         | Comando                                                                              | Observação                |
+| ------------------- | ------------------------------------------------------------------------------------ | ------------------------- |
+| `qualidade`         | `npm run verify`                                                                     |                           |
+| `banco`             | `supabase start && supabase test db`                                                 |                           |
+| `jornadas-demo`     | `npm run test:e2e`                                                                   |                           |
+| `jornadas-supabase` | ver README (`supabase functions serve` + `E2E_SUPABASE_URL`/`E2E_SUPABASE_ANON_KEY`) | exige as funções servidas |
+
+## 3. Primeira execução na proposta (US1)
+
+1. Abrir a proposta; as quatro verificações aparecem sozinhas.
+2. Esperado: todas verdes em até 25 minutos; nenhum artefato de falha.
+3. Enviar um commit novo enquanto roda: a execução anterior é cancelada (US1-3).
+
+## 4. Prova de que cada grupo pega a sua falha (FR-014, SC-002)
+
+Numa branch descartável, quebrar de propósito (um por grupo):
+
+- `qualidade`: uma asserção falsa num teste de unidade;
+- `banco`: um `select ok(false, ...)` num pgTAP;
+- `jornadas-demo`: uma asserção falsa em `e2e/`;
+- `jornadas-supabase`: uma asserção falsa em `e2e-supabase/`.
+
+Esperado: os quatro jobs vermelhos, cada um pelo seu motivo; nos dois de jornadas, o artefato
+de falha traz o relatório e o traço (US2). Repetir com novo commit duas vezes (3 de 3) e
+descartar a branch.
+
+## 5. Bloqueio de mesclagem (US3)
+
+Seguir o passo a passo de `docs/operacao-e-homologacao.md` (seção "Integração contínua"):
+exigir os contextos `qualidade`, `banco`, `jornadas-demo` e `jornadas-supabase`. Com uma
+verificação vermelha ou pendente, o botão de mesclar fica bloqueado; com as quatro verdes,
+liberado.
+
+## 6. Verificação do `main` e execução manual (US4)
+
+Após mesclar, conferir a execução do `main` em Actions; disparar `Run workflow` manualmente e
+conferir o resultado.
+
+## Resultado da validação (2026-11-06)
+
+| Item                                                        | Resultado                                                                                                                                            |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Teste da estrutura do fluxo                                 | `scripts/ci/fluxo.test.ts`: 10 casos aprovados (visto falhar antes do `ci.yml`)                                                                      |
+| Primeira execução (PR #23)                                  | `jornadas-supabase` falhou por teste instável de privacidade offline (a página saía antes de a cópia local ser salva); corrigido no teste            |
+| Execução verde (PR #23)                                     | `banco` 2 min 21 s, `qualidade` 2 min 42 s, `jornadas-demo` 4 min 32 s, `jornadas-supabase` 8 min 4 s; total de ponta a ponta ≈ 8 min (meta: 25 min) |
+| Cache de imagens Docker                                     | não necessário (total bem abaixo de 20 min)                                                                                                          |
+| Prova de falha injetada (PR descartável #24, FR-014/SC-002) | 3 execuções, nas 3 os quatro jobs ficaram vermelhos, cada um pela sua falha (teste de unidade, pgTAP, jornada de demonstração, jornada Supabase)     |
+| Artefatos de falha (SC-004)                                 | `jornadas-demo-falha` e `jornadas-supabase-falha` gerados e baixados; o de Supabase traz o traço e o registro das funções                            |
+| Leitura do `ci.yml` (SC-007)                                | sem `secrets.*`, sem banco remoto, permissões `contents: read`, só ações `actions/*` e `supabase/setup-cli`                                          |
+| Observação                                                  | o fluxo só dispara para propostas com base `main`; mudar a base de uma proposta existente não dispara (um commit novo dispara)                       |
+| Pendente do dono                                            | regra de proteção (US3/SC-005/SC-006) e execução do `main` após a mesclagem (US4)                                                                    |

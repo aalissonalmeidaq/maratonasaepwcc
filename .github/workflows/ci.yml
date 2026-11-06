@@ -1,0 +1,175 @@
+# Spec 017 — integração contínua. Roda as mesmas verificações exigidas por CLAUDE.md em toda
+# proposta para o main, em cada push no main e sob demanda. Sem segredos, sem banco remoto: o
+# Supabase usado é o local, criado do zero em cada job. A regra que bloqueia a mesclagem é
+# configuração manual do dono (docs/operacao-e-homologacao.md); este arquivo não altera nada no
+# repositório.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CI: true
+
+jobs:
+  qualidade:
+    name: qualidade
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tipos, estilo, testes de unidade e build
+        run: npm run verify
+      - name: Resumo
+        if: always()
+        run: |
+          {
+            echo "### qualidade"
+            echo "Comando: \`npm run verify\`. Para reproduzir: \`npm ci && npm run verify\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  banco:
+    name: banco
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.118.0
+      - name: Supabase local (migrations e seed fictício)
+        run: supabase start
+      - name: Regras de segurança do banco (pgTAP)
+        run: supabase test db
+      - name: Encerrar o Supabase local
+        if: always()
+        run: supabase stop --no-backup
+      - name: Resumo
+        if: always()
+        run: |
+          {
+            echo "### banco"
+            echo "Comando: \`supabase test db\`. Para reproduzir: \`supabase start && supabase test db\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  jornadas-demo:
+    name: jornadas-demo
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Navegador das jornadas
+        run: npx playwright install --with-deps chromium
+      - name: Jornadas no modo demonstração
+        run: npm run test:e2e
+      - name: Relatório e traços da falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jornadas-demo-falha
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Resumo
+        if: always()
+        run: |
+          {
+            echo "### jornadas-demo"
+            echo "Comando: \`npm run test:e2e\`. Para reproduzir: \`npm ci && npx playwright install chromium && npm run test:e2e\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  jornadas-supabase:
+    name: jornadas-supabase
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Navegador das jornadas
+        run: npx playwright install --with-deps chromium
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.118.0
+      - name: Supabase local (migrations e seed fictício)
+        run: supabase start
+      - name: Funções de servidor (valores locais, sem segredo)
+        run: |
+          cp supabase/functions/.env.example supabase/functions/.env
+          nohup supabase functions serve > funcoes-serve.log 2>&1 &
+          for i in $(seq 1 60); do
+            codigo=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:54421/functions/v1/criar-conta || true)
+            if [ "$codigo" != "000" ] && [ "$codigo" != "502" ] && [ "$codigo" != "503" ]; then
+              echo "Funções prontas (HTTP $codigo)."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "As funções não ficaram prontas a tempo." >&2
+          tail -n 50 funcoes-serve.log >&2 || true
+          exit 1
+      - name: Chave pública local das jornadas
+        run: |
+          chave=$(supabase status -o env | sed -n 's/^PUBLISHABLE_KEY="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p')
+          if [ -z "$chave" ]; then echo "Chave pública local não encontrada." >&2; exit 1; fi
+          echo "::add-mask::$chave"
+          echo "E2E_SUPABASE_ANON_KEY=$chave" >> "$GITHUB_ENV"
+          echo "E2E_SUPABASE_URL=http://127.0.0.1:54421" >> "$GITHUB_ENV"
+      - name: Jornadas contra o Supabase local
+        run: npm run test:e2e:supabase
+      - name: Relatório, traços e registro das funções da falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jornadas-supabase-falha
+          path: |
+            playwright-report/
+            test-results-supabase/
+            funcoes-serve.log
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Encerrar o Supabase local
+        if: always()
+        run: supabase stop --no-backup
+      - name: Resumo
+        if: always()
+        run: |
+          {
+            echo "### jornadas-supabase"
+            echo "Comando: \`npm run test:e2e:supabase\`. Para reproduzir: veja o README (Supabase local, funções servidas e variáveis E2E_SUPABASE_*)."
+          } >> "$GITHUB_STEP_SUMMARY"

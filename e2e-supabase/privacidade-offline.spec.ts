@@ -9,6 +9,14 @@ test('PWA real: três perfis e logout sem persistir respostas privadas', async (
   });
   if (!(await page.evaluate(() => !!navigator.serviceWorker.controller))) await page.reload();
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  // A cópia local só existe depois que o servidor respondeu; sair antes disso (CI lenta) a perde.
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Object.keys(localStorage).some((k) => k.startsWith('maratona:regulamento-publico:v1:')),
+      ),
+    )
+    .toBe(true);
   for (const perfil of ['coordenacao', 'docente', 'aluno']) {
     await page.goto('/entrar');
     await page.getByLabel('E-mail', { exact: true }).fill(`${perfil}@exemplo.invalid`);

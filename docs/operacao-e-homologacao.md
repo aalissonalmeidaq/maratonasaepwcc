@@ -69,6 +69,57 @@ foi deixado com o seed limpo. Os servidores temporários desta execução foram 
 | Homologação | projeto Supabase **separado** | fictícios ou anonimizados, salvo autorização | **proibido** |
 | Produção    | projeto Supabase próprio      | reais                                        | **proibido** |
 
+## Integração contínua (spec 017)
+
+Toda proposta de mudança (PR) para o `main` roda sozinha as mesmas verificações exigidas por
+`CLAUDE.md`, no fluxo `CI` (`.github/workflows/ci.yml`). O resultado aparece na própria proposta,
+como quatro verificações independentes:
+
+| Verificação         | O que cobre                                                                          | Como reproduzir na sua máquina                                                          |
+| ------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `qualidade`         | tipos, estilo, testes de unidade e build                                             | `npm ci && npm run verify`                                                              |
+| `banco`             | regras de segurança do banco (pgTAP)                                                 | `supabase start && supabase test db`                                                    |
+| `jornadas-demo`     | jornadas de ponta a ponta no modo demonstração, em computador e celular              | `npx playwright install chromium && npm run test:e2e`                                   |
+| `jornadas-supabase` | jornadas contra o Supabase local, com funções de servidor e caixa de e-mail de teste | roteiro do `README.md` (Supabase local + `supabase functions serve` + `E2E_SUPABASE_*`) |
+
+Também rodam após cada mesclagem no `main` e sob demanda (aba **Actions** › **CI** › **Run
+workflow**). Uma nova versão da mesma proposta cancela a execução anterior. Cada verificação tem
+limite de tempo (15, 15, 20 e 25 minutos); estourar o limite conta como falha.
+
+**Garantias:** o banco é o Supabase **local**, criado do zero em cada execução com o seed
+fictício; o fluxo não usa segredos, não conecta banco remoto nem altera configurações do
+repositório; as permissões são só de leitura. O teste `scripts/ci/fluxo.test.ts` (parte do
+`npm run verify`) falha se alguma dessas garantias deixar de valer.
+
+**Quando uma verificação falha:** abra a execução na aba **Actions**, leia o resumo do job e,
+nas jornadas, baixe o artefato `jornadas-demo-falha` ou `jornadas-supabase-falha` (ficam 7 dias).
+Eles trazem o relatório e os traços do Playwright (e o registro das funções, no caso do
+Supabase); abra o traço com `npx playwright show-trace <arquivo>.zip`. Falha de infraestrutura
+(download de dependência ou de imagem do banco): use **Re-run failed jobs**, sem novo commit.
+
+### Exigir as verificações antes de mesclar (passo manual do dono)
+
+O fluxo só informa; quem bloqueia a mesclagem é uma regra do repositório, que exige permissão de
+administrador e **não** é feita pelo pipeline. Faça uma vez:
+
+1. No GitHub, abra o repositório › **Settings** › **Rules** › **Rulesets** › **New ruleset** ›
+   **New branch ruleset** (ou **Settings** › **Branches** › **Add branch protection rule**).
+2. Nome: `main exige CI`; **Enforcement status**: _Active_; alvo: a branch `main`.
+3. Marque **Require status checks to pass** e **Require branches to be up to date before
+   merging** e adicione exatamente estas quatro verificações: `qualidade`, `banco`,
+   `jornadas-demo` e `jornadas-supabase`. (Elas só aparecem na lista depois da primeira execução
+   do fluxo.)
+4. Salve. Confira abrindo uma proposta com uma verificação vermelha ou pendente: o botão de
+   mesclar fica bloqueado; com as quatro verdes, é liberado.
+
+Alternativa por linha de comando (como dono, com `gh` autenticado):
+
+```bash
+gh api -X PUT repos/<dono>/<repositorio>/branches/main/protection   -H "Accept: application/vnd.github+json"   -f "required_status_checks[strict]=true"   -f "required_status_checks[contexts][]=qualidade"   -f "required_status_checks[contexts][]=banco"   -f "required_status_checks[contexts][]=jornadas-demo"   -f "required_status_checks[contexts][]=jornadas-supabase"   -F "enforce_admins=false" -F "required_pull_request_reviews=null" -F "restrictions=null"
+```
+
+Renomear uma verificação no `ci.yml` exige atualizar esta regra e este documento.
+
 ## Primeiro master e unidades (spec 016)
 
 O master é quem cadastra unidades e contas de gestão. O **primeiro** só pode ser criado pela
