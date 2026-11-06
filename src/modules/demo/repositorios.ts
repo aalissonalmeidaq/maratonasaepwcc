@@ -8,7 +8,6 @@ import type { RepositorioOrganizacao } from '@/modules/organizacao';
 import type { RepositorioPainelTurma } from '@/modules/painel-turma';
 import { criarAtividadesDemo } from './atividades';
 import { criarComunicadosDemo } from './comunicados';
-import { criarPremissasDemo } from './premissas';
 import { criarRedeDemo } from './rede';
 import { criarEdicoesDemo, edicoesDemo } from './edicoes';
 import { criarRegrasDemo } from './regras';
@@ -264,7 +263,6 @@ export function criarRepositoriosDemo(usuarioAtual: () => string | null) {
     paineis: criarPaineisDemo(usuarioAtual, resultado),
     comunicados: criarComunicadosDemo(usuarioAtual),
     regras: criarRegrasDemo(coordena),
-    premissas: criarPremissasDemo(() => usuarioAtual() === 'u-master'),
     rede: criarRedeDemo(),
   };
 }

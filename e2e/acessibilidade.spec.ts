@@ -16,7 +16,6 @@ const grupos = [
       '/docente/encontros',
       '/docente/presenca',
       '/docente/avaliacoes',
-      '/docente/premissas',
     ],
   },
   {
@@ -28,18 +27,17 @@ const grupos = [
       '/coordenacao/edicoes',
       '/coordenacao/presenca',
       '/coordenacao/avaliacoes',
-      '/coordenacao/premissas',
     ],
   },
   {
     perfil: 'master',
     conta: /master/i,
-    rotas: ['/master', '/master/unidades', '/master/masters', '/master/premissas'],
+    rotas: ['/master', '/master/unidades', '/master/masters'],
   },
   {
     perfil: 'gestão',
     conta: /gestão/i,
-    rotas: ['/gestao', '/gestao/equipe', '/gestao/edicoes', '/gestao/premissas'],
+    rotas: ['/gestao', '/gestao/equipe', '/gestao/edicoes'],
   },
   {
     perfil: 'analista',

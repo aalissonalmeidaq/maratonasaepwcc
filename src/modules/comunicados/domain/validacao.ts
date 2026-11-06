@@ -1,6 +1,6 @@
 import type { EntradaComunicado } from './tipos';
 
-/** Limites do título e do texto (premissas técnicas da spec 009; em validação como P30, spec 015). */
+/** Limites do título e do texto (premissas técnicas da spec 009; ver P30 em docs/premissas.md). */
 export const LIMITE_TITULO = 200;
 export const LIMITE_TEXTO = 5000;
 

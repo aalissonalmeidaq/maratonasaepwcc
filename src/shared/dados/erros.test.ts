@@ -47,11 +47,9 @@ describe('mensagens de erro do servidor', () => {
       mensagemDeErro({
         code: '40001',
         message:
-          'Esta premissa foi respondida por outra pessoa. Veja a resposta atual antes de registrar.',
+          'Este registro foi alterado por outra pessoa. Veja a versão atual antes de salvar.',
       }),
-    ).toBe(
-      'Esta premissa foi respondida por outra pessoa. Veja a resposta atual antes de registrar.',
-    );
+    ).toBe('Este registro foi alterado por outra pessoa. Veja a versão atual antes de salvar.');
   });
 
   it('permissão negada vira mensagem clara', () => {

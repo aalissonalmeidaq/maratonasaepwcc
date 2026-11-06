@@ -52,6 +52,14 @@ git grep -n -i "premissas_em_validacao\|responder_premissa\|modules/premissas" -
 
 Esperado: nenhuma linha.
 
-## Resultado da validação
+## Resultado da validação (2026-11-06)
 
-_(preenchido na implementação)_
+| Item                                             | Antes                      | Depois                                                                                                    |
+| ------------------------------------------------ | -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (testes de unidade)             | 140 arquivos, 1.001 testes | 133 arquivos, 968 testes (módulo e testes de premissas removidos; teste do documento e do menu ajustados) |
+| `npm run test:db`                                | 17 arquivos, 1.929 testes  | 16 arquivos, 1.861 testes (016 removido; 017 com o bloco de ausência)                                     |
+| `npm run test:e2e` (demonstração)                | 181 aprovados, 1 ignorado  | 173 aprovados, 1 ignorado (quatro perfis × rota antiga "não encontrado")                                  |
+| `npm run test:e2e:supabase`                      | 75 aprovados               | 74 aprovados (RPCs inexistentes e rota antiga)                                                            |
+| `docs/premissas.md`                              | —                          | 32 premissas × 6 campos, guardado por `scripts/premissas-documento.test.ts`                               |
+| Migration `20261114120000_remover_premissas.sql` | —                          | aplica do zero e é idempotente (reexecução sem erro)                                                      |
+| Busca de resíduos (SC-006)                       | —                          | só restam o bloco de ausência do 017, migrations antigas, `specs/` e docs                                 |

@@ -1,34 +1,10 @@
 import { Link } from 'react-router';
 import { useAuth } from '@/modules/auth';
-import { contarPorSituacao } from '@/modules/premissas';
 import { Masters, Unidades, type AcoesDeMasters, type AcoesDeUnidades } from '@/modules/rede';
-import { Alert, Card, PageHeader } from '@/shared/ui';
+import { Card, PageHeader } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
-import {
-  useBloqueioDeEscrita,
-  useGravar,
-  useMasters,
-  usePremissas,
-  useUnidades,
-} from '../dados/consultas';
+import { useBloqueioDeEscrita, useGravar, useMasters, useUnidades } from '../dados/consultas';
 import { useRepositorios } from '../dados/useRepositorios';
-
-/** Premissas que aguardam resposta do master (spec 015, FR-005; spec 016, FR-013); some quando não há. */
-export function AvisoDePremissas() {
-  const { data } = usePremissas();
-  const aguardando = data ? contarPorSituacao(data.premissas).aguardando : 0;
-  if (aguardando === 0) return null;
-  return (
-    <div className="mb-6">
-      <Alert tom="info" titulo={`Premissas aguardando resposta: ${aguardando}`}>
-        Escolhas que o sistema adotou sem decisão da unidade.{' '}
-        <Link to="/master/premissas" className="font-semibold text-link underline">
-          Ver premissas
-        </Link>
-      </Alert>
-    </div>
-  );
-}
 
 /** Início do master (spec 016): unidades sem gestão e o resumo da rede. */
 export function MasterInicioPage() {
@@ -41,7 +17,6 @@ export function MasterInicioPage() {
         icone="administracao"
         descricao="Unidades, contas de gestão e masters da instalação. O master não vê dados de estudantes."
       />
-      <AvisoDePremissas />
       <Consulta consulta={unidades}>
         {(lista) => {
           const ativas = lista.filter((u) => u.ativa);

@@ -63,6 +63,6 @@ export function gerarCsv(relatorio: Relatorio): string {
 }
 
 /** `maratona-<tipo>-<AAAA-MM-DD>.csv`, com a data de Juazeiro do Norte. */
-export function nomeDoArquivo(tipo: TipoRelatorio | 'premissas', data: Date): string {
+export function nomeDoArquivo(tipo: TipoRelatorio, data: Date): string {
   return `maratona-${tipo}-${dataIso.format(data)}.csv`;
 }

@@ -2,16 +2,14 @@
 
 > Orientações a validar pela unidade. Nenhum ambiente remoto foi criado ou conectado.
 
-## Premissas em validação (spec 015)
+## Premissas (spec 018)
 
-- As 32 premissas (P01–P32) estão resolvidas: P25 pela spec 016 e as demais por decisão do projeto
-  (06/11/2026). A tela "Premissas em validação" segue como registro, exportável em CSV ou
-  imprimível. Se uma nova premissa entrar no catálogo, o **master** responde "Confirmada" ou
-  "Precisa mudar"; "Precisa mudar" não altera o sistema: abrir uma spec para cada mudança.
+- As 32 premissas (P01–P32) estão resolvidas e registradas em [premissas.md](premissas.md); não há
+  tela no site para tratá-las (retirada pela spec 018). Premissa nova entra nesse documento; se
+  mudar regra, vira spec.
 - **Antes de usar dados reais, na implantação** (fora do sistema): configurar o provedor e o remetente
   de e-mail da unidade (P32; ver "Preparar homologação"), preencher a premiação de cada edição (P13)
   e fazer a conferência visual e institucional da identidade (P01, P02, P06, P08).
-- Respostas são só de inserção e ficam na auditoria (`respostas_premissas`).
 - Datas de relatórios, painéis e o corte de "encontro realizado" usam `America/Fortaleza`.
 
 ## Incremento PWA e acessibilidade (spec 014)

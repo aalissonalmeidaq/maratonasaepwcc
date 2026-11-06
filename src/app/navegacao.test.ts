@@ -26,7 +26,6 @@ const CAMINHOS = {
     '/docente/ocorrencias',
     '/docente/comunicados',
     '/docente/relatorios',
-    '/docente/premissas',
   ],
   coordenacao: [
     '/coordenacao',
@@ -44,7 +43,6 @@ const CAMINHOS = {
     '/coordenacao/comunicados',
     '/coordenacao/premiacao',
     '/coordenacao/relatorios',
-    '/coordenacao/premissas',
   ],
 } as const;
 
@@ -78,45 +76,43 @@ describe('menu em categorias (spec 011, US6, FR-017, SC-007)', () => {
       MENUS.coordenacao.grupos.map((g) => [g.titulo, g.itens.map((i) => i.rotulo)]),
     );
     expect(rotulos).toEqual({
-      Preparação: [
-        'Edições',
-        'Premissas em validação',
-        'Cursos e turmas',
-        'Organização',
-        'Equipes',
-        'Encontros',
-      ],
+      Preparação: ['Edições', 'Cursos e turmas', 'Organização', 'Equipes', 'Encontros'],
       'Durante os encontros': ['Presença', 'Avaliações', 'Prova oficial', 'Ocorrências'],
       Resultado: ['Ranking', 'Revisões', 'Premiação'],
       Comunicação: ['Comunicados', 'Relatórios'],
     });
   });
 
-  it('premissas em validação (spec 015): docente em Comunicação; aluno não vê', () => {
-    const comunicacao = MENUS.docente.grupos.find((g) => g.titulo === 'Comunicação');
-    expect(comunicacao?.itens.map((i) => i.rotulo)).toContain('Premissas em validação');
-    expect(itensDoMenu('aluno').some((i) => i.caminho.includes('premissas'))).toBe(false);
+  it('nenhum perfil tem item de premissas no menu (spec 018)', () => {
+    for (const area of [
+      'aluno',
+      'docente',
+      'coordenacao',
+      'master',
+      'gestao',
+      'analista',
+    ] as const) {
+      expect(itensDoMenu(area).some((i) => /premissa/i.test(i.caminho + i.rotulo))).toBe(false);
+    }
   });
 });
 
 describe('menus das áreas de rede e de unidade (spec 016)', () => {
-  it('master: Início, Rede (Unidades, Masters) e Sistema (Premissas)', () => {
+  it('master: Início e Rede (Unidades, Masters), sem grupo Sistema', () => {
     expect(MENUS.master.inicio.caminho).toBe('/master');
     expect(
       Object.fromEntries(MENUS.master.grupos.map((g) => [g.titulo, g.itens.map((i) => i.caminho)])),
     ).toEqual({
       Rede: ['/master/unidades', '/master/masters'],
-      Sistema: ['/master/premissas'],
     });
   });
 
-  it('gestão: Unidade (Equipe, Edições) e Sistema (Premissas, só leitura)', () => {
+  it('gestão: Unidade (Equipe, Edições), sem grupo Sistema', () => {
     expect(MENUS.gestao.inicio.caminho).toBe('/gestao');
     expect(
       Object.fromEntries(MENUS.gestao.grupos.map((g) => [g.titulo, g.itens.map((i) => i.caminho)])),
     ).toEqual({
       Unidade: ['/gestao/equipe', '/gestao/edicoes'],
-      Sistema: ['/gestao/premissas'],
     });
   });
 

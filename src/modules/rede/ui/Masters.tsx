@@ -35,7 +35,7 @@ export function Masters({
       <PageHeader
         titulo="Masters"
         icone="seguranca"
-        descricao="Contas da rede: cadastram unidades e a gestão de cada uma e respondem às premissas. A rede mantém ao menos um master ativo."
+        descricao="Contas da rede: cadastram unidades e a gestão de cada uma. A rede mantém ao menos um master ativo."
       />
       {bloqueio && <Alert tom="info" titulo={bloqueio} />}
       <Card titulo="Convidar master" nivel={2}>
