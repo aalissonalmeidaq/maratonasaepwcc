@@ -13,3 +13,8 @@ cadastra unidades, contas de gestão e outros masters; a gestão da unidade cada
 - `index.ts`: API pública. Outros módulos importam só por `@/modules/rede`.
 
 Permissão e isolamento são verificados no servidor. Master e gestão não leem dados de estudantes.
+
+**Transferência de conta (spec 019):** o master lista a equipe de uma unidade
+(`equipeDaUnidadeDaRede`) e transfere uma conta para outra unidade (`transferirConta`, componente
+`TransferirConta`). A regra e as recusas moram no servidor (`transferir_conta`); a tela só mostra a
+mensagem do servidor.

@@ -137,6 +137,25 @@ A instalação existente é migrada para a unidade inicial "SENAI Juazeiro do No
 nome com a unidade]**. Com duas ou mais unidades, operações de administração do banco que gravam
 dados de unidade precisam informar a unidade.
 
+## Transferir uma conta de equipe para outra unidade (spec 019)
+
+Quando uma pessoa da equipe passa a trabalhar em outra unidade, o **master** transfere a conta (em vez
+de desativá-la e criar outra):
+
+1. **Rede › Unidades**, na unidade de origem, **Ver equipe** e **Transferir…** na conta.
+2. Escolher a **unidade de destino** (ativa) e escrever a **justificativa** (10 a 2.000 caracteres);
+   confirmar. O sucesso só aparece depois da resposta do servidor.
+3. A conta passa a pertencer ao destino **sem funções**; a **gestão do destino** define as funções
+   em **Equipe** (até lá a pessoa vê "aguardando permissão"). A função de gestão continua só do
+   master.
+
+O que acontece: funções e vínculos na origem ficam **inativos e preservados** (inclusive os de
+edições encerradas); a pessoa deixa de acessar o que era da origem; a gestão e as contas da origem
+continuam lendo o histórico; a transferência fica registrada (quem, quando, origem, destino e
+justificativa). Não são transferidos: estudantes, masters, a **última gestão ativa** da unidade e a
+**última coordenação ativa** de uma edição não encerrada (indique outra antes). O e-mail e o login
+não mudam.
+
 ## Preparar homologação
 
 1. Criar um projeto Supabase de homologação (conta institucional) e anotar a URL e a chave

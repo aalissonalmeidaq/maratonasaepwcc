@@ -5,6 +5,7 @@ import type {
   MasterDaRede,
   MembroDaUnidade,
   PedidoDeContaDaRede,
+  PedidoDeTransferencia,
   RepositorioRede,
   ResultadoDaConta,
   Unidade,
@@ -132,6 +133,22 @@ export function criarRepositorioRedeSupabase(sb: SupabaseClient): RepositorioRed
         'Não foi possível reenviar o convite.',
       )) as { conviteEnviado?: boolean };
       return { conviteEnviado: Boolean(dados.conviteEnviado) };
+    },
+    async equipeDaUnidadeDaRede(unidadeId) {
+      return verificar(
+        await sb.rpc('equipe_de_unidade_da_rede', { p_unidade: unidadeId }),
+      ) as MembroDaUnidade[];
+    },
+    async transferirConta(p: PedidoDeTransferencia) {
+      return verificar(
+        await sb.rpc('transferir_conta', {
+          p_chave: p.chave,
+          p_usuario: p.usuarioId,
+          p_unidade_origem: p.unidadeOrigemId,
+          p_unidade_destino: p.unidadeDestinoId,
+          p_justificativa: p.justificativa.trim(),
+        }),
+      ) as string;
     },
   };
 }

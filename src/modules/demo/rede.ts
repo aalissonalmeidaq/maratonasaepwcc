@@ -118,5 +118,8 @@ export function criarRedeDemo(): RepositorioRede {
     edicoes: async () => edicoesFicticias(),
     criarEdicao: recusar,
     definirCoordenacao: recusar,
+    equipeDaUnidadeDaRede: async (unidadeId) =>
+      unidadeId === unidadesDemo[0].id ? equipeFicticia() : [],
+    transferirConta: recusar,
   };
 }
