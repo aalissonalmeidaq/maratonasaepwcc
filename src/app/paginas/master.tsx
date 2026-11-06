@@ -1,9 +1,23 @@
 import { Link } from 'react-router';
 import { useAuth } from '@/modules/auth';
-import { Masters, Unidades, type AcoesDeMasters, type AcoesDeUnidades } from '@/modules/rede';
+import {
+  Masters,
+  TransferirConta,
+  Unidades,
+  type AcoesDeMasters,
+  type AcoesDeUnidades,
+  type Unidade,
+} from '@/modules/rede';
+import { novaChaveDeEnvio } from '@/shared/lib/chave';
 import { Card, PageHeader } from '@/shared/ui';
 import { Consulta } from '../dados/Consulta';
-import { useBloqueioDeEscrita, useGravar, useMasters, useUnidades } from '../dados/consultas';
+import {
+  useBloqueioDeEscrita,
+  useEquipeDaUnidadeDaRede,
+  useGravar,
+  useMasters,
+  useUnidades,
+} from '../dados/consultas';
 import { useRepositorios } from '../dados/useRepositorios';
 
 /** Início do master (spec 016): unidades sem gestão e o resumo da rede. */
@@ -77,6 +91,36 @@ function mensagemDe(e: unknown) {
   return e instanceof Error ? e.message : 'Não foi possível criar a conta.';
 }
 
+/** Equipe de uma unidade e transferência de conta (spec 019): o servidor decide e recusa. */
+function EquipeParaTransferir({ unidade, unidades }: { unidade: Unidade; unidades: Unidade[] }) {
+  const { rede } = useRepositorios();
+  const gravar = useGravar();
+  const bloqueio = useBloqueioDeEscrita();
+  return (
+    <Consulta consulta={useEquipeDaUnidadeDaRede(unidade.id)}>
+      {(membros) => (
+        <TransferirConta
+          unidade={unidade}
+          membros={membros}
+          destinos={unidades}
+          bloqueio={bloqueio}
+          transferir={async (dados) => {
+            await gravar(() =>
+              rede.transferirConta({
+                chave: novaChaveDeEnvio(),
+                usuarioId: dados.usuarioId,
+                unidadeOrigemId: unidade.id,
+                unidadeDestinoId: dados.unidadeDestinoId,
+                justificativa: dados.justificativa,
+              }),
+            )();
+          }}
+        />
+      )}
+    </Consulta>
+  );
+}
+
 export function MasterUnidadesPage() {
   const { rede } = useRepositorios();
   const gravar = useGravar();
@@ -113,7 +157,14 @@ export function MasterUnidadesPage() {
   };
   return (
     <Consulta consulta={useUnidades()}>
-      {(unidades) => <Unidades unidades={unidades} acoes={acoes} bloqueio={bloqueio} />}
+      {(unidades) => (
+        <Unidades
+          unidades={unidades}
+          acoes={acoes}
+          bloqueio={bloqueio}
+          equipeDe={(u) => <EquipeParaTransferir unidade={u} unidades={unidades} />}
+        />
+      )}
     </Consulta>
   );
 }

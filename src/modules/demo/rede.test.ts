@@ -64,4 +64,22 @@ describe('rede da demonstração (spec 016)', () => {
     const edicoes = await r.edicoes();
     expect(edicoes.map((e) => e.estado)).toEqual(['ativa', 'encerrada']);
   });
+
+  it('equipe fictícia só na unidade das contas de exemplo; a transferência é recusada (spec 019)', async () => {
+    const r = criarRedeDemo();
+    const [a, b] = await r.unidades();
+    const equipe = await r.equipeDaUnidadeDaRede(a!.id);
+    expect(equipe.length).toBeGreaterThan(0);
+    expect(equipe.every((m) => m.email.endsWith('.invalid'))).toBe(true);
+    expect(await r.equipeDaUnidadeDaRede(b!.id)).toEqual([]);
+    await expect(
+      r.transferirConta({
+        chave: 'k',
+        usuarioId: 'u-doc-a',
+        unidadeOrigemId: a!.id,
+        unidadeDestinoId: b!.id,
+        justificativa: 'Mudança de unidade da docente.',
+      }),
+    ).rejects.toThrow(/demonstração/);
+  });
 });

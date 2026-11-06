@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { novaChaveDeEnvio } from '@/shared/lib/chave';
 import { formatarDataHora } from '@/shared/lib/formatacao';
 import {
@@ -126,12 +126,15 @@ function CartaoDaUnidade({
   unidade: u,
   acoes,
   bloqueio,
+  equipeDe,
 }: {
   unidade: Unidade;
   acoes: AcoesDeUnidades;
   bloqueio?: string;
+  equipeDe?: (unidade: Unidade) => ReactNode;
 }) {
   const [modo, setModo] = useState<'renomear' | 'gestao' | null>(null);
+  const [verEquipe, setVerEquipe] = useState(false);
   const [novoNome, setNovoNome] = useState(u.nome);
   const [erroNome, setErroNome] = useState<string>();
   const [desativando, setDesativando] = useState(false);
@@ -308,6 +311,17 @@ function CartaoDaUnidade({
         >
           Acrescentar gestão <span className="sr-only">em {u.nome}</span>
         </Button>
+        {equipeDe && u.ativa && (
+          <Button
+            variante="secundario"
+            icone="equipe"
+            aria-expanded={verEquipe}
+            onClick={() => setVerEquipe((v) => !v)}
+          >
+            {verEquipe ? 'Ocultar equipe' : 'Ver equipe'}{' '}
+            <span className="sr-only">de {u.nome}</span>
+          </Button>
+        )}
         {u.ativa ? (
           <Button variante="terciario" disabled={desabilitado} onClick={() => setDesativando(true)}>
             Desativar unidade <span className="sr-only">{u.nome}</span>
@@ -324,6 +338,13 @@ function CartaoDaUnidade({
           </Button>
         )}
       </div>
+
+      {equipeDe && verEquipe && (
+        <section aria-label={`Equipe de ${u.nome}`} className="mt-4 border-t border-border pt-3">
+          <h4 className="mb-2 text-sm font-semibold text-text">Equipe da unidade</h4>
+          {equipeDe(u)}
+        </section>
+      )}
 
       <DialogoDeJustificativa
         aberto={desativando}
@@ -357,10 +378,13 @@ export function Unidades({
   unidades,
   acoes,
   bloqueio,
+  equipeDe,
 }: {
   unidades: Unidade[];
   acoes: AcoesDeUnidades;
   bloqueio?: string;
+  /** Conteúdo da equipe de uma unidade (spec 019); entregue pela página, que busca os dados. */
+  equipeDe?: (unidade: Unidade) => ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -373,7 +397,13 @@ export function Unidades({
       <FormCadastroDeUnidade acoes={acoes} bloqueio={bloqueio} />
       <section aria-label="Lista de unidades" className="flex flex-col gap-4">
         {unidades.map((u) => (
-          <CartaoDaUnidade key={u.id} unidade={u} acoes={acoes} bloqueio={bloqueio} />
+          <CartaoDaUnidade
+            key={u.id}
+            unidade={u}
+            acoes={acoes}
+            bloqueio={bloqueio}
+            equipeDe={equipeDe}
+          />
         ))}
       </section>
     </div>

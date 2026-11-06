@@ -165,4 +165,49 @@ describe('repositório Supabase da rede (spec 016)', () => {
       ],
     ]);
   });
+
+  it('equipe de uma unidade e transferência chamam as RPCs do contrato (spec 019)', async () => {
+    const { sb, rpc } = cliente({ data: [], error: null });
+    const repo = criarRepositorioRedeSupabase(sb);
+    expect(await repo.equipeDaUnidadeDaRede('un1')).toEqual([]);
+    rpc.mockResolvedValueOnce({ data: 'tr1', error: null });
+    expect(
+      await repo.transferirConta({
+        chave: 'k1',
+        usuarioId: 'p1',
+        unidadeOrigemId: 'un1',
+        unidadeDestinoId: 'un2',
+        justificativa: '  Mudança de unidade da docente.  ',
+      }),
+    ).toBe('tr1');
+    expect(rpc.mock.calls).toEqual([
+      ['equipe_de_unidade_da_rede', { p_unidade: 'un1' }],
+      [
+        'transferir_conta',
+        {
+          p_chave: 'k1',
+          p_usuario: 'p1',
+          p_unidade_origem: 'un1',
+          p_unidade_destino: 'un2',
+          p_justificativa: 'Mudança de unidade da docente.',
+        },
+      ],
+    ]);
+  });
+
+  it('recusa da transferência vira ErroDeDados com a mensagem do servidor', async () => {
+    const { sb } = cliente({
+      data: null,
+      error: { code: '23514', message: 'Indique outra gestão antes.', details: '', hint: '' },
+    });
+    await expect(
+      criarRepositorioRedeSupabase(sb).transferirConta({
+        chave: 'k',
+        usuarioId: 'p',
+        unidadeOrigemId: 'a',
+        unidadeDestinoId: 'b',
+        justificativa: 'Mudança de unidade.',
+      }),
+    ).rejects.toThrow('Indique outra gestão antes.');
+  });
 });

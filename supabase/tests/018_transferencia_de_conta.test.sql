@@ -196,5 +196,80 @@ select is((select unidade_id from public.perfis where id = pg_temp.u('e1')), pg_
 select is((select count(*)::int from public.atribuicoes where usuario_id = pg_temp.u('e1') and ativo), 0, 'o vínculo da edição encerrada virou histórico');
 
 
+-- ===========================================================================
+-- US2 — recusas que deixariam a origem sem responsável (T013)
+-- ===========================================================================
+create function pg_temp.pedido(p_usuario uuid, p_origem uuid, p_destino uuid, p_justificativa text) returns text language sql as $$
+  select format('select public.transferir_conta(gen_random_uuid(), %L, %L, %L, %L)', p_usuario, p_origem, p_destino, p_justificativa);
+$$;
+create function pg_temp.estado() returns text language sql stable security definer as $$
+  select md5(
+    coalesce((select string_agg(id::text || ':' || coalesce(unidade_id::text, '-') || ':' || ativo, ',' order by id) from public.perfis), '')
+    || '|' || coalesce((select string_agg(usuario_id::text || funcao::text || ativa || desativada_com_conta, ',' order by usuario_id, funcao) from public.funcoes_unidade), '')
+    || '|' || coalesce((select string_agg(id::text || ativo, ',' order by id) from public.atribuicoes), '')
+    || '|' || (select count(*) from public.transferencias_de_conta));
+$$;
+
+insert into public.unidades (id, nome) values ('10000000-0000-0000-0019-0000000000d0', 'Unidade D');
+insert into auth.users (id, email, raw_user_meta_data, aud, role)
+values (pg_temp.u('dd'), 'pdd@exemplo.invalid', jsonb_build_object('nome', 'Pessoa dd', 'unidade_id', '10000000-0000-0000-0019-0000000000d0'), 'authenticated', 'authenticated'),
+       (pg_temp.u('ee'), 'pee@exemplo.invalid', jsonb_build_object('nome', 'Pessoa ee', 'unidade_id', (select id from public.unidades where nome = 'SENAI Juazeiro do Norte')), 'authenticated', 'authenticated');
+insert into public.funcoes_unidade (usuario_id, funcao) values (pg_temp.u('dd'), 'docente');
+select pg_temp.guardar('estado_recusas', pg_temp.estado());
+
+-- Quem não é master: gestão, coordenação, docente e analista.
+select is(pg_temp.mensagem(pg_temp.u(quem), pg_temp.pedido(pg_temp.u('d2'), pg_temp.ui(), pg_temp.ub(), 'Tentativa sem permissão.')),
+  '42501: Somente o master faz isso.', quem || ': não-master é recusado')
+from unnest(array['f1', 'c1', 'd2', 'a1']) quem;
+
+-- Master e estudante nunca são transferidos.
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('fa'), pg_temp.ui(), pg_temp.ub(), 'Master não é transferido.')),
+  '23514: Contas de master não são transferidas.', 'conta de master é recusada');
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('21'), pg_temp.ui(), pg_temp.ub(), 'Estudante não é transferido.')),
+  '23514: Contas de estudante não são transferidas.', 'conta de estudante é recusada');
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('ee'), pg_temp.ui(), pg_temp.ub(), 'Sem função de equipe.')),
+  '23514: Esta não é uma conta de equipe.', 'conta sem função de equipe é recusada');
+
+-- Origem e destino.
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_temp.uc(), pg_temp.ub(), 'Origem informada errada.')),
+  '23514: Esta conta não é da unidade de origem.', 'origem informada diferente da unidade da conta');
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_temp.ui(), pg_temp.ui(), 'Destino igual à origem.')),
+  '23514: A unidade de destino deve ser outra.', 'destino igual à origem');
+update public.unidades set ativa = false, desativada_em = now(), justificativa_desativacao = 'Teste da transferência.'
+where id = '10000000-0000-0000-0019-0000000000d0';
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_temp.ui(), '10000000-0000-0000-0019-0000000000d0', 'Destino desativado.')),
+  '23514: Unidade desativada.', 'destino desativado');
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('dd'), '10000000-0000-0000-0019-0000000000d0', pg_temp.ui(), 'Origem desativada.')),
+  '23514: Unidade desativada.', 'origem desativada');
+
+-- Conta desativada.
+update public.perfis set ativo = false where id = pg_temp.u('d2');
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_temp.ui(), pg_temp.ub(), 'Conta desativada.')),
+  '23514: Reative a conta antes de transferi-la.', 'conta desativada');
+update public.perfis set ativo = true where id = pg_temp.u('d2');
+
+-- Última gestão ativa da origem.
+update public.funcoes_unidade set ativa = false where usuario_id = pg_temp.u('f2') and funcao = 'gestao';
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('f1'), pg_temp.ui(), pg_temp.ub(), 'Última gestão da unidade.')),
+  '23514: Indique outra gestão antes.', 'última gestão ativa da unidade');
+update public.funcoes_unidade set ativa = true where usuario_id = pg_temp.u('f2') and funcao = 'gestao';
+
+-- Última coordenação ativa de edição não encerrada.
+update public.atribuicoes set ativo = false where usuario_id = pg_temp.u('c2') and papel = 'coordenacao';
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('c1'), pg_temp.ui(), pg_temp.ub(), 'Última coordenação da edição.')),
+  '23514: Indique outra coordenação antes.', 'última coordenação ativa de edição não encerrada');
+update public.atribuicoes set ativo = true where usuario_id = pg_temp.u('c2') and papel = 'coordenacao';
+
+-- Justificativa.
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_temp.ui(), pg_temp.ub(), j)),
+  '23514: Justifique com 10 a 2.000 caracteres.', 'justificativa inválida: ' || left(j, 12))
+from (values ('curta'), ('         '), (repeat('a', 2001))) v (j);
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_temp.ui(), pg_temp.ub(), null)),
+  '23514: Justifique com 10 a 2.000 caracteres.', 'justificativa nula');
+
+-- Nada mudou em nenhuma das recusas.
+select is(pg_temp.estado(), pg_temp.lido('estado_recusas'), 'nenhuma recusa alterou perfis, funções, vínculos nem transferências');
+
+
 select * from finish();
 rollback;

@@ -96,6 +96,16 @@ export interface ResultadoDaConta {
   conviteEnviado: boolean;
 }
 
+/** Pedido de transferência de conta entre unidades (spec 019). */
+export interface PedidoDeTransferencia {
+  /** Chave de idempotência: o mesmo pedido repetido não duplica nada. */
+  chave: string;
+  usuarioId: string;
+  unidadeOrigemId: string;
+  unidadeDestinoId: string;
+  justificativa: string;
+}
+
 export interface RepositorioRede {
   unidades(): Promise<Unidade[]>;
   masters(): Promise<MasterDaRede[]>;
@@ -126,4 +136,7 @@ export interface RepositorioRede {
     ativa: boolean,
     justificativa: string | null,
   ): Promise<void>;
+  // Transferência de conta (spec 019, só o master)
+  equipeDaUnidadeDaRede(unidadeId: string): Promise<MembroDaUnidade[]>;
+  transferirConta(pedido: PedidoDeTransferencia): Promise<string>;
 }

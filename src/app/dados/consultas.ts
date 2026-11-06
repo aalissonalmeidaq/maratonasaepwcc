@@ -372,6 +372,12 @@ export function useEdicoesDaUnidade() {
   const r = useRepositorios();
   return useResultado('edicoes-da-unidade', [], true, () => r.rede.edicoes());
 }
+export function useEquipeDaUnidadeDaRede(unidadeId: string) {
+  const r = useRepositorios();
+  return useResultado('equipe-da-rede', [unidadeId], Boolean(unidadeId), () =>
+    r.rede.equipeDaUnidadeDaRede(unidadeId),
+  );
+}
 export function useMasters() {
   const r = useRepositorios();
   return useResultado('masters', [], true, () => r.rede.masters());

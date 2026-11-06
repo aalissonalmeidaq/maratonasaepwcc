@@ -6,6 +6,7 @@ import {
   validarContaDaRede,
   validarJustificativa,
   validarNomeDaUnidade,
+  validarTransferencia,
 } from './validacao';
 
 describe('validação da rede (spec 016)', () => {
@@ -89,5 +90,27 @@ describe('validação da rede (spec 016)', () => {
     expect(validarEdicaoDaUnidade({ ...ok, coordenacaoId: '' })).toEqual({
       coordenacaoId: 'Escolha quem coordena a edição.',
     });
+  });
+
+  it('transferência de conta (spec 019): destino diferente da origem e justificativa de 10 a 2.000 caracteres', () => {
+    const ok = {
+      origemId: 'a',
+      destinoId: 'b',
+      justificativa: '  Mudança de unidade da docente.  ',
+    };
+    expect(validarTransferencia(ok)).toEqual({});
+    expect(validarTransferencia({ ...ok, destinoId: '' })).toEqual({
+      destinoId: 'Escolha a unidade de destino.',
+    });
+    expect(validarTransferencia({ ...ok, destinoId: 'a' })).toEqual({
+      destinoId: 'A unidade de destino deve ser outra.',
+    });
+    expect(validarTransferencia({ ...ok, justificativa: '   curta   ' })).toEqual({
+      justificativa: 'Justifique com 10 a 2.000 caracteres.',
+    });
+    expect(validarTransferencia({ ...ok, justificativa: 'a'.repeat(2001) })).toEqual({
+      justificativa: 'Justifique com 10 a 2.000 caracteres.',
+    });
+    expect(validarTransferencia({ ...ok, justificativa: 'a'.repeat(2000) })).toEqual({});
   });
 });

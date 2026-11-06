@@ -80,3 +80,21 @@ export function validarEdicaoDaUnidade(
   if (!e.coordenacaoId) erros.coordenacaoId = 'Escolha quem coordena a edição.';
   return erros;
 }
+
+export interface DadosDeTransferencia {
+  origemId: string;
+  destinoId: string;
+  justificativa: string;
+}
+
+/** Mesmas regras do servidor (`transferir_conta`): destino diferente da origem e justificativa de 10 a 2.000 caracteres. */
+export function validarTransferencia(
+  d: DadosDeTransferencia,
+): Partial<Record<'destinoId' | 'justificativa', string>> {
+  const erros: Partial<Record<'destinoId' | 'justificativa', string>> = {};
+  if (!d.destinoId) erros.destinoId = 'Escolha a unidade de destino.';
+  else if (d.destinoId === d.origemId) erros.destinoId = 'A unidade de destino deve ser outra.';
+  const tamanho = d.justificativa.trim().length;
+  if (tamanho < 10 || tamanho > 2000) erros.justificativa = 'Justifique com 10 a 2.000 caracteres.';
+  return erros;
+}
