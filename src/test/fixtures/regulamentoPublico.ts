@@ -5,6 +5,7 @@ export const regulamentoPublicoFixture = {
     {
       id: '10000000-0000-0000-0014-000000000001',
       nome: 'Edição fictícia',
+      unidade: 'Unidade fictícia',
       inicio: '2026-03-01',
       fim: null,
       regrasVersao: 'teste',

@@ -11,7 +11,9 @@ insert into auth.users (
 select
   '00000000-0000-0000-0000-000000000000', u.id, 'authenticated', 'authenticated', u.email,
   extensions.crypt('senha-local-123', extensions.gen_salt('bf')), now(),
-  '{"provider":"email","providers":["email"]}', jsonb_build_object('nome', u.nome), now(), now(),
+  '{"provider":"email","providers":["email"]}',
+  jsonb_build_object('nome', u.nome) || case when u.email = 'master@exemplo.invalid' then '{"master": true}'::jsonb else '{}'::jsonb end,
+  now(), now(),
   '', '', '', ''
 from (values
   ('a0000000-0000-0000-0000-000000000001'::uuid, 'coordenacao@exemplo.invalid', 'Coordenação (fictícia)'),
@@ -32,7 +34,11 @@ from (values
   ('a0000000-0000-0000-0000-000000000015'::uuid, 'mateus@exemplo.invalid', 'Mateus Exemplo'),
   ('a0000000-0000-0000-0000-000000000016'::uuid, 'nina@exemplo.invalid', 'Nina Exemplo'),
   -- Mentor vinculado ao curso A (spec 010): atua em todas as turmas do curso.
-  ('a0000000-0000-0000-0000-000000000017'::uuid, 'mentor@exemplo.invalid', 'Marcos Exemplo (mentor)')
+  ('a0000000-0000-0000-0000-000000000017'::uuid, 'mentor@exemplo.invalid', 'Marcos Exemplo (mentor)'),
+  -- Spec 016: rede de unidades. Master (sem unidade de trabalho), gestão e analista da unidade inicial.
+  ('a0000000-0000-0000-0000-000000000018'::uuid, 'master@exemplo.invalid', 'Master (fictício)'),
+  ('a0000000-0000-0000-0000-000000000019'::uuid, 'gestao@exemplo.invalid', 'Gestão da unidade (fictícia)'),
+  ('a0000000-0000-0000-0000-000000000020'::uuid, 'analista@exemplo.invalid', 'Analista (fictício)')
 ) as u (id, email, nome);
 
 insert into auth.identities (id, user_id, provider_id, identity_data, provider, created_at, updated_at, last_sign_in_at)
@@ -155,3 +161,10 @@ select 'f4000000-0000-0000-0000-000000000001', e.edicao_id, e.id, 'f0000000-0000
          {"estudanteId": "a0000000-0000-0000-0000-000000000009", "nome": "João Exemplo"}]',
        now() + interval '24 hours', 'f5000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000010'
 from public.encontros e where e.edicao_id = 'b0000000-0000-0000-0000-000000000001' and e.numero = 1;
+
+-- Spec 016: uma única unidade no seed (a inicial). O master vem do comando de administração do
+-- banco; gestão e analista pertencem à unidade inicial. Uma segunda unidade nasce pela tela do master.
+select app.promover_master('master@exemplo.invalid');
+insert into public.funcoes_unidade (usuario_id, funcao) values
+  ('a0000000-0000-0000-0000-000000000019', 'gestao'),
+  ('a0000000-0000-0000-0000-000000000020', 'analista');

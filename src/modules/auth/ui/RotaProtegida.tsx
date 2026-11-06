@@ -1,5 +1,5 @@
 import { Link, Navigate, Outlet, useLocation } from 'react-router';
-import { areaInicial, podeAcessarArea, type Area } from '@/modules/acesso';
+import { areaInicialDoAcesso, podeAcessar, type Area } from '@/modules/acesso';
 import { Spinner } from '@/shared/ui';
 import { useAuth } from './AuthContext';
 import { CAMINHO_DO_DESTINO } from './caminhos';
@@ -22,7 +22,7 @@ export function RotaProtegida({ area }: { area: Area }) {
 
   if (carregando) return <Carregando />;
   if (!sessao) return <Navigate to="/entrar" replace state={{ de: local.pathname }} />;
-  if (!podeAcessarArea(sessao.papeis, area)) {
+  if (!podeAcessar(sessao, area)) {
     return (
       <main className="mx-auto max-w-md p-6 text-center">
         <h1 className="font-display text-2xl font-bold text-text">Acesso não autorizado</h1>
@@ -30,7 +30,7 @@ export function RotaProtegida({ area }: { area: Area }) {
           Esta área não faz parte das permissões do seu perfil.
         </p>
         <Link
-          to={CAMINHO_DO_DESTINO[areaInicial(sessao.papeis)]}
+          to={CAMINHO_DO_DESTINO[areaInicialDoAcesso(sessao)]}
           className="mt-4 inline-block font-semibold text-link underline"
         >
           Ir para o meu painel
@@ -45,5 +45,5 @@ export function RedirecionarParaPainel() {
   const { sessao, carregando } = useAuth();
   if (carregando) return <Carregando />;
   if (!sessao) return <Navigate to="/entrar" replace />;
-  return <Navigate to={CAMINHO_DO_DESTINO[areaInicial(sessao.papeis)]} replace />;
+  return <Navigate to={CAMINHO_DO_DESTINO[areaInicialDoAcesso(sessao)]} replace />;
 }

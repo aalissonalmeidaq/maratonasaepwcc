@@ -11,6 +11,7 @@ import type {
 } from '@/modules/relatorios';
 import type { RepositorioResultado } from '@/modules/resultado';
 import { cursos, desafios, duplas, encontros, lancamentos, pessoas, turmas } from './dados';
+import { criarResultadoDemo } from './resultado';
 
 const hojeISO = () => new Date().toISOString().slice(0, 10);
 const realizado = (e: (typeof encontros)[number]) => e.data < hojeISO();
@@ -39,6 +40,8 @@ export function criarPaineisDemo(
   const eu = () => pessoas.find((p) => p.id === usuarioAtual());
   const tem = (papel: 'aluno' | 'coordenacao' | 'docente' | 'mentor') =>
     eu()?.papeis.includes(papel) ?? false;
+  // Analista fictício (spec 016): lê o painel da coordenação, só leitura, com os mesmos números.
+  const ehAnalista = () => usuarioAtual() === 'u-analista';
 
   return {
     async painelDoAluno(edicaoId) {
@@ -170,9 +173,11 @@ export function criarPaineisDemo(
     },
 
     async painelDaCoordenacao(edicaoId) {
-      if (!tem('coordenacao')) throw semPermissao();
+      if (!tem('coordenacao') && !ehAnalista()) throw semPermissao();
       const numerosRealizados = new Set(encontros.filter(realizado).map((e) => e.numero));
-      const lista = await resultado.rankingDaEdicao(edicaoId);
+      const lista = await (
+        ehAnalista() ? criarResultadoDemo(() => 'u-coord') : resultado
+      ).rankingDaEdicao(edicaoId);
       const provasRealizadas = encontros.filter(
         (e) => realizado(e) && e.avaliacaoObjetiva === 'prova_oficial',
       ).length;

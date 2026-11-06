@@ -35,6 +35,8 @@ export const regulamentoPublicoSchema = z.object({
     z.object({
       id: z.string().min(1),
       nome: z.string().min(1),
+      // Ausente nas cópias salvas antes da spec 016: a página continua legível offline.
+      unidade: z.string().min(1).optional(),
       inicio: data.nullable(),
       fim: data.nullable(),
       regras: regrasPublicasSchema,

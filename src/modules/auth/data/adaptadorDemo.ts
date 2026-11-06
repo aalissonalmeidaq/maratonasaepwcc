@@ -4,6 +4,9 @@ export interface ContaDemo {
   usuarioId: string;
   nome: string;
   papeis: Sessao['papeis'];
+  master?: Sessao['master'];
+  funcoes?: Sessao['funcoes'];
+  unidade?: Sessao['unidade'];
 }
 
 const CHAVE = 'maratona-demo-conta';
@@ -22,7 +25,12 @@ function lerContaSalva(): string | null {
  */
 export function criarAdaptadorDemo(contas: ContaDemo[]) {
   const ouvintes = new Set<(s: Sessao | null) => void>();
-  const paraSessao = (c: ContaDemo): Sessao => ({ ...c, papeis: [...c.papeis], demo: true });
+  const paraSessao = (c: ContaDemo): Sessao => ({
+    ...c,
+    papeis: [...c.papeis],
+    ...(c.funcoes && { funcoes: [...c.funcoes] }),
+    demo: true,
+  });
   const avisar = (s: Sessao | null) => ouvintes.forEach((o) => o(s));
 
   const adaptador: AdaptadorAuth & { entrarComo(usuarioId: string): Promise<Sessao> } = {

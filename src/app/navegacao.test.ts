@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MENUS, itensDoMenu } from './navegacao';
+import { MENUS, ROTULO_AREA, itensDoMenu } from './navegacao';
 
 /** Caminhos do menu antes do agrupamento (spec 011, SC-007): nenhum some, nenhum entra. */
 const CAMINHOS = {
@@ -96,5 +96,43 @@ describe('menu em categorias (spec 011, US6, FR-017, SC-007)', () => {
     const comunicacao = MENUS.docente.grupos.find((g) => g.titulo === 'Comunicação');
     expect(comunicacao?.itens.map((i) => i.rotulo)).toContain('Premissas em validação');
     expect(itensDoMenu('aluno').some((i) => i.caminho.includes('premissas'))).toBe(false);
+  });
+});
+
+describe('menus das áreas de rede e de unidade (spec 016)', () => {
+  it('master: Início, Rede (Unidades, Masters) e Sistema (Premissas)', () => {
+    expect(MENUS.master.inicio.caminho).toBe('/master');
+    expect(
+      Object.fromEntries(MENUS.master.grupos.map((g) => [g.titulo, g.itens.map((i) => i.caminho)])),
+    ).toEqual({
+      Rede: ['/master/unidades', '/master/masters'],
+      Sistema: ['/master/premissas'],
+    });
+  });
+
+  it('gestão: Unidade (Equipe, Edições) e Sistema (Premissas, só leitura)', () => {
+    expect(MENUS.gestao.inicio.caminho).toBe('/gestao');
+    expect(
+      Object.fromEntries(MENUS.gestao.grupos.map((g) => [g.titulo, g.itens.map((i) => i.caminho)])),
+    ).toEqual({
+      Unidade: ['/gestao/equipe', '/gestao/edicoes'],
+      Sistema: ['/gestao/premissas'],
+    });
+  });
+
+  it('analista: só leitura de painel e relatórios', () => {
+    expect(MENUS.analista.inicio.caminho).toBe('/analista');
+    expect(itensDoMenu('analista').map((i) => i.caminho)).toEqual([
+      '/analista',
+      '/analista/relatorios',
+    ]);
+  });
+
+  it('rótulos das áreas novas e nenhum caminho fora da própria área', () => {
+    expect(ROTULO_AREA.master).toBe('Rede');
+    expect(ROTULO_AREA.gestao).toBe('Gestão da unidade');
+    expect(ROTULO_AREA.analista).toBe('Análise');
+    for (const area of ['master', 'gestao', 'analista'] as const)
+      expect(itensDoMenu(area).every((i) => i.caminho.startsWith(`/${area}`))).toBe(true);
   });
 });

@@ -27,13 +27,13 @@ async function responder(page: Page, codigo: string, decisao: string, justificat
   return c;
 }
 
-test('coordenação responde; docente lê; resposta concorrente recebe o aviso', async ({
+test('master responde; coordenação e docente leem; resposta concorrente recebe o aviso', async ({
   browser,
 }) => {
-  const a = await entrar(browser, 'coordenacao@exemplo.invalid');
-  const b = await entrar(browser, 'coordenacao@exemplo.invalid');
+  const a = await entrar(browser, 'master@exemplo.invalid');
+  const b = await entrar(browser, 'master@exemplo.invalid');
   for (const p of [a, b]) {
-    await p.goto('/coordenacao/premissas');
+    await p.goto('/master/premissas');
     await expect(
       p.getByRole('heading', { level: 1, name: 'Premissas em validação' }),
     ).toBeVisible();
@@ -42,7 +42,7 @@ test('coordenação responde; docente lê; resposta concorrente recebe o aviso',
   // "Confirmada" pela aba A; a aba B ainda mostra a situação anterior.
   const p22 = await responder(a, 'P22', 'Confirmada', 'Convites sem prazo atendem à turma.');
   await expect(p22.getByText('Resposta registrada.')).toBeVisible();
-  await expect(p22.getByText(/Confirmada por Coordenação \(fictícia\)/)).toBeVisible();
+  await expect(p22.getByText(/Confirmada por Master \(fictício\)/)).toBeVisible();
 
   const desatualizada = await responder(
     b,
@@ -51,12 +51,18 @@ test('coordenação responde; docente lê; resposta concorrente recebe o aviso',
     'Convites devem expirar em 7 dias.',
   );
   await expect(desatualizada.getByRole('alert')).toContainText('respondida por outra pessoa');
-  await expect(desatualizada.getByText(/Confirmada por Coordenação \(fictícia\)/)).toBeVisible();
+  await expect(desatualizada.getByText(/Confirmada por Master \(fictício\)/)).toBeVisible();
 
   // "Precisa mudar" com histórico.
   const p23 = await responder(a, 'P23', 'Precisa mudar', 'Nomes de equipe precisam de revisão.');
   await expect(p23.getByText('Resposta registrada.')).toBeVisible();
   await expect(p23.getByText(/O sistema segue a premissa em uso/).first()).toBeVisible();
+
+  // Coordenação lê a resposta sem formulário (spec 016, FR-013).
+  const c = await entrar(browser, 'coordenacao@exemplo.invalid');
+  await c.goto('/coordenacao/premissas');
+  await expect(cartao(c, 'P23').getByText('Nomes de equipe precisam de revisão.')).toBeVisible();
+  await expect(c.getByRole('button', { name: /^Responder/ })).toHaveCount(0);
 
   // Docente lê a resposta sem formulário.
   const d = await entrar(browser, 'docente@exemplo.invalid');

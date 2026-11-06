@@ -1,4 +1,3 @@
-import type { Edicao } from '@/modules/organizacao';
 import { FormRelatorio } from '@/modules/relatorios';
 import { useOnline } from '@/shared/pwa';
 import { Card, PageHeader } from '@/shared/ui';
@@ -15,12 +14,19 @@ function useBloqueioDeExportacao(): string | undefined {
   return undefined;
 }
 
-function Exportacao({ edicao, perfil }: { edicao: Edicao; perfil: 'coordenacao' | 'docente' }) {
+/** Exportação da edição (`analista`, spec 016: a edição inteira, sem os pedidos de revisão). */
+export function Exportacao({
+  edicaoId,
+  perfil,
+}: {
+  edicaoId: string;
+  perfil: 'coordenacao' | 'docente' | 'analista';
+}) {
   const r = useRepositorios();
   const bloqueio = useBloqueioDeExportacao();
-  const cursos = useCursos(edicao.id);
-  const turmas = useTurmas(edicao.id);
-  const encontros = useEncontros(edicao.id);
+  const cursos = useCursos(edicaoId);
+  const turmas = useTurmas(edicaoId);
+  const encontros = useEncontros(edicaoId);
   return (
     <Card icone="exportar" titulo="Exportar relatório">
       <FormRelatorio
@@ -32,9 +38,7 @@ function Exportacao({ edicao, perfil }: { edicao: Edicao; perfil: 'coordenacao' 
           rotulo: `${e.numero}. ${e.titulo}`,
         }))}
         bloqueio={bloqueio}
-        onExportar={(tipo, filtros) =>
-          r.paineis.relatorio(tipo, { edicaoId: edicao.id, ...filtros })
-        }
+        onExportar={(tipo, filtros) => r.paineis.relatorio(tipo, { edicaoId, ...filtros })}
       />
     </Card>
   );
@@ -48,7 +52,7 @@ export function CoordenacaoRelatoriosPage() {
         titulo="Relatórios"
         descricao="Exporte em CSV os dados de toda a edição: pontos, presença, entregas, ocorrências e pedidos de revisão."
       />
-      <ComEdicao>{(edicao) => <Exportacao edicao={edicao} perfil="coordenacao" />}</ComEdicao>
+      <ComEdicao>{(edicao) => <Exportacao edicaoId={edicao.id} perfil="coordenacao" />}</ComEdicao>
     </>
   );
 }
@@ -61,7 +65,7 @@ export function DocenteRelatoriosPage() {
         titulo="Relatórios"
         descricao="Exporte em CSV os dados das turmas em que você atua: pontos, presença, entregas e ocorrências."
       />
-      <ComEdicao>{(edicao) => <Exportacao edicao={edicao} perfil="docente" />}</ComEdicao>
+      <ComEdicao>{(edicao) => <Exportacao edicaoId={edicao.id} perfil="docente" />}</ComEdicao>
     </>
   );
 }

@@ -15,7 +15,11 @@ select no_plan();
 insert into auth.users (id, email, raw_user_meta_data, aud, role)
 select ('00000000-0000-0000-0011-0000000000' || s)::uuid, 'e' || s || '@exemplo.invalid',
        jsonb_build_object('nome', 'Pessoa ' || s), 'authenticated', 'authenticated'
-from (values ('c1'), ('c2'), ('c9'), ('d1'), ('a1'), ('b1'), ('b2')) as v (s);
+from (values ('c1'), ('c2'), ('c9'), ('d1'), ('a1'), ('b1'), ('b2'), ('e9')) as v (s);
+-- Spec 016: funções na unidade, como a gestão concederia (coordenação vincula só quem tem a função).
+insert into public.funcoes_unidade (usuario_id, funcao)
+select ('00000000-0000-0000-0011-0000000000' || s)::uuid, 'coordenacao' from (values ('b1'), ('b2')) as v (s);
+insert into public.funcoes_unidade (usuario_id, funcao) values ('00000000-0000-0000-0011-0000000000b2', 'docente');
 
 insert into public.edicoes (id, nome, estado, inicio, fim, regras, regras_versao) values
   ('10000000-0000-0000-0011-0000000000e0', 'Edição E', 'ativa', '2026-03-01', '2026-11-30',
@@ -354,8 +358,8 @@ select ok((select bool_and(x ? 'usuarioId' and x ? 'nome' and not (x ? 'email'))
   'FR-007: a busca devolve id e nome, nunca e-mail');
 select ok(public.pessoas_para_vincular(pg_temp.ed('e'), 'Pessoa') @> jsonb_build_array(jsonb_build_object('usuarioId', pg_temp.u('a1'))),
   'FR-007: encontra quem participa de edição que a pessoa coordena');
-select ok(not (public.pessoas_para_vincular(pg_temp.ed('e'), 'Pessoa') @> jsonb_build_array(jsonb_build_object('usuarioId', pg_temp.u('b1')))),
-  'FR-007: não encontra contas fora das edições que a pessoa coordena');
+select ok(not (public.pessoas_para_vincular(pg_temp.ed('e'), 'Pessoa') @> jsonb_build_array(jsonb_build_object('usuarioId', pg_temp.u('e9')))),
+  'FR-007: não encontra contas sem função na unidade e sem vínculo com as edições que a pessoa coordena');
 select is(jsonb_array_length(public.pessoas_para_vincular(pg_temp.ed('e'), 'ninguém com esse nome')), 0,
   'FR-007: busca sem resultado devolve lista vazia');
 
@@ -387,6 +391,8 @@ select is((select ativo from public.atribuicoes where usuario_id = pg_temp.u('b1
 -- ===========================================================================
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0011-0000000000f1', 'ef1@exemplo.invalid', '{"nome": "Mentora f1"}', 'authenticated', 'authenticated');
+insert into public.funcoes_unidade (usuario_id, funcao)
+select '00000000-0000-0000-0011-0000000000f1', f::public.funcao_unidade from (values ('mentor'), ('docente')) as v (f);
 create function pg_temp.mentor_atua(p_turma uuid) returns boolean language sql stable security definer as $$
   select exists (select 1 from public.atribuicoes where usuario_id = '00000000-0000-0000-0011-0000000000f1'
                  and turma_id = p_turma and papel = 'mentor' and ativo);
@@ -603,6 +609,8 @@ select throws_ok(format($f$ delete from public.atribuicoes where usuario_id = %L
 -- ===========================================================================
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('00000000-0000-0000-0011-0000000000f2', 'ef2@exemplo.invalid', '{"nome": "Mentor f2"}', 'authenticated', 'authenticated');
+insert into public.funcoes_unidade (usuario_id, funcao)
+select '00000000-0000-0000-0011-0000000000f2', f::public.funcao_unidade from (values ('mentor')) as v (f);
 insert into public.edicoes (id, nome, estado, regras, regras_versao) values
   ('10000000-0000-0000-0011-0000000000b0', 'Edição H', 'rascunho', '{"versao":"teste","quantidadeEncontros":4}', 'teste');
 insert into public.atribuicoes (usuario_id, edicao_id, papel) values

@@ -69,6 +69,21 @@ foi deixado com o seed limpo. Os servidores temporários desta execução foram 
 | Homologação | projeto Supabase **separado** | fictícios ou anonimizados, salvo autorização | **proibido** |
 | Produção    | projeto Supabase próprio      | reais                                        | **proibido** |
 
+## Primeiro master e unidades (spec 016)
+
+O master é quem cadastra unidades e contas de gestão. O **primeiro** só pode ser criado pela
+administração do banco, em máquina autorizada (nunca pelo frontend):
+
+1. Criar a conta do master no Auth com o metadado `{"master": true}` (a conta nasce **sem
+   unidade**; uma conta de unidade não vira master) e enviar o convite de primeiro acesso.
+2. No SQL do projeto: `select app.promover_master('<e-mail do master>');`.
+3. O master entra, cadastra a unidade em **Rede › Unidades** e a conta de gestão (convite por
+   e-mail); a gestão monta a equipe. Nenhum segredo vai ao frontend.
+
+A instalação existente é migrada para a unidade inicial "SENAI Juazeiro do Norte" **[validar o
+nome com a unidade]**. Com duas ou mais unidades, operações de administração do banco que gravam
+dados de unidade precisam informar a unidade.
+
 ## Preparar homologação
 
 1. Criar um projeto Supabase de homologação (conta institucional) e anotar a URL e a chave

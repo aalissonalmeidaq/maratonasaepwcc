@@ -10,6 +10,14 @@ describe('regulamento público (US1)', () => {
     expect(screen.getByText(/horário a confirmar/i)).toBeInTheDocument();
     expect(screen.getByText('Cancelado')).toBeInTheDocument();
   });
+  it('mostra a unidade da edição (spec 016) e segue legível sem ela (cópia antiga)', () => {
+    const { rerender } = render(<RegulamentoPublico conteudo={regulamentoPublicoFixture} />);
+    expect(screen.getByText(/Unidade: Unidade fictícia/)).toBeInTheDocument();
+    const [primeira] = regulamentoPublicoFixture.edicoes;
+    const antiga = { ...primeira!, unidade: undefined };
+    rerender(<RegulamentoPublico conteudo={{ ...regulamentoPublicoFixture, edicoes: [antiga] }} />);
+    expect(screen.queryByText(/Unidade:/)).not.toBeInTheDocument();
+  });
   it('informa quando não há publicação', () => {
     render(<RegulamentoPublico conteudo={{ ...regulamentoPublicoFixture, edicoes: [] }} />);
     expect(screen.getByText('Nenhum regulamento publicado no momento.')).toBeInTheDocument();

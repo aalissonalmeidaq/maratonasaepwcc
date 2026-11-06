@@ -24,3 +24,58 @@ describe('Falhas ao entrar', () => {
     ).rejects.toThrow('Verifique sua conexão');
   });
 });
+
+describe('sessão montada por minha_conta() (spec 016)', () => {
+  function clienteComConta(conta: unknown, erro: unknown = null) {
+    const rpc = vi.fn().mockResolvedValue({ data: conta, error: erro });
+    const cliente = {
+      auth: {
+        getSession: vi.fn().mockResolvedValue({ data: { session: { user: { id: 'u1' } } } }),
+      },
+      rpc,
+    } as unknown as SupabaseClient;
+    return { cliente, rpc };
+  }
+
+  it('traz nome, papéis, funções, unidade e master do servidor', async () => {
+    const { cliente, rpc } = clienteComConta({
+      nome: 'Ana Gestão',
+      master: false,
+      unidade: { id: 'un1', nome: 'Unidade B', ativa: true },
+      funcoes: ['coordenacao', 'gestao'],
+      papeis: ['coordenacao'],
+    });
+    expect(await criarAdaptadorSupabase(cliente).sessaoAtual()).toEqual({
+      usuarioId: 'u1',
+      nome: 'Ana Gestão',
+      papeis: ['coordenacao'],
+      master: false,
+      funcoes: ['coordenacao', 'gestao'],
+      unidade: { id: 'un1', nome: 'Unidade B', ativa: true },
+      demo: false,
+    });
+    expect(rpc).toHaveBeenCalledWith('minha_conta');
+  });
+
+  it('master não tem unidade', async () => {
+    const { cliente } = clienteComConta({
+      nome: 'Master',
+      master: true,
+      unidade: null,
+      funcoes: [],
+      papeis: [],
+    });
+    expect(await criarAdaptadorSupabase(cliente).sessaoAtual()).toMatchObject({
+      master: true,
+      unidade: null,
+      funcoes: [],
+    });
+  });
+
+  it('falha ao carregar a conta vira erro de autenticação com mensagem pronta', async () => {
+    const { cliente } = clienteComConta(null, { code: '500', message: 'x' });
+    await expect(criarAdaptadorSupabase(cliente).sessaoAtual()).rejects.toThrow(
+      'Não foi possível carregar o seu perfil',
+    );
+  });
+});

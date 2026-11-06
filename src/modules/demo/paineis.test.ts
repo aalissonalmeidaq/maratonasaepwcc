@@ -21,6 +21,14 @@ describe('painéis da demonstração (spec 008, R7)', () => {
     await expect(como('e01').painelDaGestao('ed-demo')).rejects.toThrow(/permissão/);
   });
 
+  it('analista (spec 016): lê o mesmo painel da coordenação; docente e aluno continuam recusados', async () => {
+    const analista = await como('u-analista').painelDaCoordenacao('ed-demo');
+    const coordenacao = await como('u-coord').painelDaCoordenacao('ed-demo');
+    expect(analista).toEqual(coordenacao);
+    await expect(como('u-doc-a').painelDaCoordenacao('ed-demo')).rejects.toThrow(/permissão/);
+    await expect(como('e01').painelDaCoordenacao('ed-demo')).rejects.toThrow(/permissão/);
+  });
+
   it('coordenação: indicadores e uma linha por turma (spec 012)', async () => {
     const p = await como('u-coord').painelDaCoordenacao('ed-demo');
     expect(p.indicadores).toMatchObject({ cursos: 2, turmas: 2, equipes: 6, encontrosTotal: 4 });

@@ -38,10 +38,15 @@ const painel: PainelDaCoordenacao = {
   ],
 };
 
-const renderizar = (ficticio = false) =>
+const renderizar = (ficticio = false, somenteLeitura = false) =>
   render(
     <MemoryRouter>
-      <PainelCoordenacao painel={painel} edicaoNome="Edição fictícia" ficticio={ficticio} />
+      <PainelCoordenacao
+        painel={painel}
+        edicaoNome="Edição fictícia"
+        ficticio={ficticio}
+        somenteLeitura={somenteLeitura}
+      />
     </MemoryRouter>,
   );
 
@@ -98,5 +103,14 @@ describe('PainelCoordenacao (US3, FR-004, FR-005)', () => {
   it('na demonstração, o selo "Dados fictícios"', () => {
     renderizar(true);
     expect(screen.getByText('Dados fictícios')).toBeInTheDocument();
+  });
+
+  it('somente leitura (analista, spec 016): mesmos números, sem nenhum link de ação', async () => {
+    const { container } = renderizar(false, true);
+    expect(screen.getByText('2 / 3')).toBeInTheDocument();
+    expect(screen.getAllByText('Componentes sem registro')).toHaveLength(2);
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
+    expect(screen.getByText('Ranking da turma ainda não publicado')).toBeInTheDocument();
+    expect(await violacoesA11y(container)).toEqual([]);
   });
 });

@@ -1,5 +1,5 @@
 // Dados fictícios do modo demonstração. NÃO usar com dados reais nem em produção.
-export { AVISO_FICTICIO, contasDemo, edicao as edicaoDemo } from './dados';
+export { AVISO_FICTICIO, contasDemo, edicao as edicaoDemo, unidadesDemo } from './dados';
 export {
   painelCoordenacao,
   proximoEncontro,

@@ -34,6 +34,7 @@ select set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0014-00000000
 set local role authenticated;
 select lives_ok($$select public.definir_regulamento_publico('10000000-0000-0000-0014-000000000001',true)$$,'coordenação publica');
 select is(jsonb_array_length(public.regulamento_publico()->'edicoes'),1,'somente a edição ativa publicada');
+select is(public.regulamento_publico()->'edicoes'->0->>'unidade','SENAI Juazeiro do Norte','spec 016: a edição publicada informa a unidade');
 select ok(public.regulamento_publico()::text not like '%SEGREDO%','projeção exclui dados privados recursivamente');
 select ok(not has_column_privilege('authenticated','public.edicoes','regulamento_publico','UPDATE'),'marca sem UPDATE direto');
 select throws_ok($$update public.edicoes set regulamento_publico=false where id='10000000-0000-0000-0014-000000000001'$$,'42501',null,'REST não contorna RPC');

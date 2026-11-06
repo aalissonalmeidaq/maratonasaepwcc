@@ -252,7 +252,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   coordenada e não mudam nesta spec.
 - **Cadastro permanente:** cursos e turmas são da unidade; `cursos` e `turmas` passaram a ser o curso
   e a turma **na edição**. Correções do cadastro chegam sozinhas só às edições em preparação; na
-  edição ativa, por "Atualizar a partir do cadastro". Instalação de uma só unidade. **[P25 — em validação]**
+  edição ativa, por "Atualizar a partir do cadastro". Instalação de uma só unidade (a spec 016 passou a atender várias unidades — **P25 resolvida**).
 - **Gestão por turma:** só a coordenação cadastra, importa e vincula alunos e docentes na turma.
   A busca de pessoas traz só contas que participam ou participaram de edições que a pessoa
   coordena, sem e-mail. **[P26 — em validação]** se é preciso buscar qualquer conta.
@@ -273,6 +273,33 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   pelo vínculo ao curso (só a derivada da turma ativa); fixtures em edição encerrada reabrem a
   edição durante a gravação; criação de cursos e turmas passou às RPCs do cadastro.
 
+## 6.14 Spec 016 — unidades e master (implementada em 2026-11-06)
+
+- Implementação: migration `20261110120000_unidades.sql`, Edge Function `contas-da-rede`, módulo
+  `rede`, áreas `/master`, `/gestao` e `/analista`, ADR 0013 (`docs/adr/0013-multiunidade.md`).
+- **Modelo:** um só banco; a **unidade** é o limite de isolamento (RLS). Cada conta pertence a uma
+  unidade (exceto o master) e tem **funções na unidade** (gestão, coordenação, docente, mentor,
+  analista). A função não dá acesso a dados: o acesso continua vindo das atribuições por edição; o
+  analista lê painéis e relatórios da unidade sem vínculo.
+- **Master:** cadastra unidades, contas de gestão e outros masters; **não lê dados de estudantes**
+  nem de edições. O primeiro vem do comando de administração do banco
+  (`select app.promover_master('<e-mail>')`; ver `docs/operacao-e-homologacao.md`).
+- **Gestão da unidade:** cadastra a equipe, cria edições e indica/retira a coordenação de cada
+  edição (sempre ao menos uma). A coordenação também cria edições da própria unidade.
+- **Unidade desativada ou conta desativada:** recusadas em tabelas (política restritiva
+  `conta_ativa`), no armazenamento e em toda RPC pública (guarda `exigir_conta_ativa`); o pgTAP
+  varre o catálogo e falha se uma tabela ou RPC nova ficar sem a guarda. `minha_conta` continua
+  respondendo para a conta saber que está desativada.
+- **Regulamento público:** cada edição mostra "Unidade: <nome>".
+- **Premissas:** passam a ser respondidas **só pelo master**; gestão, coordenação, docentes e
+  mentores leem; o aviso de pendências está no início do master. **P25 resolvida** (várias unidades).
+- **Seed local:** uma só unidade (a inicial, "SENAI Juazeiro do Norte"); `master@`, `gestao@` e
+  `analista@exemplo.invalid`. A segunda unidade só nasce pelas telas ou dentro dos testes.
+- **Salvaguarda:** com duas ou mais unidades, gravar sem informar a unidade é recusado
+  ("Informe a unidade."), evitando misturar dados.
+- **Pendências desta spec:** nome oficial das unidades além da inicial e quem será o primeiro master
+  em produção dependem da unidade/da rede **[validar]**.
+
 ## 6.13 Spec 015 — premissas em validação (implementada em 2026-11-05)
 
 - Implementação: migrations `20261109120000_premissas_em_validacao.sql` (catálogo P01–P32,
@@ -282,7 +309,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
 - **Catálogo da instalação:** as marcas em aberto deste documento viraram premissas (P01–P32); o
   texto vem da documentação, sem regra nova. Responder "Precisa mudar" não muda o sistema: cada
   mudança precisa de uma spec, que então marca a premissa como resolvida (`resolvida_por`).
-- **Quem responde:** coordenação de qualquer edição, inclusive encerrada; docentes e mentores com
+- **Quem responde:** (spec 015) coordenação de qualquer edição; **desde a spec 016, só o master**. Docentes e mentores com
   vínculo ativo só leem; estudantes e visitantes são recusados no servidor.
 - **Resolvidos sem perguntar à unidade:** encontros por turma (spec 011), ranking por turma
   (spec 012), contraste e axe no navegador (spec 014) e o fuso, que passou a `America/Fortaleza`

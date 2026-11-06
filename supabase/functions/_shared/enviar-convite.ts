@@ -1,12 +1,18 @@
 // Registra um convite de primeiro acesso (revogando o anterior) e envia o e-mail. Usado por
-// criar-conta, reenviar-convite e importar-alunos. Depende do Deno (variáveis de ambiente).
+// criar-conta, reenviar-convite, importar-alunos e contas-da-rede (sem edição: spec 016). Depende do Deno (variáveis de ambiente).
 import { gerarToken, hashDoToken, linkDePrimeiroAcesso } from './convites.ts';
 import { criarEnviadorDeEmail, emailDeConvite } from './email.ts';
 
 /** Devolve `false` (sem lançar) quando o registro ou o envio falham: quem chama informa. */
 export async function enviarConvite(
   admin: { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ error: unknown }> },
-  dados: { usuarioId: string; edicaoId: string; criadoPor: string; nome: string; email: string },
+  dados: {
+    usuarioId: string;
+    edicaoId: string | null;
+    criadoPor: string;
+    nome: string;
+    email: string;
+  },
 ): Promise<boolean> {
   try {
     const token = gerarToken();

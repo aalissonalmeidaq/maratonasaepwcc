@@ -13,7 +13,7 @@ const DECISOES: Decisao[] = ['confirmada', 'precisa_mudar'];
 const milhar = new Intl.NumberFormat('pt-BR');
 
 /**
- * Resposta da coordenação a uma premissa (spec 015, US2): "Confirmada" ou "Precisa mudar" com
+ * Resposta do master a uma premissa (spec 015, US2): "Confirmada" ou "Precisa mudar" com
  * justificativa. Envia a resposta atual como base (concorrência, R4); a situação só muda depois
  * da resposta do servidor.
  */

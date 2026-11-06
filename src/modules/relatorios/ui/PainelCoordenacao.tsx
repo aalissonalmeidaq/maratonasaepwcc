@@ -5,7 +5,7 @@ import type { PainelDaCoordenacao, TurmaDoPainelCoordenacao } from '../domain/ti
 import { AcaoDoBanner, FaixaDeIndicadores, Indicador, SeloFicticio } from './comum';
 import { plural } from './texto';
 
-function Turma({ c }: { c: TurmaDoPainelCoordenacao }) {
+function Turma({ c, somenteLeitura }: { c: TurmaDoPainelCoordenacao; somenteLeitura: boolean }) {
   const itens = [
     {
       rotulo: 'Componentes sem registro',
@@ -31,27 +31,41 @@ function Turma({ c }: { c: TurmaDoPainelCoordenacao }) {
       <ul className="-mx-2 flex flex-col">
         {itens.map((i) => (
           <li key={i.rotulo}>
-            <Link
-              to={i.para}
-              className="group flex min-h-11 items-center justify-between gap-3 rounded-md px-2 transition-colors hover:bg-surface-muted"
-            >
-              <span
-                className={cx(
-                  'font-medium underline-offset-4 group-hover:underline',
-                  i.valor > 0 ? 'text-link' : 'text-text-secondary',
-                )}
+            {somenteLeitura ? (
+              <div className="flex min-h-11 items-center justify-between gap-3 px-2">
+                <span className="font-medium text-text-secondary">{i.rotulo}</span>
+                <span
+                  className={cx(
+                    'min-w-8 rounded-full px-2.5 py-0.5 text-center text-sm font-bold tabular-nums',
+                    i.valor > 0 ? 'bg-yellow-500 text-navy-950' : 'bg-gray-100 text-text-secondary',
+                  )}
+                >
+                  {i.valor}
+                </span>
+              </div>
+            ) : (
+              <Link
+                to={i.para}
+                className="group flex min-h-11 items-center justify-between gap-3 rounded-md px-2 transition-colors hover:bg-surface-muted"
               >
-                {i.rotulo}
-              </span>
-              <span
-                className={cx(
-                  'min-w-8 rounded-full px-2.5 py-0.5 text-center text-sm font-bold tabular-nums',
-                  i.valor > 0 ? 'bg-yellow-500 text-navy-950' : 'bg-gray-100 text-text-secondary',
-                )}
-              >
-                {i.valor}
-              </span>
-            </Link>
+                <span
+                  className={cx(
+                    'font-medium underline-offset-4 group-hover:underline',
+                    i.valor > 0 ? 'text-link' : 'text-text-secondary',
+                  )}
+                >
+                  {i.rotulo}
+                </span>
+                <span
+                  className={cx(
+                    'min-w-8 rounded-full px-2.5 py-0.5 text-center text-sm font-bold tabular-nums',
+                    i.valor > 0 ? 'bg-yellow-500 text-navy-950' : 'bg-gray-100 text-text-secondary',
+                  )}
+                >
+                  {i.valor}
+                </span>
+              </Link>
+            )}
           </li>
         ))}
       </ul>
@@ -77,10 +91,13 @@ export function PainelCoordenacao({
   painel: p,
   edicaoNome,
   ficticio = false,
+  somenteLeitura = false,
 }: {
   painel: PainelDaCoordenacao;
   edicaoNome: string;
   ficticio?: boolean;
+  /** Analista (spec 016): os mesmos números, sem links para as telas de ação da coordenação. */
+  somenteLeitura?: boolean;
 }) {
   const i = p.indicadores;
   const totalDa = (c: TurmaDoPainelCoordenacao) =>
@@ -98,9 +115,11 @@ export function PainelCoordenacao({
           </span>
         }
         acao={
-          <AcaoDoBanner para="/coordenacao/relatorios" icone="relatorio">
-            Relatórios
-          </AcaoDoBanner>
+          somenteLeitura ? undefined : (
+            <AcaoDoBanner para="/coordenacao/relatorios" icone="relatorio">
+              Relatórios
+            </AcaoDoBanner>
+          )
         }
       />
       <FaixaDeIndicadores>
@@ -144,7 +163,7 @@ export function PainelCoordenacao({
       </h2>
       <div className="grid gap-4 lg:grid-cols-2">
         {p.turmas.map((c) => (
-          <Turma key={c.turmaId} c={c} />
+          <Turma key={c.turmaId} c={c} somenteLeitura={somenteLeitura} />
         ))}
       </div>
     </>

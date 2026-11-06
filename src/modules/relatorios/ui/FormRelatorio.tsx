@@ -41,7 +41,8 @@ export function FormRelatorio({
   onExportar,
   baixar = baixarArquivo,
 }: {
-  perfil: 'coordenacao' | 'docente';
+  /** `analista` (spec 016): a edição inteira, sem os pedidos de revisão. */
+  perfil: 'coordenacao' | 'docente' | 'analista';
   categorias: string[];
   turmas: { id: string; nome: string }[];
   encontros: { id: string; rotulo: string }[];
@@ -55,6 +56,7 @@ export function FormRelatorio({
   const [encontroId, setEncontroId] = useState('');
   const { estado, enviando, enviar } = useEnvio();
   const coordenacao = perfil === 'coordenacao';
+  const edicaoInteira = perfil !== 'docente';
 
   async function aoExportar(ev: FormEvent) {
     ev.preventDefault();
@@ -101,7 +103,7 @@ export function FormRelatorio({
           rotulo="Turma"
           value={turmaId}
           onChange={(e) => setTurmaId(e.target.value)}
-          placeholder={coordenacao ? 'Todas as turmas' : 'Todas as minhas turmas'}
+          placeholder={edicaoInteira ? 'Todas as turmas' : 'Todas as minhas turmas'}
           opcoes={turmas.map((t) => ({ valor: t.id, rotulo: t.nome }))}
         />
         <SelectField

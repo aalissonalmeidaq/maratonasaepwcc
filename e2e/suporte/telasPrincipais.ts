@@ -29,4 +29,19 @@ export const telasPrincipais = [
       '/coordenacao/premissas',
     ],
   },
+  {
+    perfil: 'master',
+    conta: /master/i,
+    rotas: ['/master', '/master/unidades', '/master/masters', '/master/premissas'],
+  },
+  {
+    perfil: 'gestão',
+    conta: /gestão/i,
+    rotas: ['/gestao', '/gestao/equipe', '/gestao/edicoes', '/gestao/premissas'],
+  },
+  {
+    perfil: 'analista',
+    conta: /analista/i,
+    rotas: ['/analista', '/analista/relatorios'],
+  },
 ];

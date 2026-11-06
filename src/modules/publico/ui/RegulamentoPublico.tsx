@@ -12,7 +12,8 @@ export function RegulamentoPublico({ conteudo }: { conteudo: Conteudo }) {
             {e.nome}
           </h2>
           <p className="mb-4 text-sm text-text-secondary">
-            Período: {e.inicio ? formatarData(e.inicio, { year: 'numeric' }) : 'início a confirmar'}
+            {e.unidade ? `Unidade: ${e.unidade} · ` : ''}Período:{' '}
+            {e.inicio ? formatarData(e.inicio, { year: 'numeric' }) : 'início a confirmar'}
             {e.fim ? ` a ${formatarData(e.fim, { year: 'numeric' })}` : ' · término a confirmar'}
           </p>
           <ResumoRegulamento regras={e.regras} versao={e.regrasVersao} />

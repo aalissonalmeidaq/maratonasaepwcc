@@ -433,6 +433,12 @@ entrypoint = "./functions/criar-conta/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/criar-conta/*.html" ]
 
+[functions.contas-da-rede]
+enabled = true
+verify_jwt = true
+import_map = "./functions/contas-da-rede/deno.json"
+entrypoint = "./functions/contas-da-rede/index.ts"
+
 [functions.reenviar-convite]
 enabled = true
 verify_jwt = true

@@ -115,4 +115,16 @@ describe('FormRelatorio (US4, FR-007, FR-010, FR-012, SC-004)', () => {
     expect(screen.getByRole('button', { name: 'Exportar CSV' })).toBeDisabled();
     expect(screen.getByText(/Sem conexão/)).toBeInTheDocument();
   });
+
+  it('analista (spec 016): 4 relatórios, sem pedidos de revisão, com os filtros da edição inteira', () => {
+    render(<FormRelatorio perfil="analista" {...props} onExportar={vi.fn()} baixar={vi.fn()} />);
+    const tipo = screen.getByRole('combobox', { name: 'Relatório' });
+    const opcoes = within(tipo)
+      .getAllByRole('option')
+      .map((o) => o.textContent);
+    expect(opcoes).toHaveLength(4);
+    expect(opcoes).not.toContain('Pedidos de revisão');
+    expect(screen.queryByRole('combobox', { name: 'Categoria' })).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Turma' })).toHaveDisplayValue('Todas as turmas');
+  });
 });
