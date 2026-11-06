@@ -1,8 +1,14 @@
 # Decisões, premissas e pendências
 
-Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]** estão no catálogo
-"Premissas em validação" da coordenação (spec 015), onde a unidade registra "Confirmada" ou
-"Precisa mudar"; resolver antes de usar dados reais. Itens já decididos citam a spec que os resolveu.
+Atualizado em 2026-11-06. Itens marcados **[Pnn — em validação]** estão no catálogo "Premissas em
+validação" (o master registra "Confirmada" ou "Precisa mudar"). Itens **[Pnn — decidida em
+06/11/2026]** foram decididos pelo projeto, sem spec nova: o que o sistema usa passou a ser regra
+(migration `20261111120000_premissas_decididas.sql`; a premissa fica no catálogo como resolvida).
+Itens já decididos por spec citam a spec que os resolveu.
+
+**Em aberto (6), porque dependem de fato externo ou de conferência da unidade:** P01, P02, P06 e
+P08 (fidelidade e confirmação da identidade visual), P13 (valores, quantidade, validade e entrega
+da premiação) e P32 (provedor e remetente dos e-mails).
 
 ## 1. Documentos e ativos
 
@@ -21,14 +27,14 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
 
 - A prancha "Diretrizes de marca" mostra hex diferentes dos tokens (ex.: azul-marinho `#0B2D6B`
   vs `#062457`; amarelo `#FFC02E` vs `#FFB820`). O Design System diz que o CSS é a referência
-  inicial → usamos `tokens_maratona.css`. **[P03 — em validação]**
+  inicial → usamos `tokens_maratona.css`. **[P03 — decidida em 06/11/2026]**
 - O prompt cita "seta da marca em laranja"; os SVGs oficiais usam coral `#FC4B55`. Mantivemos os
-  arquivos como estão (não alteramos a marca). **[P04 — em validação]**
+  arquivos como estão (não alteramos a marca). **[P04 — decidida em 06/11/2026]**
 - Tokens têm `--color-coral-500 #FF5866` e os SVGs `#FC4B55` (diferença pequena). Sem ação.
 
 - **Largura da barra lateral (2026-11-03, spec 011):** `--sidebar-width` passou de 16rem para
   17.5rem no arquivo de tokens, no tema e no `DESIGN.md`, para caber os títulos e ícones das
-  categorias do menu. Decisão do usuário. **[P05 — em validação]** com o Design System.
+  categorias do menu. Decisão do usuário. **[P05 — decidida em 06/11/2026]** com o Design System.
 
 ## 2.1 Identidade visual — pranchas recebidas em 2026-10-29
 
@@ -43,25 +49,25 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   (117 no total). **[P02 — em validação]**
 - **Paleta da prancha × tokens em uso:** azul-marinho `#0B2D6B` × `#062457`; amarelo `#FFC02E` ×
   `#FFB820`; borda sutil `#E6EBF2` × `#DCE5EF`. Os padrões gráficos usam a paleta da prancha; os
-  tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[P03 — em validação]**
+  tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[P03 — decidida em 06/11/2026]**
   se os tokens devem migrar para a paleta da prancha.
 - Ilustrações de pessoas enviadas como modelo não chegaram como arquivos; aguardam
   `docs/referencias/ilustracoes/`.
 
 ## 3. Premissas de regra (configuração `REGRAS_PILOTO`)
 
-| Premissa                             | Escolha provisória                                                                                              |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| Arredondamento                       | 2 casas, meio para cima, só no resultado do componente e no total. **[P09 — em validação]**                     |
-| Teto de 10 pontos                    | Vale para descontos gerais de ocorrências; zerar entrega por plágio não entra no teto. **[P10 — em validação]** |
-| Atraso com exceção autorizada        | Prorrogação/impedimento registrado ⇒ sem desconto de atraso. **[P11 — em validação]**                           |
-| Penalidade duplicada (mesmo fato)    | Mantém a primeira registrada e informa as ignoradas. **[P12 — em validação]**                                   |
-| Ranking                              | Por categoria; no piloto, categoria = curso. (resolvido pela spec 012 — ranking por turma)                      |
-| Desempate "questões e prova oficial" | Soma do componente objetivo (30) de todos os encontros                                                          |
-| Prova oficial                        | Encontro em que o componente objetivo é a prova; realização "pendente" também deixa o resultado pendente        |
-| Pedido de revisão                    | 24 h, exceção registrada pela coordenação (spec 007, §6.5)                                                      |
-| Premiação                            | Itens registrados como configuração; valores, quantidade, validade e entrega **[P13 — em validação]**           |
-| Cronograma                           | Nada fixado no código; demo usa datas relativas ao dia atual                                                    |
+| Premissa                             | Escolha provisória                                                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Arredondamento                       | 2 casas, meio para cima, só no resultado do componente e no total. **[P09 — decidida em 06/11/2026]**                     |
+| Teto de 10 pontos                    | Vale para descontos gerais de ocorrências; zerar entrega por plágio não entra no teto. **[P10 — decidida em 06/11/2026]** |
+| Atraso com exceção autorizada        | Prorrogação/impedimento registrado ⇒ sem desconto de atraso. **[P11 — decidida em 06/11/2026]**                           |
+| Penalidade duplicada (mesmo fato)    | Mantém a primeira registrada e informa as ignoradas. **[P12 — decidida em 06/11/2026]**                                   |
+| Ranking                              | Por categoria; no piloto, categoria = curso. (resolvido pela spec 012 — ranking por turma)                                |
+| Desempate "questões e prova oficial" | Soma do componente objetivo (30) de todos os encontros                                                                    |
+| Prova oficial                        | Encontro em que o componente objetivo é a prova; realização "pendente" também deixa o resultado pendente                  |
+| Pedido de revisão                    | 24 h, exceção registrada pela coordenação (spec 007, §6.5)                                                                |
+| Premiação                            | Itens registrados como configuração; valores, quantidade, validade e entrega **[P13 — em validação]**                     |
+| Cronograma                           | Nada fixado no código; demo usa datas relativas ao dia atual                                                              |
 
 ## 4. Decisões técnicas (ver `docs/adr/`)
 
@@ -88,7 +94,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   provedor de e-mail da produção e SMTP do Auth **[P32 — em validação]**.
 - Criação de edições: resolvida na spec 010 (seção 6.8); só a primeira edição de uma instalação
   continua criada pela administração do banco.
-- Ícones PWA gerados a partir de `maratona-simbolo.svg` com fundo branco no maskable. **[P07 — em validação]**
+- Ícones PWA gerados a partir de `maratona-simbolo.svg` com fundo branco no maskable. **[P07 — decidida em 06/11/2026]**
 - Contraste e axe no navegador real: resolvidos pela spec 014 (auditoria automática); o teste com
   leitor de tela segue o roteiro manual da spec 014, aguardando execução pela unidade.
 - O CLI `claude` não está no PATH (sessão via extensão do VS Code); `specify init` rodou com
@@ -102,7 +108,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   equipes; coordenação, docente e mentor alteram com justificativa. **Implementado em
   2026-10-30** (ver §6.2). Duplas entre turmas continuam recusadas.
 - Encontros valem para todas as turmas da edição. (resolvido pela spec 011 — encontros por turma)
-- Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[P21 — em validação]**
+- Justificativa mínima de 10 caracteres para substituir integrante ou desfazer dupla. **[P21 — decidida em 06/11/2026]**
 - Edição de curso e turma pela interface: implementada em 2026-10-30. Decidido na mesma data
   (spec 002, Clarifications): com dupla ativa, o curso da turma não pode mudar — regra no servidor
   implementada (gatilho `turmas_validar_troca_de_curso`); a tela mostra o curso bloqueado.
@@ -120,9 +126,9 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   ao FR-013). A RPC `formar_dupla` foi removida.
 - Seed local: turma fictícia "3º ano C" (5 alunos, ímpar, sem equipes) para os E2E de trio e de
   formação pelo docente. Os E2E reais exigem `supabase db reset` antes de cada execução.
-- **[P22 — em validação]** Convites não expiram e não há limite de convites por aluno (a spec não define;
+- **[P22 — decidida em 06/11/2026]** Convites não expiram e não há limite de convites por aluno (a spec não define;
   nada foi inventado).
-- **[P23 — em validação]** Nomes de equipe não passam por moderação; o docente/mentor pode renomear com
+- **[P23 — decidida em 06/11/2026]** Nomes de equipe não passam por moderação; o docente/mentor pode renomear com
   justificativa.
 
 ## 6.3 Spec 004 — painel da turma (implementada em 2026-10-30)
@@ -168,13 +174,13 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   opcional, sem efeito nos pontos.
 - Decidido em 2026-10-30: o mentor da turma tem as mesmas permissões do docente (cria e publica
   atividades, registra presença, participação, avaliação e prorrogação).
-- **[P24 — em validação]** Prorrogação/impedimento registrados pelo docente/mentor da turma ou pela
+- **[P24 — decidida em 06/11/2026]** Prorrogação/impedimento registrados pelo docente/mentor da turma ou pela
   coordenação.
-- **[P15 — em validação]** Trio: presença de três alunos limitada ao máximo por equipe das regras (piloto 10).
+- **[P15 — decidida em 06/11/2026]** Trio: presença de três alunos limitada ao máximo por equipe das regras (piloto 10).
 - **Pendente (operação):** limpeza automática de arquivos sem entrega no bucket `entregas` (upload
   concluído com registro recusado). Exige rotina com a API do Storage no ambiente de produção.
 - Decidido em 2026-10-30: um encontro pode ter vários desafios e listas por turma; a pontuação
-  do componente é a média simples dos itens (o PRD não define a agregação). **[P14 — em validação]**
+  do componente é a média simples dos itens (o PRD não define a agregação). **[P14 — decidida em 06/11/2026]**
 
 ## 6.5 Spec 007 — resultado oficial, ocorrências e ranking (implementada em 2026-11-01)
 
@@ -188,10 +194,10 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
 - Regras completadas pela migration: `penalidades.tipos` (reincidência 2, desrespeito 5, uso não
   autorizado 5, plágio zera a entrega) e `prazos` (24 h para manifestação e revisão), valores do
   PRD. Só edições não encerradas, com o sufixo `+inc4` no `regras_versao`; a auditoria de
-  `edicoes` guarda o antes. **[P16 — em validação]** com o regulamento.
+  `edicoes` guarda o antes. **[P16 — decidida em 06/11/2026]** com o regulamento.
 - Nota da prova "indisponível": mantém os 5 pontos da realização, sem bônus e sem pendência. Nota
   sem escala 0–100 e autorização confirmadas fica pendente; o sistema não converte escalas.
-  **[P17 — em validação]** a equivalência para escalas diferentes.
+  **[P17 — decidida em 06/11/2026]** a equivalência para escalas diferentes.
 - Decididos em 2026-11-01: revisão vale para decisão de ocorrência e para componente da
   publicação **provisória** (parcial não abre prazo; definitiva é final); revisão aceita corrige o
   registro de origem, ligado ao pedido, sem ajuste manual de pontos; a coordenação só decide
@@ -255,14 +261,14 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   edição ativa, por "Atualizar a partir do cadastro". Instalação de uma só unidade (a spec 016 passou a atender várias unidades — **P25 resolvida**).
 - **Gestão por turma:** só a coordenação cadastra, importa e vincula alunos e docentes na turma.
   A busca de pessoas traz só contas que participam ou participaram de edições que a pessoa
-  coordena, sem e-mail. **[P26 — em validação]** se é preciso buscar qualquer conta.
+  coordena, sem e-mail. **[P26 — decidida em 06/11/2026]** se é preciso buscar qualquer conta.
 - **Mentor por curso:** o vínculo ao curso gera linhas por turma (derivadas), mantidas por gatilho;
   vínculo direto de mentor a turma é recusado. Na migração, cada mentor por turma passou a ser
-  vinculado ao curso e atua também nas outras turmas dele. **[P27 — em validação]**
+  vinculado ao curso e atua também nas outras turmas dele. **[P27 — decidida em 06/11/2026]**
 - **Encerramento:** lista ocorrências sem decisão, revisões abertas e categorias sem ranking, sem
   impedir; a justificativa e a lista ficam na edição e na auditoria. Edição encerrada recusa
   escrita em todas as tabelas dela (gatilho central); avisos e exportações continuam. Edição
-  encerrada não é reaberta. **[P28 — em validação]**
+  encerrada não é reaberta. **[P28 — decidida em 06/11/2026]**
 - **Coordenação:** a edição mantém ao menos uma coordenação ativa; ninguém altera a própria.
 - **Várias edições ativas:** o seletor no topo aparece com duas ou mais edições da área; a escolha
   fica no dispositivo (só o id). Edição em preparação aparece com o selo "Em preparação".
@@ -396,7 +402,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   atraso e tipos de penalidade podem ser criados, removidos e renomeados; o id do critério nasce do
   nome e não muda ao renomear. A prova oficial segue o PRD (HU04) e não muda. Limites de proteção
   contra erro de digitação: 20 critérios por rubrica, nomes de 80 caracteres, 0 a 4 casas
-  decimais, 1 a 20 encontros. **[P18 — em validação]**
+  decimais, 1 a 20 encontros. **[P18 — decidida em 06/11/2026]**
 - **Ajustes da turma:** cada ajuste guarda o conjunto completo de grupos definidos para a turma
   (`{}` volta a herdar tudo); o restante vem da edição, inclusive mudanças posteriores. Coordenação
   ajusta qualquer grupo; o mentor do curso, só presença, participação, questões, entrega e
@@ -409,7 +415,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   prazos usam as regras do encontro para a turma da equipe; avaliação já lançada continua válida e
   com os nomes antigos. As leituras para o cálculo parcial devolvem as regras de cada encontro.
 - **Limite de atraso exibido do desafio** (desafio encerrado na lista): o maior entre as turmas do
-  desafio; o envio de cada equipe usa o da própria turma. **[P20 — em validação]**
+  desafio; o envio de cada equipe usa o da própria turma. **[P20 — decidida em 06/11/2026]**
 - **Prazo de revisão do ranking publicado:** ainda pelas regras atuais da edição (o ranking por
   turma é a spec 012).
 - **Encontros da turma:** guardam-se só as exclusões; encontro com presença, participação,
@@ -418,7 +424,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   encontro" do painel do aluno continua o da edição.
 - **Pontuação máxima da turma:** soma, nos encontros da turma, de presença + participação +
   questões (ou prova oficial, conforme o encontro) + entrega + apresentação pelas regras de cada
-  encontro. **[P19 — em validação]** encontros com avaliação objetiva diferente.
+  encontro. **[P19 — decidida em 06/11/2026]** encontros com avaliação objetiva diferente.
 - **Regulamento:** quem tem uma turma só (estudante, docente de uma turma) vê as regras da turma, com
   "definido para a sua turma" e a pontuação máxima; coordenação e docentes de várias turmas veem as
   da edição.
@@ -440,7 +446,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   (ex.: convites pendentes) e um ponto quando contém a página atual. A barra lateral passa de 16rem
   para 17,5rem (token `--sidebar-width`, atualizado também na referência de tokens) e o menu do
   celular de 15rem para 16rem (18rem no tablet), para caber ícone, título e seta sem cortar.
-  **[P05 — em validação]** com a identidade visual.
+  **[P05 — decidida em 06/11/2026]** com a identidade visual.
 - **Barras de rolagem:** finas, trilho transparente e polegar na cor azul-marinho da marca (branco
   translúcido nas áreas escuras do menu); a barra lateral rola quando a categoria aberta não cabe.
 - **Tela Entrar:** ocupa exatamente a altura da tela (o aviso de demonstração e o de sem conexão
@@ -467,7 +473,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   comunicado da edição. Quem deixa de atuar numa turma não corrige mais os comunicados dela.
 - **Público por perfil e turma:** todos (estudantes, docentes e mentores), estudantes ou equipe
   docente, opcionalmente limitado a turmas, avaliado na leitura. Público por equipe ou por pessoa
-  fica fora. **[P29 — em validação]**
+  fica fora. **[P29 — decidida em 06/11/2026]**
 - **Apoio e analista** não leem comunicados neste incremento, porque o PRD não define o que
   recebem.
 - **Avisos e selo "Novo":** publicação e cada correção geram avisos na tabela `avisos` (tipos
@@ -480,7 +486,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
   de `app.exigir_justificativa`, já usada no projeto), registrada na auditoria com a versão
   anterior. O público não muda depois de publicado; publicado não é apagado, só retirado.
 - **Limites:** título de 1 a 200 caracteres e texto de 1 a 5.000, sem marcação (exibido como texto
-  puro). **[P30 — em validação]**
+  puro). **[P30 — decidida em 06/11/2026]**
 - **Regulamento:** o resumo passa a ler `edicoes.regras` e `regras_versao` da edição, sem números
   fixos na tela; valor ausente aparece como "a definir". O documento oficial do regulamento
   continua ausente e não é publicado por esta spec.
@@ -491,7 +497,7 @@ Atualizado em 2026-11-05 (spec 015). Itens marcados **[Pnn — em validação]**
 - Busca e paginação são feitas no navegador sobre os registros que a RLS já entregou (volume
   pequeno por edição). Se as listagens crescerem (ex.: centenas de estudantes por edição), migrar
   para paginação e busca no servidor (`range` + filtro no PostgREST).
-- Tamanho de página: 10. **[P31 — em validação]** com a coordenação.
+- Tamanho de página: 10. **[P31 — decidida em 06/11/2026]** com a coordenação.
 - Resumos dos painéis iniciais não são listagens e não têm busca.
 
 ## 7. Questões em aberto (PRD §19)

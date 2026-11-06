@@ -27,15 +27,15 @@ async function abrirPeloMenu(page: Page) {
 
 test('master: vê o aviso no início, abre pelo menu, filtra e baixa o CSV', async ({ page }) => {
   await entrarComo(page, /master/i);
-  await expect(page.getByText(/Premissas aguardando resposta: 29/)).toBeVisible();
+  await expect(page.getByText(/Premissas aguardando resposta: 4/)).toBeVisible();
   await abrirPeloMenu(page);
   const resumo = page.getByRole('list', { name: 'Situação das premissas' });
-  await expect(resumo).toContainText('29');
-  await page.getByLabel('Tema', { exact: true }).selectOption('Comunicados e relatórios');
-  await expect(page.getByRole('article')).toHaveCount(3);
+  await expect(resumo).toContainText('4');
+  await page.getByLabel('Tema', { exact: true }).selectOption('Identidade visual');
+  await expect(page.getByRole('article')).toHaveCount(4);
   await page.getByLabel('Situação', { exact: true }).selectOption('precisa_mudar');
   await expect(page.getByRole('article')).toHaveCount(1);
-  await expect(page.getByRole('article').first()).toContainText('P31');
+  await expect(page.getByRole('article').first()).toContainText('P06');
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: 'Baixar lista (CSV)' }).click(),
@@ -55,7 +55,7 @@ test('coordenação: lê sem formulário e sem aviso no início (só o master re
 test('docente: lê sem formulário de resposta', async ({ page }) => {
   await entrarComo(page, /lúcia exemplo/i);
   await abrirPeloMenu(page);
-  await expect(page.getByRole('article')).toHaveCount(31);
+  await expect(page.getByRole('article')).toHaveCount(6);
   await expect(page.getByRole('button', { name: /Responder/ })).toHaveCount(0);
 });
 
