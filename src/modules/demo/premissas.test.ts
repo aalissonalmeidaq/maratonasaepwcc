@@ -44,13 +44,13 @@ describe('catálogo de premissas da demonstração (spec 015, Apêndice A)', () 
 
   it('leitura fictícia: uma confirmada, uma precisa mudar com histórico de duas; as demais aguardando', async () => {
     const { premissas } = await criarPremissasDemo(() => true).premissas();
-    const porSituacao = (s: string) => premissas.filter((p) => p.situacao === s);
+    const porSituacao = (s: string) => premissas.filter((p) => !p.resolvidaPor && p.situacao === s);
     expect(porSituacao('confirmada')).toHaveLength(1);
     const mudar = porSituacao('precisa_mudar');
     expect(mudar).toHaveLength(1);
     expect(mudar[0]!.historico).toHaveLength(2);
     expect(mudar[0]!.atual).toEqual(mudar[0]!.historico[1]);
-    expect(porSituacao('aguardando')).toHaveLength(30);
+    expect(porSituacao('aguardando')).toHaveLength(4);
   });
 
   it('só o master pode responder na leitura; os demais não; registrar é recusado', async () => {

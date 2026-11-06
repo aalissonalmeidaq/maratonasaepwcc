@@ -325,28 +325,62 @@ export const CATALOGO_PREMISSAS: ItemDoCatalogo[] = [
   ),
 ];
 
+const RESOLVIDAS_PELO_PROJETO = new Set([
+  'P03',
+  'P04',
+  'P05',
+  'P07',
+  'P09',
+  'P10',
+  'P11',
+  'P12',
+  'P14',
+  'P15',
+  'P16',
+  'P17',
+  'P18',
+  'P19',
+  'P20',
+  'P21',
+  'P22',
+  'P23',
+  'P24',
+  'P26',
+  'P27',
+  'P28',
+  'P29',
+  'P30',
+  'P31',
+]);
+
+/** Resolvida por spec (P25) ou por decisão do projeto; as demais seguem em aberto, como no banco. */
+function resolvidaPor(codigo: string): string | null {
+  if (codigo === 'P25') return 'spec 016';
+  return RESOLVIDAS_PELO_PROJETO.has(codigo) ? 'decisão do projeto de 06/11/2026' : null;
+}
+
 const RESPOSTAS_FICTICIAS: Record<string, Resposta[]> = {
-  P21: [
+  P02: [
     {
       id: 'demo-r1',
       decisao: 'confirmada',
-      justificativa: 'Fictício: 10 caracteres bastam para registrar o motivo.',
+      justificativa: 'Fictício: a prancha confere com o ícone redesenhado.',
       autorNome: 'Master Fictício',
       registradoEm: '2026-11-03T13:00:00.000Z',
     },
   ],
-  P31: [
+  P06: [
     {
       id: 'demo-r2',
       decisao: 'confirmada',
-      justificativa: 'Fictício: 10 itens por página está bom no celular.',
+      justificativa: 'Fictício: o padrão recriado parece fiel à prancha.',
       autorNome: 'Master Fictício',
       registradoEm: '2026-11-02T12:00:00.000Z',
     },
     {
       id: 'demo-r3',
       decisao: 'precisa_mudar',
-      justificativa: 'Fictício: no computador, preferimos 20 itens por página.',
+      justificativa: 'Fictício: falta o padrão da prancha 08 na galeria.',
       autorNome: 'Master Fictício',
       registradoEm: '2026-11-04T15:30:00.000Z',
     },
@@ -364,7 +398,7 @@ export function criarPremissasDemo(ehMaster: () => boolean): RepositorioPremissa
           const atual = historico.at(-1) ?? null;
           return {
             ...p,
-            resolvidaPor: p.codigo === 'P25' ? 'spec 016' : null,
+            resolvidaPor: resolvidaPor(p.codigo),
             situacao: atual?.decisao ?? 'aguardando',
             atual,
             historico,

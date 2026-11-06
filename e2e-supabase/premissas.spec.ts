@@ -40,13 +40,13 @@ test('master responde; coordenação e docente leem; resposta concorrente recebe
   }
 
   // "Confirmada" pela aba A; a aba B ainda mostra a situação anterior.
-  const p22 = await responder(a, 'P22', 'Confirmada', 'Convites sem prazo atendem à turma.');
-  await expect(p22.getByText('Resposta registrada.')).toBeVisible();
-  await expect(p22.getByText(/Confirmada por Master \(fictício\)/)).toBeVisible();
+  const p06 = await responder(a, 'P06', 'Confirmada', 'Convites sem prazo atendem à turma.');
+  await expect(p06.getByText('Resposta registrada.')).toBeVisible();
+  await expect(p06.getByText(/Confirmada por Master \(fictício\)/)).toBeVisible();
 
   const desatualizada = await responder(
     b,
-    'P22',
+    'P06',
     'Precisa mudar',
     'Convites devem expirar em 7 dias.',
   );
@@ -54,21 +54,21 @@ test('master responde; coordenação e docente leem; resposta concorrente recebe
   await expect(desatualizada.getByText(/Confirmada por Master \(fictício\)/)).toBeVisible();
 
   // "Precisa mudar" com histórico.
-  const p23 = await responder(a, 'P23', 'Precisa mudar', 'Nomes de equipe precisam de revisão.');
-  await expect(p23.getByText('Resposta registrada.')).toBeVisible();
-  await expect(p23.getByText(/O sistema segue a premissa em uso/).first()).toBeVisible();
+  const p08 = await responder(a, 'P08', 'Precisa mudar', 'Nomes de equipe precisam de revisão.');
+  await expect(p08.getByText('Resposta registrada.')).toBeVisible();
+  await expect(p08.getByText(/O sistema segue a premissa em uso/).first()).toBeVisible();
 
   // Coordenação lê a resposta sem formulário (spec 016, FR-013).
   const c = await entrar(browser, 'coordenacao@exemplo.invalid');
   await c.goto('/coordenacao/premissas');
-  await expect(cartao(c, 'P23').getByText('Nomes de equipe precisam de revisão.')).toBeVisible();
+  await expect(cartao(c, 'P08').getByText('Nomes de equipe precisam de revisão.')).toBeVisible();
   await expect(c.getByRole('button', { name: /^Responder/ })).toHaveCount(0);
 
   // Docente lê a resposta sem formulário.
   const d = await entrar(browser, 'docente@exemplo.invalid');
   await d.goto('/docente/premissas');
-  const p23Docente = cartao(d, 'P23');
-  await expect(p23Docente.getByText('Nomes de equipe precisam de revisão.')).toBeVisible();
+  const p08Docente = cartao(d, 'P08');
+  await expect(p08Docente.getByText('Nomes de equipe precisam de revisão.')).toBeVisible();
   await expect(d.getByRole('button', { name: /^Responder/ })).toHaveCount(0);
 });
 
