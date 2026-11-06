@@ -66,4 +66,5 @@ conferir o resultado.
 | Artefatos de falha (SC-004)                                 | `jornadas-demo-falha` e `jornadas-supabase-falha` gerados e baixados; o de Supabase traz o traço e o registro das funções                            |
 | Leitura do `ci.yml` (SC-007)                                | sem `secrets.*`, sem banco remoto, permissões `contents: read`, só ações `actions/*` e `supabase/setup-cli`                                          |
 | Observação                                                  | o fluxo só dispara para propostas com base `main`; mudar a base de uma proposta existente não dispara (um commit novo dispara)                       |
-| Pendente do dono                                            | regra de proteção (US3/SC-005/SC-006) e execução do `main` após a mesclagem (US4)                                                                    |
+| Execução no `main` (US4)                                    | push da mesclagem do PR #23 (execução 42246958714) e disparo manual (42247140893): quatro verificações verdes nas duas                               |
+| Pendente do dono                                            | regra de proteção (US3/SC-005/SC-006), tarefa T021                                                                                                   |

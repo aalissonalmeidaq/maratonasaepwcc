@@ -98,7 +98,7 @@ teste de estrutura passa.
 - [x] T019 Na mesma execução de T018, baixar os artefatos de falha dos dois jobs de jornadas e confirmar relatório e traço (SC-004); conferir que a execução verde da proposta de entrega não gerou artefatos
 - [x] T020 [P] Conferir SC-007 e a borda de fork: revisar o `ci.yml` final sem `secrets.*`, sem banco remoto, com permissões mínimas e sem nenhum passo que dependa de segredo (propostas de fork rodam igual); o teste de T003 já cobre, registrar a leitura manual em `quickstart.md`
 - [ ] T021 Pedir ao dono do repositório que configure a regra de proteção seguindo `docs/operacao-e-homologacao.md` e registrar o tempo gasto (SC-006) e a comprovação do bloqueio (US3); sem a permissão, registrar como pendência do dono em `docs/decisoes-e-pendencias.md`
-- [ ] T022 Depois da mesclagem, conferir a execução do `main` e disparar uma execução manual (US4); registrar os resultados
+- [x] T022 Depois da mesclagem, conferir a execução do `main` e disparar uma execução manual (US4); registrar os resultados
 - [x] T023 Preencher "Resultado da validação" em `specs/017-integracao-continua/quickstart.md` (durações, execuções, número de testes) e rodar `npx prettier --write` apenas nos arquivos tocados
 - [x] T024 Portões locais finais: `npm run verify` (inclui o teste do fluxo) e conferir que nada fora do escopo mudou (`git status`)
 
