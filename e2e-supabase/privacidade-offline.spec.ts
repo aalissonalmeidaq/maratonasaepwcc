@@ -4,6 +4,8 @@ test('PWA real: três perfis e logout sem persistir respostas privadas', async (
   context,
 }) => {
   await page.goto('/regulamento');
+  console.log('DIAG navigator.onLine =', await page.evaluate(() => navigator.onLine));
+  console.log('DIAG corpo =', (await page.locator('main').innerText()).slice(0, 200));
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
   });
