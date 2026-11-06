@@ -10,6 +10,18 @@ Itens já decididos por spec citam a spec que os resolveu.
 P08 (fidelidade e confirmação da identidade visual), P13 (valores, quantidade, validade e entrega
 da premiação) e P32 (provedor e remetente dos e-mails).
 
+**Conferência técnica das seis em aberto (2026-11-06):** o que dá para verificar no repositório
+foi verificado; o restante é da unidade.
+
+| Premissa | Verificado                                                                                                            | Falta da unidade                             |
+| -------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| P01      | O sistema usa só `docs/referencias/`; a pasta antiga `VETORIZADAS CLAUDE/` não existe mais no repositório             | Confirmar que essa é a versão aprovada       |
+| P02      | 118 ícones em `dados.ts` e 118 arquivos em `docs/icones/svg` (os textos diziam 117 e 103; corrigidos)                 | Conferir a fidelidade visual com as pranchas |
+| P06      | Padrões em `src/shared/ui/padroes/dados.ts`, arquivos e galeria em `docs/padroes/`                                    | Conferir a fidelidade com a prancha 08       |
+| P08      | Montserrat via `@fontsource`, auto-hospedada, licença SIL OFL 1.1 no pacote; nenhuma chamada a Google Fonts no código | Confirmação institucional do uso da fonte    |
+| P13      | Nada a verificar: o sistema só guarda os itens de premiação como configuração                                         | Valores, quantidade, validade e entrega      |
+| P32      | Nada a verificar: `supabase/config.toml` só tem o SMTP local; produção usa o provedor da unidade                      | Provedor e remetente dos e-mails             |
+
 ## 1. Documentos e ativos
 
 | Item                                                                                   | Situação                                                                                                                                                                                                                                                                |
@@ -20,7 +32,7 @@ da premiação) e P32 (provedor e remetente dos e-mails).
 | `docs/VETORIZADAS CLAUDE/`                                                             | Versão anterior dos SVGs (prefixo `saep-`), arquivos diferentes dos de `referencias/`. Usamos os de `referencias/` (mais recentes). **[P01 — em validação]** qual é a versão aprovada                                                                                   |
 | **Projeto pedagógico / livro de regras / regulamento**                                 | **AUSENTE.** Regras implementadas a partir do PRD e das instruções do usuário, versão `piloto-2026.0-a-confirmar`                                                                                                                                                       |
 | **Marca SENAI Ceará** (colorida e totalmente branca)                                   | Disponíveis em `public/brand/`: `senai-ceara-colorido.svg` para fundo claro (arquivo `logo-senai.svg` indicado pelo usuário em 30/10/2026, copiado sem alteração) e `senai-ceara-branco.svg` para fundo escuro.                                                         |
-| **Ícones do projeto em SVG individual**                                                | **Vetorizados (2026-10-29)**: 103 ícones redesenhados à mão a partir da prancha em `src/shared/ui/icones/dados.ts`; arquivos em `docs/icones/svg` e galeria em `docs/icones/galeria.html`. Não é rastreio automático: **[P02 — em validação]** fidelidade com a unidade |
+| **Ícones do projeto em SVG individual**                                                | **Vetorizados (2026-10-29)**: 118 ícones redesenhados à mão a partir da prancha em `src/shared/ui/icones/dados.ts`; arquivos em `docs/icones/svg` e galeria em `docs/icones/galeria.html`. Não é rastreio automático: **[P02 — em validação]** fidelidade com a unidade |
 | Licença/arquivos de fonte                                                              | Montserrat (SIL OFL) via `@fontsource`, auto-hospedada. **[P08 — em validação]** confirmação institucional                                                                                                                                                              |
 
 ## 2. Divergências registradas
@@ -46,7 +58,7 @@ da premiação) e P32 (provedor e remetente dos e-mails).
   **[P06 — em validação]**
 - **13 ícones** das pranchas "Navegação e conta", "Maratona e aprendizagem" e "Avaliação e
   administração" acrescentados, mais o ícone "Salvar" criado no mesmo estilo em 2026-10-30
-  (117 no total). **[P02 — em validação]**
+  (118 no total, conferidos em 2026-11-06). **[P02 — em validação]**
 - **Paleta da prancha × tokens em uso:** azul-marinho `#0B2D6B` × `#062457`; amarelo `#FFC02E` ×
   `#FFB820`; borda sutil `#E6EBF2` × `#DCE5EF`. Os padrões gráficos usam a paleta da prancha; os
   tokens da interface **não foram alterados** (estão documentados em `DESIGN.md`). **[P03 — decidida em 06/11/2026]**
