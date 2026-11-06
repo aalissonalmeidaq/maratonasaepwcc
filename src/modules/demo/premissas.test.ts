@@ -53,7 +53,7 @@ describe('catálogo de premissas da demonstração (spec 015, Apêndice A)', () 
     expect(porSituacao('aguardando')).toHaveLength(30);
   });
 
-  it('coordenação pode responder na leitura; docente não; registrar é recusado', async () => {
+  it('só o master pode responder na leitura; os demais não; registrar é recusado', async () => {
     expect((await criarPremissasDemo(() => true).premissas()).podeResponder).toBe(true);
     expect((await criarPremissasDemo(() => false).premissas()).podeResponder).toBe(false);
     await expect(

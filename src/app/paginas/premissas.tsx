@@ -25,7 +25,7 @@ function useResponder() {
 }
 
 /**
- * Premissas em validação (spec 015): a mesma tela para coordenação e docentes; o servidor decide
+ * Premissas em validação (spec 015): a mesma tela para master, gestão, coordenação e docentes; o servidor decide
  * quem pode responder (`podeResponder`) e recusa estudantes.
  */
 export function PremissasEmValidacaoPage() {

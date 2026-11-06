@@ -18,9 +18,14 @@ mantém a leitura online e exibe aviso. Dados autenticados não entram no cache 
 O [guia de validação](specs/014-pwa-acessibilidade/quickstart.md) reúne os testes e o
 [roteiro de leitor de tela](docs/acessibilidade/roteiro-leitor-de-tela.md) aguarda execução pela unidade.
 
-Na spec 015, a coordenação tem a tela **Premissas em validação** (`/coordenacao/premissas`): as
+Na spec 016, a instalação atende **várias unidades**: o **master** cadastra unidades e contas de
+gestão (sem ver dados de estudantes), a **gestão** monta a equipe e cria edições, e o **analista**
+lê painéis e relatórios. O isolamento entre unidades é por RLS. O primeiro master vem do comando
+`select app.promover_master('<e-mail>')` (veja `docs/operacao-e-homologacao.md`).
+
+Na spec 015, a tela **Premissas em validação** (`/master/premissas`; leitura em `/gestao`, `/coordenacao` e `/docente`): as
 escolhas que o sistema adotou sem decisão da unidade (P01–P32), para registrar "Confirmada" ou
-"Precisa mudar" com justificativa, histórico e auditoria; docentes e mentores leem. Exporta CSV e
+"Precisa mudar" com justificativa, histórico e auditoria; desde a spec 016 só o master responde e os demais leem. Exporta CSV e
 imprime. Responder não muda regras: cada mudança vira uma spec. Datas usam `America/Fortaleza`.
 
 - [Arquitetura](#arquitetura) · [Pré-requisitos](#pré-requisitos) · [Instalação](#instalação)

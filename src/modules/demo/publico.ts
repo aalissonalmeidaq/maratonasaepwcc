@@ -9,6 +9,7 @@ export const repositorioPublicoDemo: RepositorioPublico = {
         {
           id: edicao.id,
           nome: edicao.nome,
+          unidade: 'SENAI Juazeiro do Norte',
           inicio: '2026-03-02',
           fim: '2026-11-27',
           regras: edicao.regras,

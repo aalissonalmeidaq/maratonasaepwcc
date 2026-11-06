@@ -58,6 +58,15 @@ export default {
     const edicaoDaTurma = (turma as { cursos?: { edicao_id: string } } | null)?.cursos?.edicao_id;
     if (edicaoDaTurma !== edicaoId) return erro(400, 'A turma não pertence a esta edição.');
 
+    // As contas novas nascem na unidade da edição (spec 016).
+    const { data: edicao } = await ctx.supabase
+      .from('edicoes')
+      .select('unidade_id')
+      .eq('id', edicaoId)
+      .maybeSingle();
+    const unidadeId = (edicao as { unidade_id?: string } | null)?.unidade_id;
+    if (!unidadeId) return erro(500, 'Não foi possível identificar a unidade da edição.');
+
     const criadas: { linha: number; email: string; conviteEnviado: boolean }[] = [];
     const vinculadas: { linha: number; email: string }[] = [];
     const recusadas: { linha: number; email: string; motivo: string }[] = [];
@@ -111,7 +120,7 @@ export default {
       const { data: criado, error: erroCriacao } = await ctx.supabaseAdmin.auth.admin.createUser({
         email,
         email_confirm: true,
-        user_metadata: { nome },
+        user_metadata: { nome, unidade_id: unidadeId },
       });
       if (erroCriacao || !criado.user) {
         recusar('Não foi possível criar a conta.');

@@ -31,6 +31,21 @@ const grupos = [
       '/coordenacao/premissas',
     ],
   },
+  {
+    perfil: 'master',
+    conta: /master/i,
+    rotas: ['/master', '/master/unidades', '/master/masters', '/master/premissas'],
+  },
+  {
+    perfil: 'gestão',
+    conta: /gestão/i,
+    rotas: ['/gestao', '/gestao/equipe', '/gestao/edicoes', '/gestao/premissas'],
+  },
+  {
+    perfil: 'analista',
+    conta: /analista/i,
+    rotas: ['/analista', '/analista/relatorios'],
+  },
 ];
 for (const grupo of grupos)
   for (const rota of grupo.rotas)

@@ -41,7 +41,7 @@ export interface Premissa {
 }
 
 export interface CatalogoDePremissas {
-  /** Só a coordenação registra respostas; docentes e mentores leem. */
+  /** Só o master registra respostas; docentes e mentores leem. */
   podeResponder: boolean;
   premissas: Premissa[];
 }

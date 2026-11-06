@@ -1,25 +1,32 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Papel } from '@/modules/acesso';
+import type { FuncaoUnidade, Papel } from '@/modules/acesso';
 import { ErroDeAutenticacao, type AdaptadorAuth, type Sessao } from '../domain/sessao';
 
 /**
  * Autenticação real via Supabase Auth (e-mail e senha, contas criadas pela coordenação).
- * Papéis vêm da tabela `atribuicoes`; a RLS só devolve as linhas da própria pessoa.
+ * Papéis, funções e unidade vêm de `minha_conta()` (spec 016); o servidor só devolve os da própria pessoa.
  */
 export function criarAdaptadorSupabase(supabase: SupabaseClient): AdaptadorAuth {
   async function montarSessao(usuarioId: string): Promise<Sessao> {
-    const [perfil, atribuicoes] = await Promise.all([
-      supabase.from('perfis').select('nome').eq('id', usuarioId).maybeSingle(),
-      supabase.from('atribuicoes').select('papel').eq('usuario_id', usuarioId).eq('ativo', true),
-    ]);
-    if (perfil.error || atribuicoes.error) {
+    // A conta inteira vem de `minha_conta()`: papéis nas edições, funções, unidade e master.
+    const { data, error } = await supabase.rpc('minha_conta');
+    if (error || !data) {
       throw new ErroDeAutenticacao('Não foi possível carregar o seu perfil. Tente novamente.');
     }
-    const papeis = [...new Set((atribuicoes.data ?? []).map((a) => a.papel as Papel))];
+    const conta = data as {
+      nome?: string;
+      master?: boolean;
+      unidade?: { id: string; nome: string; ativa: boolean } | null;
+      funcoes?: FuncaoUnidade[];
+      papeis?: Papel[];
+    };
     return {
       usuarioId,
-      nome: (perfil.data?.nome as string | undefined) ?? 'Pessoa usuária',
-      papeis,
+      nome: conta.nome ?? 'Pessoa usuária',
+      papeis: conta.papeis ?? [],
+      master: conta.master ?? false,
+      funcoes: conta.funcoes ?? [],
+      unidade: conta.unidade ?? null,
       demo: false,
     };
   }

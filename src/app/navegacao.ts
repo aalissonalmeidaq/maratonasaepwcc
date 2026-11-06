@@ -190,7 +190,7 @@ export const MENUS: Record<Area, MenuDaArea> = {
             rotulo: 'Premissas em validação',
             caminho: '/docente/premissas',
             icone: 'checklist',
-            descricao: 'Premissas e respostas da coordenação',
+            descricao: 'Premissas e respostas do master',
           },
         ],
       },
@@ -218,7 +218,7 @@ export const MENUS: Record<Area, MenuDaArea> = {
             rotulo: 'Premissas em validação',
             caminho: '/coordenacao/premissas',
             icone: 'checklist',
-            descricao: 'Respostas da unidade às premissas',
+            descricao: 'Respostas do master às premissas',
           },
           {
             rotulo: 'Cursos e turmas',
@@ -320,6 +320,108 @@ export const MENUS: Record<Area, MenuDaArea> = {
       },
     ],
   },
+  master: {
+    inicio: {
+      rotulo: 'Início',
+      caminho: '/master',
+      icone: 'inicio',
+      descricao: 'Unidades da rede',
+    },
+    grupos: [
+      {
+        titulo: 'Rede',
+        icone: 'administracao',
+        itens: [
+          {
+            rotulo: 'Unidades',
+            caminho: '/master/unidades',
+            icone: 'administracao',
+            descricao: 'Cadastrar unidades e a gestão de cada uma',
+          },
+          {
+            rotulo: 'Masters',
+            caminho: '/master/masters',
+            icone: 'seguranca',
+            descricao: 'Contas de rede',
+          },
+        ],
+      },
+      {
+        titulo: 'Sistema',
+        icone: 'checklist',
+        itens: [
+          {
+            rotulo: 'Premissas em validação',
+            caminho: '/master/premissas',
+            icone: 'checklist',
+            descricao: 'Decisões do sistema',
+          },
+        ],
+      },
+    ],
+  },
+  gestao: {
+    inicio: {
+      rotulo: 'Início',
+      caminho: '/gestao',
+      icone: 'inicio',
+      descricao: 'Equipe e edições da unidade',
+    },
+    grupos: [
+      {
+        titulo: 'Unidade',
+        icone: 'gestao',
+        itens: [
+          {
+            rotulo: 'Equipe da unidade',
+            caminho: '/gestao/equipe',
+            icone: 'usuarios',
+            descricao: 'Coordenação, docentes, mentores e analistas',
+          },
+          {
+            rotulo: 'Edições',
+            caminho: '/gestao/edicoes',
+            icone: 'gestao',
+            descricao: 'Criar edições e indicar a coordenação',
+          },
+        ],
+      },
+      {
+        titulo: 'Sistema',
+        icone: 'checklist',
+        itens: [
+          {
+            rotulo: 'Premissas em validação',
+            caminho: '/gestao/premissas',
+            icone: 'checklist',
+            descricao: 'Decisões do sistema (leitura)',
+          },
+        ],
+      },
+    ],
+  },
+  analista: {
+    inicio: {
+      rotulo: 'Início',
+      caminho: '/analista',
+      icone: 'inicio',
+      descricao: 'Painel da edição',
+    },
+    grupos: [
+      {
+        titulo: 'Acompanhamento',
+        icone: 'painel',
+        itens: [
+          {
+            rotulo: 'Relatórios',
+            caminho: '/analista/relatorios',
+            icone: 'relatorio',
+            descricao: 'Exportação CSV da edição',
+          },
+        ],
+      },
+    ],
+  },
 };
 
 /** Itens do menu na ordem em que aparecem: Início e os itens de cada categoria. */
@@ -329,7 +431,10 @@ export function itensDoMenu(area: Area): ItemMenu[] {
 }
 
 export const ROTULO_AREA: Record<Area, string> = {
+  master: 'Rede',
+  gestao: 'Gestão da unidade',
   aluno: 'Área do aluno',
   docente: 'Área docente',
+  analista: 'Análise',
   coordenacao: 'Coordenação',
 };

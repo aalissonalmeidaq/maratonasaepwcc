@@ -9,7 +9,12 @@ import {
   RotaProtegida,
 } from '@/modules/auth';
 import { LimiteCarregamento } from './layout/LimiteCarregamento';
-import { AguardandoPermissaoPage, EntradaPage, NaoEncontradaPage } from './paginas/comum';
+import {
+  AguardandoPermissaoPage,
+  EntradaPage,
+  NaoEncontradaPage,
+  UnidadeDesativadaPage,
+} from './paginas/comum';
 
 /** Não memoriza uma rejeição de import causada pela falta de rede. */
 const lazy: typeof criarLazy = (carregar) =>
@@ -152,6 +157,30 @@ const CoordenacaoOrganizacaoPage = lazy(() =>
 const CoordenacaoDuplasPage = lazy(() =>
   import('./paginas/organizacao').then((modulo) => ({ default: modulo.CoordenacaoDuplasPage })),
 );
+const AnalistaInicioPage = lazy(() =>
+  import('./paginas/analista').then((modulo) => ({ default: modulo.AnalistaInicioPage })),
+);
+const AnalistaRelatoriosPage = lazy(() =>
+  import('./paginas/analista').then((modulo) => ({ default: modulo.AnalistaRelatoriosPage })),
+);
+const GestaoInicioPage = lazy(() =>
+  import('./paginas/gestao').then((modulo) => ({ default: modulo.GestaoInicioPage })),
+);
+const GestaoEquipePage = lazy(() =>
+  import('./paginas/gestao').then((modulo) => ({ default: modulo.GestaoEquipePage })),
+);
+const GestaoEdicoesPage = lazy(() =>
+  import('./paginas/gestao').then((modulo) => ({ default: modulo.GestaoEdicoesPage })),
+);
+const MasterInicioPage = lazy(() =>
+  import('./paginas/master').then((modulo) => ({ default: modulo.MasterInicioPage })),
+);
+const MasterUnidadesPage = lazy(() =>
+  import('./paginas/master').then((modulo) => ({ default: modulo.MasterUnidadesPage })),
+);
+const MasterMastersPage = lazy(() =>
+  import('./paginas/master').then((modulo) => ({ default: modulo.MasterMastersPage })),
+);
 const PremissasEmValidacaoPage = lazy(() =>
   import('./paginas/premissas').then((modulo) => ({ default: modulo.PremissasEmValidacaoPage })),
 );
@@ -171,6 +200,32 @@ export function AppRotas() {
           <Route path="/entrar" element={<EntradaPage />} />
           <Route path="/regulamento" element={<RegulamentoPublicoPage />} />
           <Route path="/aguardando-permissao" element={<AguardandoPermissaoPage />} />
+          <Route path="/unidade-desativada" element={<UnidadeDesativadaPage />} />
+
+          <Route element={<RotaProtegida area="master" />}>
+            <Route path="/master" element={<AppShell area="master" />}>
+              <Route index element={<MasterInicioPage />} />
+              <Route path="unidades" element={<MasterUnidadesPage />} />
+              <Route path="masters" element={<MasterMastersPage />} />
+              <Route path="premissas" element={<PremissasEmValidacaoPage />} />
+            </Route>
+          </Route>
+
+          <Route element={<RotaProtegida area="gestao" />}>
+            <Route path="/gestao" element={<AppShell area="gestao" />}>
+              <Route index element={<GestaoInicioPage />} />
+              <Route path="equipe" element={<GestaoEquipePage />} />
+              <Route path="edicoes" element={<GestaoEdicoesPage />} />
+              <Route path="premissas" element={<PremissasEmValidacaoPage />} />
+            </Route>
+          </Route>
+
+          <Route element={<RotaProtegida area="analista" />}>
+            <Route path="/analista" element={<AppShell area="analista" />}>
+              <Route index element={<AnalistaInicioPage />} />
+              <Route path="relatorios" element={<AnalistaRelatoriosPage />} />
+            </Route>
+          </Route>
 
           <Route element={<RotaProtegida area="aluno" />}>
             <Route path="/aluno" element={<AppShell area="aluno" />}>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { linhaDeAtribuicao, validarPedidoDeConta } from './pedido-de-conta';
+import { linhaDeAtribuicao, metadadosDaConta, validarPedidoDeConta } from './pedido-de-conta';
 
 const base = {
   edicaoId: '10000000-0000-0000-0000-000000000001',
@@ -46,5 +46,19 @@ describe('pedido de criação de conta (spec 002; mentor por curso na spec 010)'
       'Campo não aceito: senhaProvisoria.',
     );
     expect(validarPedidoDeConta({ ...base, papel: 'coordenacao' })).toBe('Papel inválido.');
+  });
+});
+
+describe('metadados da conta com a unidade (spec 016)', () => {
+  it('a conta nasce na unidade da edição: o gatilho do perfil lê o `unidade_id`', () => {
+    expect(metadadosDaConta('Ana Exemplo', '10000000-0000-0000-0000-0000000000b1')).toEqual({
+      nome: 'Ana Exemplo',
+      unidade_id: '10000000-0000-0000-0000-0000000000b1',
+    });
+  });
+
+  it('sem a unidade da edição não há metadados: quem chama recusa antes de criar a conta', () => {
+    expect(metadadosDaConta('Ana', null)).toBeNull();
+    expect(metadadosDaConta('Ana', '')).toBeNull();
   });
 });

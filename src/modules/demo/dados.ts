@@ -4,7 +4,7 @@
  * representam estudantes, turmas ou o cronograma reais. As datas são relativas ao dia atual
  * para que a demonstração sempre tenha encontros passados e futuros.
  */
-import type { Papel } from '@/modules/acesso';
+import type { FuncaoUnidade, Papel } from '@/modules/acesso';
 import type { LancamentosDoEncontro, RegrasDaEdicao } from '@/modules/pontuacao';
 import { REGRAS_PILOTO } from '@/modules/pontuacao';
 
@@ -342,9 +342,53 @@ export const lancamentos: Record<string, Record<string, LancamentosDoEncontro>> 
   },
 };
 
+/** Unidades fictícias da demonstração (spec 016): a das contas de exemplo e uma segunda, vazia. */
+export const unidadesDemo = [
+  { id: 'un-demo-a', nome: 'Unidade Fictícia A', ativa: true },
+  { id: 'un-demo-b', nome: 'Unidade Fictícia B', ativa: true },
+] as const;
+
+const unidadeA = { ...unidadesDemo[0] };
+
+interface ContaDaTelaDeEntrada {
+  usuarioId: string;
+  nome: string;
+  papeis: Papel[];
+  master?: boolean;
+  funcoes?: FuncaoUnidade[];
+  unidade: { id: string; nome: string; ativa: boolean } | null;
+}
+
 /** Contas exibidas na tela de entrada do modo demonstração. */
-export const contasDemo = [
-  { usuarioId: 'u-coord', nome: 'Coordenação (fictícia)', papeis: ['coordenacao'] as Papel[] },
-  { usuarioId: 'u-doc-a', nome: 'Profa. Lúcia Exemplo — docente', papeis: ['docente'] as Papel[] },
-  { usuarioId: 'e01', nome: 'Ana Exemplo — aluna', papeis: ['aluno'] as Papel[] },
+export const contasDemo: ContaDaTelaDeEntrada[] = [
+  { usuarioId: 'u-master', nome: 'Master (fictício)', papeis: [], master: true, unidade: null },
+  {
+    usuarioId: 'u-gestao',
+    nome: 'Gestão da unidade (fictícia)',
+    papeis: [],
+    funcoes: ['gestao'],
+    unidade: unidadeA,
+  },
+  {
+    usuarioId: 'u-coord',
+    nome: 'Coordenação (fictícia)',
+    papeis: ['coordenacao'],
+    funcoes: ['coordenacao'],
+    unidade: unidadeA,
+  },
+  {
+    usuarioId: 'u-doc-a',
+    nome: 'Profa. Lúcia Exemplo — docente',
+    papeis: ['docente'],
+    funcoes: ['docente'],
+    unidade: unidadeA,
+  },
+  {
+    usuarioId: 'u-analista',
+    nome: 'Analista (fictício)',
+    papeis: [],
+    funcoes: ['analista'],
+    unidade: unidadeA,
+  },
+  { usuarioId: 'e01', nome: 'Ana Exemplo — aluna', papeis: ['aluno'], unidade: unidadeA },
 ];

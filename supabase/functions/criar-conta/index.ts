@@ -12,7 +12,11 @@ import '@supabase/functions-js/edge-runtime.d.ts';
 import { withSupabase } from '@supabase/server';
 import { coordenaAEdicao } from '../_shared/autorizacao.ts';
 import { enviarConvite } from '../_shared/enviar-convite.ts';
-import { linhaDeAtribuicao, validarPedidoDeConta } from '../_shared/pedido-de-conta.ts';
+import {
+  linhaDeAtribuicao,
+  metadadosDaConta,
+  validarPedidoDeConta,
+} from '../_shared/pedido-de-conta.ts';
 
 const erro = (status: number, mensagem: string) => Response.json({ erro: mensagem }, { status });
 
@@ -30,11 +34,23 @@ export default {
     if (coordena === 'erro') return erro(500, 'Não foi possível verificar a permissão.');
     if (coordena === 'nao') return erro(403, 'Somente a coordenação da edição pode criar contas.');
 
+    // A conta nasce na unidade da edição (spec 016). Lida com a visão (RLS) da coordenação.
+    const { data: edicao } = await ctx.supabase
+      .from('edicoes')
+      .select('unidade_id')
+      .eq('id', pedido.edicaoId)
+      .maybeSingle();
+    const metadados = metadadosDaConta(
+      pedido.nome,
+      (edicao as { unidade_id?: string } | null)?.unidade_id,
+    );
+    if (!metadados) return erro(500, 'Não foi possível identificar a unidade da edição.');
+
     // 2. Cria o usuário no Auth sem senha (privilegiado, somente no servidor).
     const { data: criado, error: erroCriacao } = await ctx.supabaseAdmin.auth.admin.createUser({
       email: pedido.email,
       email_confirm: true,
-      user_metadata: { nome: pedido.nome },
+      user_metadata: metadados,
     });
     if (erroCriacao || !criado.user) {
       const jaExiste = /already|registered|exists/i.test(erroCriacao?.message ?? '');

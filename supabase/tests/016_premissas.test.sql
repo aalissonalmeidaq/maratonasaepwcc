@@ -17,8 +17,8 @@ select enum_has_labels('public', 'decisao_premissa', array['confirmada', 'precis
 select is((select string_agg(codigo, ',' order by codigo) from public.premissas),
   (select string_agg('P' || lpad(n::text, 2, '0'), ',' order by n) from generate_series(1, 32) n),
   'FR-002: catálogo com exatamente P01–P32');
-select is((select count(*)::int from public.premissas where resolvida_por is not null), 0,
-  'nenhuma premissa resolvida no catálogo inicial');
+select is((select string_agg(codigo || ':' || resolvida_por, ',') from public.premissas where resolvida_por is not null),
+  'P25:spec 016', 'só a P25 vem resolvida (pela spec 016, multiunidade)');
 select is((select string_agg(codigo || ':' || tema, ',' order by codigo) from public.premissas
            where codigo in ('P01', 'P08', 'P09', 'P19', 'P20', 'P24', 'P25', 'P28', 'P29', 'P31', 'P32')),
   'P01:Identidade visual,P08:Identidade visual,P09:Pontuação,P19:Pontuação,P20:Equipes e atividades,'
@@ -37,8 +37,13 @@ from unnest(array['anon', 'authenticated']) r,
 -- ===========================================================================
 insert into auth.users (id, email, raw_user_meta_data, aud, role)
 select ('00000000-0000-0000-0016-0000000000' || s)::uuid, 'p' || s || '@exemplo.invalid',
-       jsonb_build_object('nome', 'Pessoa ' || s), 'authenticated', 'authenticated'
-from (values ('c1'), ('c2'), ('d1'), ('b1'), ('a1'), ('e1')) as v (s);
+       jsonb_build_object('nome', 'Pessoa ' || s) || case when s in ('f1', 'f2') then '{"master": true}'::jsonb else '{}'::jsonb end,
+       'authenticated', 'authenticated'
+from (values ('c1'), ('c2'), ('d1'), ('b1'), ('a1'), ('e1'), ('f1'), ('f2'), ('f3'), ('f4')) as v (s);
+-- Spec 016: só o master (f1, f2) responde; gestão (f3) e analista (f4) são da unidade inicial.
+insert into public.masters (usuario_id) values ('00000000-0000-0000-0016-0000000000f1'), ('00000000-0000-0000-0016-0000000000f2');
+insert into public.funcoes_unidade (usuario_id, funcao) values
+  ('00000000-0000-0000-0016-0000000000f3', 'gestao'), ('00000000-0000-0000-0016-0000000000f4', 'analista');
 
 insert into public.edicoes (id, nome, estado, inicio, fim, regras, regras_versao)
 select v.id::uuid, v.nome, v.estado::public.estado_edicao, '2026-03-01', '2026-12-01', app.regras_piloto(),
@@ -91,6 +96,12 @@ select pg_temp.como(pg_temp.u('d1'));
 select pg_temp.guardar('d1', public.premissas_em_validacao()::text);
 select pg_temp.como(pg_temp.u('b1'));
 select pg_temp.guardar('b1', public.premissas_em_validacao()::text);
+select pg_temp.como(pg_temp.u('f1'));
+select pg_temp.guardar('f1', public.premissas_em_validacao()::text);
+select pg_temp.como(pg_temp.u('f3'));
+select pg_temp.guardar('f3', public.premissas_em_validacao()::text);
+select pg_temp.como(pg_temp.u('f4'));
+select throws_ok('select public.premissas_em_validacao()', '42501', null, 'spec 016: analista não lê as premissas');
 select pg_temp.como(pg_temp.u('a1'));
 select throws_ok('select public.premissas_em_validacao()', '42501', null, 'SC-004: estudante não lê as premissas');
 select pg_temp.como(pg_temp.u('e1'));
@@ -100,9 +111,12 @@ set local role anon;
 select throws_ok('select public.premissas_em_validacao()', '42501', null, 'SC-004: visitante não lê');
 reset role;
 
-select ok((pg_temp.lido('c1') ->> 'podeResponder')::boolean,
-  'FR-004: coordenação (só de edição encerrada) lê e pode responder');
-select is(jsonb_array_length(pg_temp.lido('c1') -> 'premissas'), 32, 'FR-003: as 32 premissas');
+select ok(not (pg_temp.lido('c1') ->> 'podeResponder')::boolean,
+  'spec 016: coordenação (só de edição encerrada) lê sem poder responder');
+select ok((pg_temp.lido('f1') ->> 'podeResponder')::boolean, 'spec 016: o master lê e pode responder');
+select ok(not (pg_temp.lido('f3') ->> 'podeResponder')::boolean, 'spec 016: a gestão lê sem poder responder');
+select is(pg_temp.lido('f3') -> 'premissas', pg_temp.lido('c1') -> 'premissas', 'spec 016: gestão e master veem a mesma lista');
+select is(jsonb_array_length(pg_temp.lido('c1') -> 'premissas'), 32, 'FR-003: as 32 premissas (inclusive resolvidas)');
 select ok(not (pg_temp.lido('d1') ->> 'podeResponder')::boolean, 'FR-004: docente lê sem poder responder');
 select ok(not (pg_temp.lido('b1') ->> 'podeResponder')::boolean, 'FR-004: mentor lê sem poder responder');
 select is(pg_temp.lido('d1') -> 'premissas', pg_temp.lido('c1') -> 'premissas', 'docente vê a mesma lista');
@@ -116,19 +130,19 @@ select is(pg_temp.premissa(pg_temp.lido('c1'), 'P01') -> 'opcoes',
 select is((select string_agg(p ->> 'codigo', ',' order by o) from jsonb_array_elements(pg_temp.lido('c1') -> 'premissas')
              with ordinality x (p, o) where o <= 3), 'P09,P10,P11', 'ordem: Pontuação primeiro, por ordem');
 select is((select p ->> 'codigo' from jsonb_array_elements(pg_temp.lido('c1') -> 'premissas') with ordinality x (p, o)
-             order by o desc limit 1), 'P32', 'ordem: Operação por último');
+             where p ->> 'resolvidaPor' is null order by o desc limit 1), 'P32', 'ordem: Operação por último entre as pendentes');
 
 -- ===========================================================================
 -- US2 — respostas (T021, FR-006 a FR-010, SC-002, SC-004)
 -- ===========================================================================
 select pg_temp.guardar('aud0', (select count(*) from public.auditoria where tabela = 'respostas_premissas')::text);
 set local role authenticated;
-select pg_temp.como(pg_temp.u('c1'));
+select pg_temp.como(pg_temp.u('f1'));
 select pg_temp.guardar('r1', public.responder_premissa('P09', 'confirmada', '  Conferido com o regulamento.  ', null)::text);
 select throws_ok(
   format($f$ select public.responder_premissa('P09', 'precisa_mudar', 'Outra leitura do regulamento.', null) $f$),
   '40001', null, 'FR-008: resposta-base desatualizada (era aguardando) é recusada');
-select pg_temp.como(pg_temp.u('c2'));
+select pg_temp.como(pg_temp.u('f2'));
 select pg_temp.guardar('r2', public.responder_premissa('P09', 'precisa_mudar', 'Usar uma casa decimal.',
   (pg_temp.lido('r1') ->> 'id')::uuid)::text);
 select throws_ok(
@@ -145,7 +159,16 @@ select throws_ok(format($f$ select public.responder_premissa('P10', 'confirmada'
   '23514', null, 'FR-006: justificativa longa');
 select pg_temp.como(pg_temp.u('d1'));
 select throws_ok($$ select public.responder_premissa('P10', 'confirmada', 'Docente tentando responder.', null) $$,
-  '42501', 'Somente a coordenação registra respostas às premissas.', 'SC-004: docente não responde');
+  '42501', 'Somente o master registra respostas às premissas.', 'SC-004: docente não responde');
+select pg_temp.como(pg_temp.u('c1'));
+select throws_ok($$ select public.responder_premissa('P10', 'confirmada', 'Coordenação tentando responder.', null) $$,
+  '42501', 'Somente o master registra respostas às premissas.', 'spec 016: coordenação não responde');
+select pg_temp.como(pg_temp.u('f3'));
+select throws_ok($$ select public.responder_premissa('P10', 'confirmada', 'Gestão tentando responder.', null) $$,
+  '42501', 'Somente o master registra respostas às premissas.', 'spec 016: gestão não responde');
+select pg_temp.como(pg_temp.u('f4'));
+select throws_ok($$ select public.responder_premissa('P10', 'confirmada', 'Analista tentando responder.', null) $$,
+  '42501', null, 'spec 016: analista não responde');
 select pg_temp.como(pg_temp.u('b1'));
 select throws_ok($$ select public.responder_premissa('P10', 'confirmada', 'Mentor tentando responder.', null) $$,
   '42501', null, 'SC-004: mentor não responde');
@@ -163,12 +186,12 @@ reset role;
 select is((select string_agg(k, ',' order by k) from jsonb_object_keys(pg_temp.lido('r1')) k),
   'autorNome,decisao,id,justificativa,registradoEm', 'contrato: chaves da resposta');
 select is(pg_temp.lido('r1') ->> 'justificativa', 'Conferido com o regulamento.', 'justificativa sem espaços nas pontas');
-select is(pg_temp.lido('r1') ->> 'autorNome', 'Pessoa c1', 'FR-007: nome de quem registrou (coordenação de edição encerrada)');
+select is(pg_temp.lido('r1') ->> 'autorNome', 'Pessoa f1', 'FR-007: nome de quem registrou (o master)');
 select is(pg_temp.premissa(pg_temp.lido('d1b'), 'P09') ->> 'situacao', 'precisa_mudar', 'FR-007: vale a resposta mais recente');
 select is(pg_temp.premissa(pg_temp.lido('d1b'), 'P09') -> 'atual', pg_temp.lido('r2'), 'atual = última registrada');
 select is((select string_agg(r ->> 'autorNome' || ':' || (r ->> 'decisao'), ',' order by o)
            from jsonb_array_elements(pg_temp.premissa(pg_temp.lido('d1b'), 'P09') -> 'historico') with ordinality x (r, o)),
-  'Pessoa c1:confirmada,Pessoa c2:precisa_mudar', 'FR-007: histórico em ordem, docente também vê');
+  'Pessoa f1:confirmada,Pessoa f2:precisa_mudar', 'FR-007: histórico em ordem, docente também vê');
 select is((select count(*)::int from public.respostas_premissas where premissa in ('P09', 'P10')), 2,
   'recusas não gravam nada');
 select is((select count(*) from public.auditoria where tabela = 'respostas_premissas')::text,
@@ -176,16 +199,16 @@ select is((select count(*) from public.auditoria where tabela = 'respostas_premi
 select is((select justificativa from public.auditoria where tabela = 'respostas_premissas'
            and registro_id = pg_temp.lido('r2') ->> 'id'), 'Usar uma casa decimal.', 'FR-010: auditoria com a justificativa');
 
-update public.perfis set nome = 'Pessoa c2 renomeada' where id = pg_temp.u('c2');
+update public.perfis set nome = 'Pessoa f2 renomeada' where id = pg_temp.u('f2');
 select is((select autor_nome from public.respostas_premissas where id = (pg_temp.lido('r2') ->> 'id')::uuid),
-  'Pessoa c2', 'nome guardado no registro não muda com o perfil');
+  'Pessoa f2', 'nome guardado no registro não muda com o perfil');
 select throws_ok($$ update public.respostas_premissas set justificativa = 'Alterada depois.' $$,
   '42501', null, 'FR-007: resposta não é alterada');
 select throws_ok($$ delete from public.respostas_premissas $$, '42501', null, 'FR-007: resposta não é apagada');
 
 update public.premissas set resolvida_por = 'spec 099' where codigo = 'P31';
 set local role authenticated;
-select pg_temp.como(pg_temp.u('c2'));
+select pg_temp.como(pg_temp.u('f2'));
 select throws_ok($$ select public.responder_premissa('P31', 'confirmada', 'Premissa já resolvida.', null) $$,
   '23514', null, 'premissa resolvida não recebe resposta');
 select pg_temp.guardar('c2b', public.premissas_em_validacao()::text);

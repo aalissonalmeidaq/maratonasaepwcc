@@ -11,6 +11,7 @@ import { useConvitesPendentes, useEdicoesVisiveis, useMeusAvisos } from '../dado
 import { useEdicaoEmUso } from '../dados/edicaoEmUsoContexto';
 import { ROTULO_AREA } from '../navegacao';
 import { Credito } from './Credito';
+import { TrocarDeArea } from './TrocarDeArea';
 import { Menu } from './Menu';
 
 function obterIniciais(nome?: string): string {
@@ -49,7 +50,9 @@ function SeletorDaArea({ area }: { area: Area }) {
 export function AppShell({ area }: { area: Area }) {
   const { sessao, sair } = useAuth();
   const convitesPendentes = useConvitesPendentes(area === 'aluno');
-  const avisos = useMeusAvisos();
+  // Rede e gestão não têm edição: sem avisos de edição nem seletor (spec 016).
+  const comEdicao = area !== 'master' && area !== 'gestao';
+  const avisos = useMeusAvisos(comEdicao);
   const extrasDoMenu = {
     '/aluno/dupla': <ContadorConvites quantidade={convitesPendentes} />,
   };
@@ -216,6 +219,16 @@ export function AppShell({ area }: { area: Area }) {
   }, [menuAberto]);
 
   const papel = sessao?.papeis[0];
+  // Rótulo sob o nome: papel na edição ou, sem papel, a função de rede/unidade (spec 016).
+  const ocupacao = sessao?.master
+    ? 'Master da rede'
+    : papel
+      ? ROTULO_PAPEL[papel]
+      : sessao?.funcoes?.includes('gestao')
+        ? 'Gestão da unidade'
+        : sessao?.funcoes?.includes('analista')
+          ? ROTULO_PAPEL.analista
+          : undefined;
   const iniciais = obterIniciais(sessao?.nome);
   const drawerAtivo = menuAberto || emTransicao || arrasto !== null;
   const abertura = arrasto ? arrasto.abertura : menuAberto ? 1 : 0;
@@ -319,6 +332,7 @@ export function AppShell({ area }: { area: Area }) {
           <Menu area={area} extras={extrasDoMenu} />
         </nav>
         <div className="relative z-10 mt-6">
+          <TrocarDeArea areaAtual={area} fundo="escuro" className="mb-4" />
           <MarcaSenai fundo="escuro" className="w-28" />
           <Credito fundo="escuro" empilhado className="mt-3" />
         </div>
@@ -356,7 +370,7 @@ export function AppShell({ area }: { area: Area }) {
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-white">{sessao?.nome}</p>
-              {papel && <p className="truncate text-xs text-white/75">{ROTULO_PAPEL[papel]}</p>}
+              {ocupacao && <p className="truncate text-xs text-white/75">{ocupacao}</p>}
             </div>
           </div>
 
@@ -374,6 +388,7 @@ export function AppShell({ area }: { area: Area }) {
 
         {/* Rodapé do drawer com ações e marca */}
         <div className="relative z-10 mt-3 border-t border-white/15 pt-3">
+          <TrocarDeArea areaAtual={area} fundo="escuro" className="mb-2 px-2" />
           <div className="mb-1.5">
             <BotaoInstalar />
             <OrientacaoInstalacao />
@@ -452,16 +467,22 @@ export function AppShell({ area }: { area: Area }) {
               <Brand variante="positivo" className="w-40 min-w-0 lg:hidden" />
               <p className="hidden text-sm font-semibold text-text-secondary lg:block">
                 {ROTULO_AREA[area]}
+                {sessao?.unidade && <span className="font-normal"> · {sessao.unidade.nome}</span>}
               </p>
               <div className="ml-auto">
-                <ContadorAvisos naoLidos={avisos.data?.naoLidos ?? 0} caminho={`/${area}/avisos`} />
+                {comEdicao && (
+                  <ContadorAvisos
+                    naoLidos={avisos.data?.naoLidos ?? 0}
+                    caminho={`/${area}/avisos`}
+                  />
+                )}
               </div>
               <div className="hidden items-center gap-2 lg:flex">
                 <BotaoInstalar />
                 <OrientacaoInstalacao />
                 <div className="text-right">
                   <p className="text-sm font-semibold text-text">{sessao?.nome}</p>
-                  {papel && <p className="text-xs text-text-secondary">{ROTULO_PAPEL[papel]}</p>}
+                  {ocupacao && <p className="text-xs text-text-secondary">{ocupacao}</p>}
                 </div>
                 <Button variante="terciario" icone="sair" onClick={() => void sair()}>
                   Sair
@@ -469,7 +490,7 @@ export function AppShell({ area }: { area: Area }) {
               </div>
             </div>
           </header>
-          <SeletorDaArea area={area} />
+          {comEdicao && <SeletorDaArea area={area} />}
 
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
           <main

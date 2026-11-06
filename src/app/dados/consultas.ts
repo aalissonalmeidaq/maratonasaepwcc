@@ -364,6 +364,27 @@ export function usePremissas() {
   return useResultado('premissas', [], true, () => r.premissas.premissas());
 }
 
+// ---------------------------------------------------------------------------
+// Rede (spec 016): unidades e masters, só para o master (o servidor recusa os demais).
+// ---------------------------------------------------------------------------
+export function useUnidades() {
+  const r = useRepositorios();
+  return useResultado('unidades', [], true, () => r.rede.unidades());
+}
+// Gestão da unidade (spec 016): equipe e edições da unidade, sem dados de estudantes.
+export function useEquipeDaUnidade() {
+  const r = useRepositorios();
+  return useResultado('equipe-da-unidade', [], true, () => r.rede.equipe());
+}
+export function useEdicoesDaUnidade() {
+  const r = useRepositorios();
+  return useResultado('edicoes-da-unidade', [], true, () => r.rede.edicoes());
+}
+export function useMasters() {
+  const r = useRepositorios();
+  return useResultado('masters', [], true, () => r.rede.masters());
+}
+
 // Spec 010 — edições que a pessoa coordena, cadastro permanente e pendências do encerramento.
 export function useEdicoesQueCoordeno() {
   const r = useRepositorios();

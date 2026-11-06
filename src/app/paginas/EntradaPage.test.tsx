@@ -45,6 +45,17 @@ describe('Tela de entrada', () => {
     expect(await violacoesA11y(container)).toEqual([]);
   });
 
+  it('no modo demonstração, master, gestão e analista ficam numa lista compacta à parte (spec 016)', async () => {
+    const { container } = renderizar('demo');
+    const lista = screen.getByRole('list', { name: 'Rede e unidade (demonstração)' });
+    const botoes = within(lista).getAllByRole('button');
+    expect(botoes).toHaveLength(3);
+    expect(botoes[0]).toHaveAccessibleName(/master/i);
+    expect(botoes[1]).toHaveAccessibleName(/gestão.*gestão da unidade/i);
+    expect(botoes[2]).toHaveAccessibleName(/analista/i);
+    expect(await violacoesA11y(container)).toEqual([]);
+  });
+
   it('formulário real permite mostrar e ocultar a senha', async () => {
     const user = userEvent.setup();
     renderizar('supabase');

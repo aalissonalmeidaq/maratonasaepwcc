@@ -331,7 +331,7 @@ const RESPOSTAS_FICTICIAS: Record<string, Resposta[]> = {
       id: 'demo-r1',
       decisao: 'confirmada',
       justificativa: 'Fictício: 10 caracteres bastam para registrar o motivo.',
-      autorNome: 'Coordenação Fictícia',
+      autorNome: 'Master Fictício',
       registradoEm: '2026-11-03T13:00:00.000Z',
     },
   ],
@@ -340,31 +340,31 @@ const RESPOSTAS_FICTICIAS: Record<string, Resposta[]> = {
       id: 'demo-r2',
       decisao: 'confirmada',
       justificativa: 'Fictício: 10 itens por página está bom no celular.',
-      autorNome: 'Coordenação Fictícia',
+      autorNome: 'Master Fictício',
       registradoEm: '2026-11-02T12:00:00.000Z',
     },
     {
       id: 'demo-r3',
       decisao: 'precisa_mudar',
       justificativa: 'Fictício: no computador, preferimos 20 itens por página.',
-      autorNome: 'Coordenação Fictícia',
+      autorNome: 'Master Fictício',
       registradoEm: '2026-11-04T15:30:00.000Z',
     },
   ],
 };
 
 /** Premissas da demonstração: catálogo real com respostas fictícias; registrar é recusado. */
-export function criarPremissasDemo(coordena: () => boolean): RepositorioPremissas {
+export function criarPremissasDemo(ehMaster: () => boolean): RepositorioPremissas {
   return {
     async premissas(): Promise<CatalogoDePremissas> {
       return {
-        podeResponder: coordena(),
+        podeResponder: ehMaster(),
         premissas: CATALOGO_PREMISSAS.map((p) => {
           const historico = RESPOSTAS_FICTICIAS[p.codigo] ?? [];
           const atual = historico.at(-1) ?? null;
           return {
             ...p,
-            resolvidaPor: null,
+            resolvidaPor: p.codigo === 'P25' ? 'spec 016' : null,
             situacao: atual?.decisao ?? 'aguardando',
             atual,
             historico,

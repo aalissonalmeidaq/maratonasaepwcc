@@ -25,12 +25,12 @@ async function abrirPeloMenu(page: Page) {
   ).toBeVisible();
 }
 
-test('coordenação: abre pelo menu, filtra e baixa o CSV', async ({ page }) => {
-  await entrarComo(page, /coordenação/i);
-  await expect(page.getByText(/Premissas aguardando resposta: 30/)).toBeVisible();
+test('master: vê o aviso no início, abre pelo menu, filtra e baixa o CSV', async ({ page }) => {
+  await entrarComo(page, /master/i);
+  await expect(page.getByText(/Premissas aguardando resposta: 29/)).toBeVisible();
   await abrirPeloMenu(page);
   const resumo = page.getByRole('list', { name: 'Situação das premissas' });
-  await expect(resumo).toContainText('30');
+  await expect(resumo).toContainText('29');
   await page.getByLabel('Tema', { exact: true }).selectOption('Comunicados e relatórios');
   await expect(page.getByRole('article')).toHaveCount(3);
   await page.getByLabel('Situação', { exact: true }).selectOption('precisa_mudar');
@@ -43,10 +43,19 @@ test('coordenação: abre pelo menu, filtra e baixa o CSV', async ({ page }) => 
   expect(download.suggestedFilename()).toMatch(/^maratona-premissas-\d{4}-\d{2}-\d{2}\.csv$/);
 });
 
+test('coordenação: lê sem formulário e sem aviso no início (só o master responde)', async ({
+  page,
+}) => {
+  await entrarComo(page, /coordenação/i);
+  await expect(page.getByText(/Premissas aguardando resposta/)).toHaveCount(0);
+  await abrirPeloMenu(page);
+  await expect(page.getByRole('button', { name: /Responder/ })).toHaveCount(0);
+});
+
 test('docente: lê sem formulário de resposta', async ({ page }) => {
   await entrarComo(page, /lúcia exemplo/i);
   await abrirPeloMenu(page);
-  await expect(page.getByRole('article')).toHaveCount(32);
+  await expect(page.getByRole('article')).toHaveCount(31);
   await expect(page.getByRole('button', { name: /Responder/ })).toHaveCount(0);
 });
 

@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
-import { areaInicial } from '@/modules/acesso';
+import { areaInicialDoAcesso } from '@/modules/acesso';
 import { CAMINHO_DO_DESTINO, useAuth, type Sessao } from '@/modules/auth';
 import { contasDemo } from '@/modules/demo';
 import { useOnline } from '@/shared/pwa/useOnline';
@@ -124,12 +124,33 @@ const PERFIL_DEMO: Record<string, { papel: string; descricao: string; icone: Nom
   aluno: { papel: 'Aluno', descricao: 'Dupla, desafios, pontuação e ranking', icone: 'estudante' },
 };
 
+/** Perfis de rede e de unidade (spec 016): lista compacta, para a Entrar continuar sem rolagem. */
+const PERFIL_REDE: Record<string, { rotulo: string; icone: NomeIcone }> = {
+  'u-master': { rotulo: 'Master', icone: 'administracao' },
+  'u-gestao': { rotulo: 'Gestão', icone: 'gestao' },
+  'u-analista': { rotulo: 'Analista', icone: 'painel' },
+};
+
 function EntradaDemo() {
   const { entrarDemo } = useAuth();
   const [escolhido, setEscolhido] = useState<string | null>(null);
   const [erro, setErro] = useState(false);
+  const principais = contasDemo.filter((c) => c.papeis.length > 0);
+  const rede = contasDemo.filter((c) => c.papeis.length === 0);
+  async function entrarComo(usuarioId: string) {
+    setEscolhido(usuarioId);
+    setErro(false);
+    try {
+      if (!entrarDemo) throw new Error('Demonstração indisponível');
+      await entrarDemo(usuarioId);
+    } catch {
+      setErro(true);
+    } finally {
+      setEscolhido(null);
+    }
+  }
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2.5 sm:gap-3">
       <p role="status" className="sr-only">
         {escolhido ? 'Abrindo o perfil de demonstração…' : ''}
       </p>
@@ -141,7 +162,7 @@ function EntradaDemo() {
         />
       )}
       <ul aria-label="Perfis de demonstração" className="flex flex-col gap-2 sm:gap-3">
-        {contasDemo.map((c) => {
+        {principais.map((c) => {
           const perfil = PERFIL_DEMO[c.papeis[0] ?? 'aluno'] ?? PERFIL_DEMO.aluno!;
           return (
             <li key={c.usuarioId} className="@container">
@@ -149,18 +170,7 @@ function EntradaDemo() {
                 type="button"
                 aria-busy={escolhido === c.usuarioId || undefined}
                 disabled={escolhido !== null}
-                onClick={async () => {
-                  setEscolhido(c.usuarioId);
-                  setErro(false);
-                  try {
-                    if (!entrarDemo) throw new Error('Demonstração indisponível');
-                    await entrarDemo(c.usuarioId);
-                  } catch {
-                    setErro(true);
-                  } finally {
-                    setEscolhido(null);
-                  }
-                }}
+                onClick={() => void entrarComo(c.usuarioId)}
                 className="group flex w-full min-w-0 flex-col items-start gap-3 rounded-lg border border-border bg-surface p-3 text-left shadow-sm transition-colors hover:border-blue-600 hover:bg-surface-muted focus-visible:shadow-(--focus-ring) focus-visible:outline-none disabled:opacity-60 @min-[14rem]:flex-row @min-[14rem]:items-center"
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-surface-muted text-navy-900 group-hover:bg-surface">
@@ -184,6 +194,33 @@ function EntradaDemo() {
           );
         })}
       </ul>
+      {rede.length > 0 && (
+        <div>
+          <ul aria-label="Rede e unidade (demonstração)" className="flex flex-wrap gap-2">
+            {rede.map((c) => {
+              const perfil = PERFIL_REDE[c.usuarioId] ?? {
+                rotulo: c.nome,
+                icone: 'usuario' as const,
+              };
+              return (
+                <li key={c.usuarioId}>
+                  <button
+                    type="button"
+                    aria-busy={escolhido === c.usuarioId || undefined}
+                    disabled={escolhido !== null}
+                    onClick={() => void entrarComo(c.usuarioId)}
+                    className="flex min-h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 text-xs sm:text-sm font-semibold text-navy-900 shadow-sm transition-colors hover:border-blue-600 hover:bg-surface-muted focus-visible:shadow-(--focus-ring) focus-visible:outline-none disabled:opacity-60"
+                  >
+                    <Icon nome={perfil.icone} tamanho="sm" cor="marca" />
+                    {perfil.rotulo}
+                    <span className="sr-only"> — conta fictícia: {c.nome}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -216,7 +253,7 @@ export function EntradaPage() {
         </span>
       </main>
     );
-  if (sessao) return <Navigate to={CAMINHO_DO_DESTINO[areaInicial(sessao.papeis)]} replace />;
+  if (sessao) return <Navigate to={CAMINHO_DO_DESTINO[areaInicialDoAcesso(sessao)]} replace />;
 
   return (
     <div className="grid flex-1 grid-cols-1 bg-bg lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
@@ -304,7 +341,10 @@ export function EntradaPage() {
               {modo === 'demo' && online && <EntradaDemo />}
               <Link
                 to="/regulamento"
-                className="mt-4 inline-flex min-h-11 items-center font-semibold text-link underline underline-offset-4"
+                className={cx(
+                  'inline-flex min-h-11 items-center font-semibold text-link underline underline-offset-4',
+                  modo === 'demo' ? 'mt-1' : 'mt-4',
+                )}
               >
                 Regulamento da Maratona
               </Link>
@@ -356,6 +396,23 @@ export function AguardandoPermissaoPage() {
       <h1 className="font-display text-2xl font-bold text-text">Aguardando permissões</h1>
       <p className="mt-2 text-text-secondary">
         Sua conta ainda não tem funções atribuídas pela coordenação nesta edição.
+      </p>
+      <Button className="mt-4" variante="secundario" onClick={() => void sair()}>
+        Sair
+      </Button>
+    </main>
+  );
+}
+
+/** Conta de unidade desativada pelo master (spec 016, FR-009): o servidor já recusa tudo. */
+export function UnidadeDesativadaPage() {
+  const { sair, sessao } = useAuth();
+  return (
+    <main className="mx-auto max-w-md p-6 text-center">
+      <h1 className="font-display text-2xl font-bold text-text">Unidade desativada</h1>
+      <p className="mt-2 text-text-secondary">
+        {sessao?.unidade ? `A unidade ${sessao.unidade.nome} está desativada. ` : ''}
+        Procure a gestão da rede para reativá-la. Os dados ficam guardados.
       </p>
       <Button className="mt-4" variante="secundario" onClick={() => void sair()}>
         Sair

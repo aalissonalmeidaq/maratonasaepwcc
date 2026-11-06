@@ -30,7 +30,7 @@ const FILTRO_INICIAL: FiltroPremissas = { situacao: 'todas', tema: 'todos' };
 /**
  * Premissas em validação (spec 015, contracts/telas.md): lista por tema com situação, filtros,
  * resumo, CSV e versão para impressão. `formulario` recebe cada premissa pendente e devolve o
- * formulário de resposta (só para a coordenação).
+ * formulário de resposta (só para o master).
  */
 export function PremissasPage({
   catalogo,

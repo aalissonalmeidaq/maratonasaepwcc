@@ -52,3 +52,12 @@ export function linhaDeAtribuicao(p: PedidoDeConta, usuarioId: string) {
     curso_id: p.papel === 'mentor' ? p.cursoId : null,
   };
 }
+
+/**
+ * Metadados da conta no Auth (spec 016): a unidade da edição vai junto, e o gatilho do perfil a
+ * grava. Sem unidade conhecida, `null`: quem chama recusa antes de criar a conta, em vez de
+ * deixá-la cair na unidade errada.
+ */
+export function metadadosDaConta(nome: string, unidadeId: string | null | undefined) {
+  return unidadeId ? { nome, unidade_id: unidadeId } : null;
+}
