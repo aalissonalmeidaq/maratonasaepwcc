@@ -42,7 +42,6 @@ select is((select count(*)::int from public.funcoes_unidade f
            join public.perfis p on p.id = f.usuario_id
            where f.funcao = 'gestao' and p.id not in (select id from auth.users where email = 'gestao@exemplo.invalid')), 0,
   'a migração não cria gestão (só o seed local cria a conta de gestão de teste)');
-select is((select resolvida_por from public.premissas where codigo = 'P25'), 'spec 016', 'P25 resolvida pela spec 016');
 
 -- ===========================================================================
 -- Integridade entre unidades (T005, FR-006b, FR-007, FR-008; salvaguardas S1 e S3)
@@ -729,6 +728,26 @@ select pg_temp.como(pg_temp.u('a6'));
 select throws_ok(format($f$ insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id) values (%L, '20000000-0000-0000-0017-0000000000a0', 'coordenacao', null) $f$, pg_temp.u('ad')),
   '23514', null, 'a coordenação não concede coordenação por vínculo (só a gestão)');
 reset role;
+
+-- ===========================================================================
+-- Spec 018 — premissas fora do site: nenhum objeto de premissas existe no banco.
+-- ===========================================================================
+select is(to_regclass('public.premissas'), null, 'spec 018: a tabela premissas não existe');
+select is(to_regclass('public.respostas_premissas'), null, 'spec 018: a tabela respostas_premissas não existe');
+select is(to_regtype('public.decisao_premissa'), null, 'spec 018: o tipo decisao_premissa não existe');
+select is((select string_agg(n.nspname || '.' || p.proname, ',' order by p.proname) from pg_proc p
+           join pg_namespace n on n.oid = p.pronamespace
+           where n.nspname in ('public', 'app')
+             and p.proname in ('premissas_em_validacao', 'responder_premissa', 'recusar_alteracao_de_resposta',
+                               'resposta_json', 'atua_como_docente_em_alguma')),
+  null, 'spec 018: nenhuma função de premissas existe');
+set local role authenticated;
+select pg_temp.como(pg_temp.u('f0'));
+select throws_ok('select public.premissas_em_validacao()', '42883', null, 'spec 018: premissas_em_validacao não existe');
+select throws_ok($$ select public.responder_premissa('P01', 'confirmada', 'Tentativa de resposta.', null) $$, '42883', null,
+  'spec 018: responder_premissa não existe');
+reset role;
+
 
 select * from finish();
 rollback;
