@@ -54,6 +54,16 @@ liberado.
 Após mesclar, conferir a execução do `main` em Actions; disparar `Run workflow` manualmente e
 conferir o resultado.
 
-## Resultado da validação
+## Resultado da validação (2026-11-06)
 
-_(preenchido na implementação)_
+| Item                                                        | Resultado                                                                                                                                            |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Teste da estrutura do fluxo                                 | `scripts/ci/fluxo.test.ts`: 10 casos aprovados (visto falhar antes do `ci.yml`)                                                                      |
+| Primeira execução (PR #23)                                  | `jornadas-supabase` falhou por teste instável de privacidade offline (a página saía antes de a cópia local ser salva); corrigido no teste            |
+| Execução verde (PR #23)                                     | `banco` 2 min 21 s, `qualidade` 2 min 42 s, `jornadas-demo` 4 min 32 s, `jornadas-supabase` 8 min 4 s; total de ponta a ponta ≈ 8 min (meta: 25 min) |
+| Cache de imagens Docker                                     | não necessário (total bem abaixo de 20 min)                                                                                                          |
+| Prova de falha injetada (PR descartável #24, FR-014/SC-002) | 3 execuções, nas 3 os quatro jobs ficaram vermelhos, cada um pela sua falha (teste de unidade, pgTAP, jornada de demonstração, jornada Supabase)     |
+| Artefatos de falha (SC-004)                                 | `jornadas-demo-falha` e `jornadas-supabase-falha` gerados e baixados; o de Supabase traz o traço e o registro das funções                            |
+| Leitura do `ci.yml` (SC-007)                                | sem `secrets.*`, sem banco remoto, permissões `contents: read`, só ações `actions/*` e `supabase/setup-cli`                                          |
+| Observação                                                  | o fluxo só dispara para propostas com base `main`; mudar a base de uma proposta existente não dispara (um commit novo dispara)                       |
+| Pendente do dono                                            | regra de proteção (US3/SC-005/SC-006) e execução do `main` após a mesclagem (US4)                                                                    |
