@@ -42,15 +42,17 @@ describe('catálogo de premissas da demonstração (spec 015, Apêndice A)', () 
     }
   });
 
-  it('leitura fictícia: uma confirmada, uma precisa mudar com histórico de duas; as demais aguardando', async () => {
+  it('todas resolvidas (P25 pela spec 016, as demais pelo projeto); respostas fictícias só no histórico', async () => {
     const { premissas } = await criarPremissasDemo(() => true).premissas();
-    const porSituacao = (s: string) => premissas.filter((p) => !p.resolvidaPor && p.situacao === s);
-    expect(porSituacao('confirmada')).toHaveLength(1);
-    const mudar = porSituacao('precisa_mudar');
-    expect(mudar).toHaveLength(1);
-    expect(mudar[0]!.historico).toHaveLength(2);
-    expect(mudar[0]!.atual).toEqual(mudar[0]!.historico[1]);
-    expect(porSituacao('aguardando')).toHaveLength(4);
+    expect(premissas.filter((p) => !p.resolvidaPor)).toHaveLength(0);
+    expect(premissas.find((p) => p.codigo === 'P25')?.resolvidaPor).toBe('spec 016');
+    expect(premissas.find((p) => p.codigo === 'P01')?.resolvidaPor).toBe(
+      'decisão do projeto de 06/11/2026',
+    );
+    const p06 = premissas.find((p) => p.codigo === 'P06')!;
+    expect(p06.situacao).toBe('precisa_mudar');
+    expect(p06.historico).toHaveLength(2);
+    expect(p06.atual).toEqual(p06.historico[1]);
   });
 
   it('só o master pode responder na leitura; os demais não; registrar é recusado', async () => {
