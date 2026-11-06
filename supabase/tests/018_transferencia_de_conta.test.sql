@@ -249,10 +249,13 @@ select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_t
 update public.perfis set ativo = true where id = pg_temp.u('d2');
 
 -- Última gestão ativa da origem.
-update public.funcoes_unidade set ativa = false where usuario_id = pg_temp.u('f2') and funcao = 'gestao';
+-- O seed local também tem uma gestão na unidade inicial: só a f1 fica ativa durante o teste.
+update public.funcoes_unidade set ativa = false
+where funcao = 'gestao' and usuario_id in (select id from public.perfis where unidade_id = pg_temp.ui() and id <> pg_temp.u('f1'));
 select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('f1'), pg_temp.ui(), pg_temp.ub(), 'Última gestão da unidade.')),
   '23514: Indique outra gestão antes.', 'última gestão ativa da unidade');
-update public.funcoes_unidade set ativa = true where usuario_id = pg_temp.u('f2') and funcao = 'gestao';
+update public.funcoes_unidade set ativa = true
+where funcao = 'gestao' and usuario_id in (select id from public.perfis where unidade_id = pg_temp.ui() and id <> pg_temp.u('f1'));
 
 -- Última coordenação ativa de edição não encerrada.
 update public.atribuicoes set ativo = false where usuario_id = pg_temp.u('c2') and papel = 'coordenacao';
@@ -269,6 +272,73 @@ select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_t
 
 -- Nada mudou em nenhuma das recusas.
 select is(pg_temp.estado(), pg_temp.lido('estado_recusas'), 'nenhuma recusa alterou perfis, funções, vínculos nem transferências');
+
+
+-- ===========================================================================
+-- US3 — auditoria, preservação, idempotência e concorrência (T016)
+-- ===========================================================================
+select pg_temp.guardar('chave2', gen_random_uuid()::text);
+select pg_temp.guardar('fn2_antes', (select count(*) from public.funcoes_unidade)::text);
+select pg_temp.guardar('at2_antes', (select count(*) from public.atribuicoes)::text);
+select pg_temp.guardar('trf_antes', (select count(*) from public.transferencias_de_conta)::text);
+select pg_temp.guardar('aud_antes', (select count(*) from public.auditoria where tabela = 'transferencias_de_conta')::text);
+
+set local role authenticated;
+select pg_temp.como(pg_temp.u('fa'));
+select pg_temp.guardar('id2', public.transferir_conta(pg_temp.lido('chave2')::uuid, pg_temp.u('d2'), pg_temp.ui(), pg_temp.uc(),
+  '  Docente passa a atuar na Unidade C.  ')::text);
+reset role;
+
+select is((select count(*) from public.transferencias_de_conta)::text, (pg_temp.lido('trf_antes')::int + 1)::text, 'exatamente 1 registro de transferência');
+select is((select unidade_origem from public.transferencias_de_conta where id = pg_temp.lido('id2')::uuid), pg_temp.ui(), 'registro: unidade de origem');
+select is((select unidade_destino from public.transferencias_de_conta where id = pg_temp.lido('id2')::uuid), pg_temp.uc(), 'registro: unidade de destino');
+select is((select justificativa from public.transferencias_de_conta where id = pg_temp.lido('id2')::uuid), 'Docente passa a atuar na Unidade C.', 'registro: justificativa sem espaços nas pontas');
+select is((select autor_id from public.transferencias_de_conta where id = pg_temp.lido('id2')::uuid), pg_temp.u('fa'), 'registro: autor é o master');
+select is((select funcoes_anteriores from public.transferencias_de_conta where id = pg_temp.lido('id2')::uuid), '["docente"]'::jsonb, 'registro: funções que a conta tinha na origem');
+select is((select vinculos_encerrados from public.transferencias_de_conta where id = pg_temp.lido('id2')::uuid), 1, 'registro: um vínculo encerrado');
+select ok((select criado_em from public.transferencias_de_conta where id = pg_temp.lido('id2')::uuid) <= now(), 'registro: horário do servidor');
+select is((select count(*) from public.auditoria where tabela = 'transferencias_de_conta')::text, (pg_temp.lido('aud_antes')::int + 1)::text,
+  'exatamente 1 linha de auditoria da transferência');
+select is((select justificativa from public.auditoria where tabela = 'transferencias_de_conta' and registro_id = pg_temp.lido('id2')),
+  'Docente passa a atuar na Unidade C.', 'auditoria: justificativa da transferência');
+
+-- Nada apagado; tudo inativo; funções da origem não voltam sozinhas.
+select is((select count(*) from public.funcoes_unidade)::text, pg_temp.lido('fn2_antes'), 'nenhuma função apagada');
+select is((select count(*) from public.atribuicoes)::text, pg_temp.lido('at2_antes'), 'nenhum vínculo apagado');
+select is((select count(*)::int from public.funcoes_unidade where usuario_id = pg_temp.u('d2') and (ativa or desativada_com_conta)), 0,
+  'funções da origem inativas e sem marca de reativação junto com a conta');
+select is((select count(*)::int from public.atribuicoes where usuario_id = pg_temp.u('d2') and ativo), 0, 'nenhum vínculo ativo');
+select isnt(coalesce(current_setting('app.transferencia_em_curso', true), ''), 'on', 'o marcador de transferência fica desligado ao fim');
+
+-- O registro é imutável e só o master o alcança (e por RPC; ninguém tem privilégio direto).
+select throws_ok($$ update public.transferencias_de_conta set justificativa = 'Alterada depois da transferência.' $$,
+  '42501', 'O registro de transferência não é alterado nem apagado.', 'o registro não é alterado');
+select throws_ok($$ delete from public.transferencias_de_conta $$, '42501', 'O registro de transferência não é alterado nem apagado.', 'o registro não é apagado');
+select is(pg_temp.visto_como(pg_temp.u(quem), 'select count(*) from public.transferencias_de_conta'), -1::bigint,
+  quem || ': sem leitura direta do registro')
+from unnest(array['f1', 'c1', 'd1', 'fa']) quem;
+
+-- Repetição do mesmo pedido: devolve o mesmo id e não altera nada.
+select pg_temp.guardar('estado_idem', pg_temp.estado());
+select is(pg_temp.mensagem(pg_temp.u('fa'), format($q$ select public.transferir_conta(%L, %L, %L, %L, 'Docente passa a atuar na Unidade C.') $q$,
+  pg_temp.lido('chave2'), pg_temp.u('d2'), pg_temp.ui(), pg_temp.uc())), null, 'repetir o mesmo pedido é aceito');
+set local role authenticated;
+select pg_temp.como(pg_temp.u('fa'));
+select is(public.transferir_conta(pg_temp.lido('chave2')::uuid, pg_temp.u('d2'), pg_temp.ui(), pg_temp.uc(), 'Docente passa a atuar na Unidade C.')::text,
+  pg_temp.lido('id2'), 'a repetição devolve o mesmo id');
+reset role;
+select is(pg_temp.estado(), pg_temp.lido('estado_idem'), 'a repetição não altera nada');
+
+-- Concorrência: outro pedido (chave nova) com a origem já desatualizada é recusado.
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_temp.ui(), pg_temp.ub(), 'Pedido com a origem desatualizada.')),
+  '23514: Esta conta não é da unidade de origem.', 'conta que já mudou de unidade é recusada');
+
+-- Volta à unidade de origem: segue as mesmas regras e não reativa nada do passado.
+select is(pg_temp.mensagem(pg_temp.u('fa'), pg_temp.pedido(pg_temp.u('d2'), pg_temp.uc(), pg_temp.ui(), 'Docente volta para a unidade inicial.')),
+  null, 'a conta volta à unidade de origem');
+select is((select unidade_id from public.perfis where id = pg_temp.u('d2')), pg_temp.ui(), 'd2 está de novo na unidade inicial');
+select is((select count(*)::int from public.atribuicoes where usuario_id = pg_temp.u('d2') and ativo), 0, 'os vínculos antigos seguem inativos');
+select is((select count(*)::int from public.funcoes_unidade where usuario_id = pg_temp.u('d2') and ativa), 0, 'as funções antigas seguem inativas');
 
 
 select * from finish();

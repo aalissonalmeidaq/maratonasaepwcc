@@ -135,10 +135,48 @@ begin
   if found then
     return v_id;
   end if;
+  if char_length(v_justificativa) not between 10 and 2000 then
+    raise exception 'Justifique com 10 a 2.000 caracteres.' using errcode = '23514';
+  end if;
+  if p_unidade_origem is not distinct from p_unidade_destino then
+    raise exception 'A unidade de destino deve ser outra.' using errcode = '23514';
+  end if;
   -- Trava a conta e relê a unidade (uma transferência concorrente já pode ter mudado).
   select * into v_perfil from public.perfis where id = p_usuario for update;
-  if not found or v_perfil.unidade_id is distinct from p_unidade_origem then
+  if not found then
     raise exception 'Esta conta não é da unidade de origem.' using errcode = '23514';
+  end if;
+  if exists (select 1 from public.masters where usuario_id = p_usuario) then
+    raise exception 'Contas de master não são transferidas.' using errcode = '23514';
+  end if;
+  if v_perfil.unidade_id is distinct from p_unidade_origem then
+    raise exception 'Esta conta não é da unidade de origem.' using errcode = '23514';
+  end if;
+  if exists (select 1 from public.atribuicoes where usuario_id = p_usuario and papel = 'aluno') then
+    raise exception 'Contas de estudante não são transferidas.' using errcode = '23514';
+  end if;
+  if not exists (select 1 from public.funcoes_unidade where usuario_id = p_usuario) then
+    raise exception 'Esta não é uma conta de equipe.' using errcode = '23514';
+  end if;
+  if not v_perfil.ativo then
+    raise exception 'Reative a conta antes de transferi-la.' using errcode = '23514';
+  end if;
+  if not exists (select 1 from public.unidades where id = p_unidade_destino) then
+    raise exception 'Unidade de destino não encontrada.' using errcode = '23514';
+  end if;
+  if exists (select 1 from public.unidades where id in (p_unidade_origem, p_unidade_destino) and not ativa) then
+    raise exception 'Unidade desativada.' using errcode = '23514';
+  end if;
+  -- A origem não fica sem responsável.
+  if exists (select 1 from public.funcoes_unidade where usuario_id = p_usuario and funcao = 'gestao' and ativa)
+     and not exists (
+       select 1 from public.funcoes_unidade f
+       join public.perfis o on o.id = f.usuario_id
+       where f.funcao = 'gestao' and f.ativa and o.ativo and o.unidade_id = p_unidade_origem and o.id <> p_usuario) then
+    raise exception 'Indique outra gestão antes.' using errcode = '23514';
+  end if;
+  if app.e_ultima_coordenacao(p_usuario) then
+    raise exception 'Indique outra coordenação antes.' using errcode = '23514';
   end if;
 
   select coalesce(jsonb_agg(f.funcao order by f.funcao::text), '[]'::jsonb) into v_funcoes

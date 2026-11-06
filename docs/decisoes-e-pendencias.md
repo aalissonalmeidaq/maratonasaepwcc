@@ -326,6 +326,25 @@ foi verificado; o restante é da unidade.
 - **Pendências desta spec:** nome oficial das unidades além da inicial e quem será o primeiro master
   em produção dependem da unidade/da rede **[validar]**.
 
+## 6.16 Spec 019 — transferência de conta entre unidades (implementada em 2026-11-06)
+
+- Implementação: migration `20261115120000_transferencia_de_conta.sql` (tabela
+  `transferencias_de_conta`, RPCs `transferir_conta` e `equipe_de_unidade_da_rede`), tela do master em
+  Rede › Unidades ("Ver equipe" e "Transferir…"), ADR 0013 atualizado.
+- **Decisões do usuário (06/11/2026):** só o master transfere; só contas de equipe (gestão,
+  coordenação, docente, mentor, analista), nunca estudantes nem masters; funções e vínculos da origem
+  ficam inativos e preservados (nada é apagado); no destino a conta chega sem funções e a gestão do
+  destino as define.
+- **Recusas:** sem justificativa de 10 a 2.000 caracteres; origem igual ao destino; unidade
+  desativada (origem ou destino); conta desativada; conta que é a última gestão ativa da origem ou a
+  última coordenação ativa de edição não encerrada.
+- **Edições encerradas:** o vínculo de quem coordenava uma edição encerrada também vira inativo
+  (histórico), por uma exceção controlada às travas de "edição encerrada é só leitura" e de "toda
+  edição tem coordenação", ligada só dentro da RPC.
+- **Fora de escopo:** transferir em lote, transferir estudantes, aprovação por outra pessoa e
+  aviso por e-mail à pessoa transferida (ela vê "aguardando permissão" ao entrar). A consulta do
+  histórico de transferências é possível pela auditoria e por `transferencias_de_conta`.
+
 ## 6.15 Spec 018 — premissas fora do site (implementada em 2026-11-06)
 
 - Decisão do usuário: as premissas não são tratadas no site, e sim no desenvolvimento. Saíram a tela

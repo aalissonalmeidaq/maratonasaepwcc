@@ -43,6 +43,15 @@ no diálogo; axe sem violações (desktop e celular). Esperado (Supabase): trans
 unidade inicial para uma unidade criada na jornada; a gestão do destino a vê e atribui a função;
 a conta transferida entra e vê "aguardando permissão" até então.
 
-## Resultado da validação
+## Resultado da validação (2026-11-06)
 
-_(preenchido na implementação)_
+| Item                                 | Antes                     | Depois                                                                                                                                                                        |
+| ------------------------------------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify` (testes de unidade) | 133 arquivos, 968 testes  | 134 arquivos, 979 testes                                                                                                                                                      |
+| `npm run test:db`                    | 16 arquivos, 1.861 testes | 17 arquivos, 1.952 testes (`018_transferencia_de_conta`: 89)                                                                                                                  |
+| `npm run test:e2e` (demonstração)    | 173 aprovados, 1 ignorado | 175 aprovados, 1 ignorado                                                                                                                                                     |
+| `npm run test:e2e:supabase`          | 74 aprovados              | 76 aprovados, em banco recém-reiniciado (`db reset`)                                                                                                                          |
+| Descobertas durante a implementação  | —                         | edições encerradas bloqueiam alteração de vínculos (exceção controlada na transferência); `garantir_coordenacao_ativa` e `proteger_derivadas` tratadas (ver `research.md` R2) |
+
+Observação: as jornadas contra o Supabase não são reexecutáveis sobre o mesmo banco sem `db reset`
+(gravam dados); a CI sempre começa de um banco novo.
