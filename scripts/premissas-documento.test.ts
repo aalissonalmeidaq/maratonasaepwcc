@@ -51,16 +51,16 @@ describe('docs/premissas.md (spec 018)', () => {
 
   it('cada premissa tem os seis campos preenchidos', () => {
     for (const [codigo, corpo] of mapa) {
+      const linhas = corpo.split(/\r?\n/);
       for (const campo of CAMPOS) {
-        const prefixo = '- **' + campo + ':** ';
-        const linha = corpo.split('
-').find((l) => l.startsWith(prefixo)) ?? '';
-        expect(linha.slice(prefixo.length).trim().length, codigo + ' — ' + campo).toBeGreaterThan(0);
-        expect(m?.[1]?.trim().length ?? 0, `${codigo} — ${campo}`).toBeGreaterThan(0);
+        const prefixo = `- **${campo}:** `;
+        const linha = linhas.find((l) => l.startsWith(prefixo)) ?? '';
+        expect(linha.slice(prefixo.length).trim().length, `${codigo} — ${campo}`).toBeGreaterThan(
+          0,
+        );
       }
-      const pergunta = corpo.split('
-').find((l) => l.startsWith('- **Pergunta:** ')) ?? '';
-      expect(pergunta.endsWith('?'), codigo + ' termina com ?').toBe(true);
+      const pergunta = linhas.find((l) => l.startsWith('- **Pergunta:** ')) ?? '';
+      expect(pergunta.endsWith('?'), `${codigo} termina com ?`).toBe(true);
     }
   });
 
