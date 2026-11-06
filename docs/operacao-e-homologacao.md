@@ -2,6 +2,14 @@
 
 > Orientações a validar pela unidade. Nenhum ambiente remoto foi criado ou conectado.
 
+## Premissas em validação (spec 015)
+
+- Antes de usar dados reais, a coordenação responde às premissas P01–P32 na tela "Premissas em
+  validação" (aceite do PRD §16). "Precisa mudar" não altera o sistema: abrir uma spec para cada
+  mudança. A lista pode ser exportada em CSV ou impressa para a reunião.
+- Respostas são só de inserção e ficam na auditoria (`respostas_premissas`).
+- Datas de relatórios, painéis e o corte de "encontro realizado" usam `America/Fortaleza`.
+
 ## Incremento PWA e acessibilidade (spec 014)
 
 - `/regulamento` usa transporte anônimo e campos públicos selecionados no servidor; publicar ou
@@ -85,7 +93,7 @@ foi deixado com o seed limpo. Os servidores temporários desta execução foram 
      novo é necessário: hoje só existe o do Mailpit (ambiente local). Confirmar o bloqueio de
      SMTP (portas 25/587) nas funções hospedadas;
    - **recuperação de senha**, enviada pelo próprio Supabase Auth: configurar o **SMTP
-     próprio** do Auth no painel (remetente e domínio da unidade) **[validar]** e incluir
+     próprio** do Auth no painel (remetente e domínio da unidade) **[P32 — em validação]** e incluir
      `<domínio>/redefinir-senha` nas URLs de redirecionamento.
 9. Fazer o deploy das funções (`supabase functions deploy`) com `definir-senha-inicial` sem
    verificação de JWT (ela é pública; ver `supabase/config.toml`).

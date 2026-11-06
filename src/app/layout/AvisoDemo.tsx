@@ -5,7 +5,7 @@ export function AvisoDemo() {
   return (
     <section
       aria-label="Aviso de modo demonstração"
-      className="flex items-center justify-center gap-2 bg-yellow-500 px-4 py-1.5 text-center text-xs font-semibold text-navy-950 sm:text-sm"
+      className="flex items-center justify-center gap-2 bg-yellow-500 print:hidden px-4 py-1.5 text-center text-xs font-semibold text-navy-950 sm:text-sm"
     >
       <Icon nome="aviso" tamanho="sm" />
       Modo demonstração — dados fictícios, acesso não seguro. Não insira dados reais.

@@ -5,7 +5,7 @@ import type { CriterioRubrica, RegrasDaEdicao } from './tipos';
 export type ErrosDeRegras = Record<string, string>;
 
 const RUBRICAS = ['participacao', 'entrega', 'apresentacao'] as const;
-// Limites de proteção contra erro de digitação, não regras do PRD (research R4). [validar]
+// Limites de proteção contra erro de digitação, não regras do PRD (research R4). Em validação como P18 (spec 015).
 const MAX_CRITERIOS = 20;
 const MAX_ROTULO = 80;
 

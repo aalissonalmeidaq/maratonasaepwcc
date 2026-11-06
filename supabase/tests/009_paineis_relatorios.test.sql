@@ -163,7 +163,7 @@ select is(app.encontro_realizado(pg_temp.en('3')), false, 'R2: encontro cancelad
 update public.encontros set estado = 'realizado' where id = pg_temp.en('2');
 select is(app.encontro_realizado(pg_temp.en('2')), true, 'R2: estado "realizado" conta mesmo com data futura');
 update public.encontros set estado = 'agendado' where id = pg_temp.en('2');
-update public.encontros set data = (now() at time zone 'America/Sao_Paulo')::date where id = pg_temp.en('1');
+update public.encontros set data = (now() at time zone 'America/Fortaleza')::date where id = pg_temp.en('1');
 select is(app.encontro_realizado(pg_temp.en('1')), false, 'R2: encontro de hoje só conta no dia seguinte');
 update public.encontros set data = current_date - 7 where id = pg_temp.en('1');
 
@@ -389,8 +389,8 @@ select ok(not pg_temp.tem_chave(pg_temp.lido('pc')::jsonb, 'nota'), 'FR-006/SC-0
 
 -- Prova realizada: integrantes sem resultado e resultados pendentes contam; nota confirmada não.
 reset role;
--- Data de Brasília: "realizado" é avaliado no fuso America/Sao_Paulo (com current_date, falhava após 21h).
-update public.encontros set data = (now() at time zone 'America/Sao_Paulo')::date - 1 where id = pg_temp.en('4');
+-- Data de Juazeiro do Norte: "realizado" é avaliado no fuso America/Fortaleza (com current_date, falhava após 21h).
+update public.encontros set data = (now() at time zone 'America/Fortaleza')::date - 1 where id = pg_temp.en('4');
 insert into public.resultados_prova (encontro_id, estudante_id, dupla_id, realizacao, nota, nota_estado, fonte,
                                      escala_confirmada, autorizacao_confirmada) values
   (pg_temp.en('4'), pg_temp.u('a1'), pg_temp.d('a1'), 'confirmada', 80, 'confirmada', 'Planilha fictícia', true, true),

@@ -43,6 +43,12 @@ export function mensagemDeErro(erro: unknown): string {
       return /permission denied|row-level security|violates/i.test(erro.message) || !erro.message
         ? 'Você não tem permissão para esta operação.'
         : erro.message;
+    case '40001':
+      // Conflito de concorrência: o servidor explica o que mudou (ex.: premissa já respondida).
+      return (
+        erro.message ||
+        'Os dados mudaram desde que a tela foi carregada. Recarregue e tente de novo.'
+      );
     case '23503':
       return 'Este registro está em uso e não pode ser removido.';
     case '23514':

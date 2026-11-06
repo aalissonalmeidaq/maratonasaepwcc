@@ -356,6 +356,14 @@ export function useComunicadosQueGerencio(edicaoId?: string) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Premissas em validação (spec 015): da instalação, não da edição; permissão no servidor.
+// ---------------------------------------------------------------------------
+export function usePremissas() {
+  const r = useRepositorios();
+  return useResultado('premissas', [], true, () => r.premissas.premissas());
+}
+
 // Spec 010 — edições que a pessoa coordena, cadastro permanente e pendências do encerramento.
 export function useEdicoesQueCoordeno() {
   const r = useRepositorios();

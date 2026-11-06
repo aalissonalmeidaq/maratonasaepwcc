@@ -40,7 +40,7 @@ function SeletorDaArea({ area }: { area: Area }) {
   }, [atual, padrao, escolher]);
   if (daArea.length < 2 && daArea[0]?.estado !== 'rascunho') return null;
   return (
-    <div className="border-b border-border bg-surface px-4 py-3 sm:px-6">
+    <div className="border-b border-border bg-surface px-4 py-3 sm:px-6 print:hidden">
       <SeletorEdicao edicoes={daArea} escolhidaId={atual} onEscolher={escolher} />
     </div>
   );
@@ -298,7 +298,7 @@ export function AppShell({ area }: { area: Area }) {
         }
       }}
       className={cx(
-        'relative min-h-dvh max-lg:overflow-x-hidden max-lg:bg-navy-900 lg:pl-(--sidebar-width)',
+        'relative min-h-dvh max-lg:overflow-x-hidden max-lg:bg-navy-900 lg:pl-(--sidebar-width) print:bg-white print:pl-0',
         drawerAtivo && 'max-lg:h-dvh max-lg:overflow-hidden max-lg:select-none',
       )}
     >
@@ -310,7 +310,7 @@ export function AppShell({ area }: { area: Area }) {
       </a>
 
       {/* Menu lateral (desktop) */}
-      <aside className="fixed inset-y-0 left-0 z-(--z-header) hidden w-(--sidebar-width) flex-col overflow-hidden bg-navy-900 px-4 py-6 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-(--z-header) hidden w-(--sidebar-width) flex-col overflow-hidden bg-navy-900 px-4 py-6 lg:flex print:hidden">
         <Brand variante="textoBranco" className="mb-8 w-full" />
         <nav
           aria-label={ROTULO_AREA[area]}
@@ -434,7 +434,7 @@ export function AppShell({ area }: { area: Area }) {
           )}
         >
           {/* Barra superior */}
-          <header className="sticky top-0 z-(--z-header) border-b border-border bg-surface/95 backdrop-blur">
+          <header className="sticky top-0 z-(--z-header) border-b border-border bg-surface/95 backdrop-blur print:hidden">
             <div className="flex min-h-16 flex-wrap items-center gap-3 px-4 py-2 sm:px-6">
               <button
                 ref={botaoMenu}

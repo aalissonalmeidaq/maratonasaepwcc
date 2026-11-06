@@ -7,7 +7,7 @@ export function StatusConexao() {
   return (
     <div
       role="status"
-      className="flex items-center gap-2 bg-amber-800 px-4 py-2 text-sm font-medium text-white"
+      className="flex items-center gap-2 bg-amber-800 print:hidden px-4 py-2 text-sm font-medium text-white"
     >
       <Icon nome="offline" tamanho="sm" />
       <span>

@@ -120,9 +120,9 @@ reset role;
 select is(pg_temp.contar('versoes_regras', format('edicao_id = %L', pg_temp.lido('nova'))), 1,
   'criar_edicao cria a versão inicial');
 
-select is(app.inicio_do_encontro(pg_temp.enc(1)), ((current_date - 7) + time '10:00') at time zone 'America/Sao_Paulo',
+select is(app.inicio_do_encontro(pg_temp.enc(1)), ((current_date - 7) + time '10:00') at time zone 'America/Fortaleza',
   'início do encontro com horário');
-select is(app.inicio_do_encontro(pg_temp.enc(2)), ((current_date + 7) + time '00:00') at time zone 'America/Sao_Paulo',
+select is(app.inicio_do_encontro(pg_temp.enc(2)), ((current_date + 7) + time '00:00') at time zone 'America/Fortaleza',
   'início do encontro sem horário: início do dia');
 select is(app.regras_vigentes(pg_temp.t('a'), now()), app.regras_piloto(), 'regras vigentes sem ajustes = versão da edição');
 

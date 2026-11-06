@@ -4,7 +4,8 @@ import type { ColunaRelatorio, Relatorio, TipoRelatorio, ValorCelula } from './t
 const BOM = '﻿';
 const SEPARADOR = ';';
 const FIM_DE_LINHA = '\r\n';
-const FUSO = 'America/Sao_Paulo';
+// Fuso oficial de Juazeiro do Norte (CE), spec 015.
+const FUSO = 'America/Fortaleza';
 
 const dataHora = new Intl.DateTimeFormat('pt-BR', {
   timeZone: FUSO,
@@ -61,7 +62,7 @@ export function gerarCsv(relatorio: Relatorio): string {
   return BOM + [cabecalho, ...linhas].join(FIM_DE_LINHA);
 }
 
-/** `maratona-<tipo>-<AAAA-MM-DD>.csv`, com a data de Brasília. */
-export function nomeDoArquivo(tipo: TipoRelatorio, data: Date): string {
+/** `maratona-<tipo>-<AAAA-MM-DD>.csv`, com a data de Juazeiro do Norte. */
+export function nomeDoArquivo(tipo: TipoRelatorio | 'premissas', data: Date): string {
   return `maratona-${tipo}-${dataIso.format(data)}.csv`;
 }

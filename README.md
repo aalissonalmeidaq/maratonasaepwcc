@@ -18,6 +18,11 @@ mantém a leitura online e exibe aviso. Dados autenticados não entram no cache 
 O [guia de validação](specs/014-pwa-acessibilidade/quickstart.md) reúne os testes e o
 [roteiro de leitor de tela](docs/acessibilidade/roteiro-leitor-de-tela.md) aguarda execução pela unidade.
 
+Na spec 015, a coordenação tem a tela **Premissas em validação** (`/coordenacao/premissas`): as
+escolhas que o sistema adotou sem decisão da unidade (P01–P32), para registrar "Confirmada" ou
+"Precisa mudar" com justificativa, histórico e auditoria; docentes e mentores leem. Exporta CSV e
+imprime. Responder não muda regras: cada mudança vira uma spec. Datas usam `America/Fortaleza`.
+
 - [Arquitetura](#arquitetura) · [Pré-requisitos](#pré-requisitos) · [Instalação](#instalação)
 - [Variáveis de ambiente](#variáveis-de-ambiente) · [Executar](#executar-a-aplicação)
 - [Demonstração](#telas-de-demonstração-dados-fictícios) · [Supabase local](#supabase-local)

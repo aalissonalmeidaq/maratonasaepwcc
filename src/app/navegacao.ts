@@ -186,6 +186,12 @@ export const MENUS: Record<Area, MenuDaArea> = {
             icone: 'relatorio',
             descricao: 'Exportação CSV das turmas',
           },
+          {
+            rotulo: 'Premissas em validação',
+            caminho: '/docente/premissas',
+            icone: 'checklist',
+            descricao: 'Premissas e respostas da coordenação',
+          },
         ],
       },
     ],
@@ -207,6 +213,12 @@ export const MENUS: Record<Area, MenuDaArea> = {
             caminho: '/coordenacao/edicoes',
             icone: 'gestao',
             descricao: 'Criar, ativar e encerrar edições',
+          },
+          {
+            rotulo: 'Premissas em validação',
+            caminho: '/coordenacao/premissas',
+            icone: 'checklist',
+            descricao: 'Respostas da unidade às premissas',
           },
           {
             rotulo: 'Cursos e turmas',
