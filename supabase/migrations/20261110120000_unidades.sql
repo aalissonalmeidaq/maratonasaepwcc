@@ -34,6 +34,8 @@ create table public.funcoes_unidade (
   usuario_id uuid not null references public.perfis (id) on delete cascade,
   funcao public.funcao_unidade not null,
   ativa boolean not null default true,
+  -- Desligada junto com a conta (e só essas voltam na reativação).
+  desativada_com_conta boolean not null default false,
   criado_em timestamptz not null default now(),
   primary key (usuario_id, funcao)
 );
@@ -159,7 +161,11 @@ begin
     select 1 from public.funcoes_unidade f
     where f.usuario_id = new.usuario_id and f.funcao::text = new.papel::text and f.ativa
   ) then
-    if (select auth.uid()) is null then
+    -- Seed/administração (sem sessão) ou a coordenação da edição criando a conta de docente/mentor
+    -- (criar-conta): a função nasce com a conta. Vincular quem já existe exige a função (gestão).
+    if (select auth.uid()) is null
+       or (new.papel in ('docente', 'mentor') and app.tem_papel(new.edicao_id, array['coordenacao']::public.papel[])
+           and not exists (select 1 from public.funcoes_unidade f where f.usuario_id = new.usuario_id)) then
       insert into public.funcoes_unidade (usuario_id, funcao) values (new.usuario_id, new.papel::text::public.funcao_unidade)
       on conflict (usuario_id, funcao) do update set ativa = true;
     else
@@ -716,6 +722,9 @@ begin
   if (select unidade_id from public.perfis where id = p_usuario) is distinct from v_unidade then
     raise exception 'Esta conta não é da sua unidade.' using errcode = '42501';
   end if;
+  if not (select ativo from public.perfis where id = p_usuario) then
+    raise exception 'A conta está desativada. Reative-a antes.' using errcode = '23514';
+  end if;
   if p_funcoes is null or cardinality(p_funcoes) = 0 then
     raise exception 'Escolha ao menos uma função. Para tirar a pessoa da equipe, desative a conta.' using errcode = '23514';
   end if;
@@ -773,7 +782,7 @@ begin
   update public.atribuicoes a set ativo = false
   where a.usuario_id = p_usuario and a.ativo and a.origem_id is null
     and exists (select 1 from public.edicoes e where e.id = a.edicao_id and e.unidade_id = v_unidade and e.estado <> 'encerrada');
-  update public.funcoes_unidade set ativa = false where usuario_id = p_usuario and ativa;
+  update public.funcoes_unidade set ativa = false, desativada_com_conta = true where usuario_id = p_usuario and ativa;
   update public.perfis set ativo = false where id = p_usuario and ativo;
   perform set_config('app.justificativa', '', true);
 end;
@@ -790,7 +799,8 @@ begin
     raise exception 'Contas de gestão só o master altera.' using errcode = '42501';
   end if;
   update public.perfis set ativo = true where id = p_usuario and not ativo;
-  update public.funcoes_unidade set ativa = true where usuario_id = p_usuario and not ativa;
+  update public.funcoes_unidade set ativa = true, desativada_com_conta = false
+  where usuario_id = p_usuario and not ativa and desativada_com_conta;
 end;
 $$;
 

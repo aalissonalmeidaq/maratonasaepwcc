@@ -701,5 +701,34 @@ select is(pg_temp.rpc_recusada(pg_temp.u('d2'), format('select public.painel_da_
 select is(pg_temp.visto_como(pg_temp.u('d2'), 'select count(*) from public.perfis'), 0::bigint, 'conta desativada: nada lido pelas tabelas');
 update public.perfis set ativo = true where id = pg_temp.u('d2');
 
+
+-- Revisão do PR: reativar devolve só o que a desativação desligou; conta desativada não recebe
+-- funções; a coordenação que cria docente novo concede a função com a conta.
+set local role authenticated;
+select pg_temp.como(pg_temp.u('a5'));
+select lives_ok(format($f$ select public.definir_funcoes(%L, array['analista','mentor']::public.funcao_unidade[], 'Mentoria temporária.') $f$, pg_temp.u('a9')), 'a gestão acrescenta mentor');
+select lives_ok(format($f$ select public.definir_funcoes(%L, array['analista']::public.funcao_unidade[], 'Mentoria encerrada.') $f$, pg_temp.u('a9')), 'a gestão retira mentor');
+select lives_ok(format($f$ select public.desativar_membro(%L, 'Saída temporária da pessoa.') $f$, pg_temp.u('a9')), 'desativa a conta');
+select throws_ok(format($f$ select public.definir_funcoes(%L, array['analista','docente']::public.funcao_unidade[], 'Com a conta desativada.') $f$, pg_temp.u('a9')),
+  '23514', 'A conta está desativada. Reative-a antes.', 'conta desativada não recebe funções');
+select lives_ok(format($f$ select public.reativar_membro(%L) $f$, pg_temp.u('a9')), 'reativa a conta');
+reset role;
+select is((select string_agg(funcao::text || ':' || ativa, ',' order by funcao::text) from public.funcoes_unidade where usuario_id = pg_temp.u('a9')),
+  'analista:true,mentor:false', 'reativação devolve só a função que a desativação desligou');
+
+insert into auth.users (id, email, raw_user_meta_data, aud, role)
+values (pg_temp.u('ad'), 'novo-docente@exemplo.invalid', jsonb_build_object('nome', 'Docente novo', 'unidade_id', pg_temp.ui()), 'authenticated', 'authenticated');
+set local role authenticated;
+select pg_temp.como(pg_temp.u('a6'));
+select lives_ok(format($f$ insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id) values (%L, '20000000-0000-0000-0017-0000000000a0', 'docente', '50000000-0000-0000-0017-0000000000a0') $f$, pg_temp.u('ad')),
+  'a coordenação vincula o docente que acabou de criar (criar-conta)');
+reset role;
+select ok(exists (select 1 from public.funcoes_unidade where usuario_id = pg_temp.u('ad') and funcao = 'docente' and ativa), 'a função de docente nasceu com a conta');
+set local role authenticated;
+select pg_temp.como(pg_temp.u('a6'));
+select throws_ok(format($f$ insert into public.atribuicoes (usuario_id, edicao_id, papel, turma_id) values (%L, '20000000-0000-0000-0017-0000000000a0', 'coordenacao', null) $f$, pg_temp.u('ad')),
+  '23514', null, 'a coordenação não concede coordenação por vínculo (só a gestão)');
+reset role;
+
 select * from finish();
 rollback;

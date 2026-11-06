@@ -27,6 +27,7 @@ interface ContaListada {
   nome: string;
   email: string;
   situacaoAcesso: string;
+  funcoes?: string[];
 }
 
 export default {
@@ -91,7 +92,12 @@ export default {
         }
         const alvo = listas.find((c) => c.usuarioId === usuarioId);
         return alvo
-          ? { nome: alvo.nome, email: alvo.email, ativo: alvo.situacaoAcesso === 'ativo' }
+          ? {
+              nome: alvo.nome,
+              email: alvo.email,
+              ativo: alvo.situacaoAcesso === 'ativo',
+              gestao: alvo.funcoes?.includes('gestao') ?? false,
+            }
           : null;
       },
       async corrigirEmail(usuarioId, email) {

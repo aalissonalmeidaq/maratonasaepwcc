@@ -53,7 +53,7 @@ Esperado:
 | Portão                              | Resultado                                                               |
 | ----------------------------------- | ----------------------------------------------------------------------- |
 | `npx supabase db reset --local`     | migrations e seed aplicados (uma única unidade no seed)                 |
-| `npm run test:db`                   | 17 arquivos, 1.918 testes aprovados (`017_unidades`: 418)               |
+| `npm run test:db`                   | 17 arquivos, 1.927 testes aprovados (`017_unidades`: 427)               |
 | `npm run verify`                    | 139 arquivos, 988 testes de unidade; typecheck, lint e build sem erros  |
 | `npm run test:e2e` (demonstração)   | 181 aprovados, 1 ignorado (desktop e celular, axe nas telas novas)      |
 | `npm run test:e2e:supabase` (local) | 75 aprovados (inclui `unidades.spec.ts` e `premissas.spec.ts` ajustado) |

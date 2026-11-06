@@ -252,6 +252,34 @@ describe('execução do pedido, com compensação (FR-005, constituição V)', (
     expect(deps.enviarConvite).not.toHaveBeenCalled();
   });
 
+  it('falha ao desfazer a conta: não diz que nada foi criado', async () => {
+    const deps = dependencias({
+      conceder: vi.fn(async () => 'Recusado.'),
+      removerConta: vi.fn(async () => {
+        throw new Error('rede');
+      }),
+    });
+    const r = await processarPedido(
+      { acao: 'gestao', nome: 'G', email: 'g@b.co', unidadeId: 'un' },
+      master,
+      'u0',
+      deps,
+    );
+    expect(r.status).toBe(500);
+    expect(String(r.corpo.erro)).not.toContain('Nada foi criado');
+  });
+
+  it('reenviar: a gestão não mexe em conta de gestão; o master pode', async () => {
+    const reenviar: PedidoDaRede = { acao: 'reenviar', usuarioId: 'u9', novoEmail: 'x@b.co' };
+    const alvo = async () => ({ nome: 'Gê', email: 'g@b.co', ativo: false, gestao: true });
+    let deps = dependencias({ localizarParaReenvio: vi.fn(alvo) });
+    const recusa = await processarPedido(reenviar, gestao, 'u0', deps);
+    expect(recusa.status).toBe(403);
+    expect(deps.corrigirEmail).not.toHaveBeenCalled();
+    deps = dependencias({ localizarParaReenvio: vi.fn(alvo) });
+    expect((await processarPedido(reenviar, master, 'u0', deps)).status).toBe(200);
+  });
+
   it('reenviar com correção de e-mail: corrige e envia ao novo endereço', async () => {
     const deps = dependencias();
     const r = await processarPedido(

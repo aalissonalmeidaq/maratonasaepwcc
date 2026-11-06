@@ -93,7 +93,7 @@ export interface Dependencias {
   /** Conta ao alcance de quem chama (master: gestão e masters; gestão: a equipe), ou `null`. */
   localizarParaReenvio(
     usuarioId: string,
-  ): Promise<{ nome: string; email: string; ativo: boolean } | null>;
+  ): Promise<{ nome: string; email: string; ativo: boolean; gestao?: boolean } | null>;
   corrigirEmail(usuarioId: string, email: string): Promise<'ok' | 'ja_existe' | 'falha'>;
 }
 
@@ -144,6 +144,9 @@ export async function processarPedido(
   if (pedido.acao === 'reenviar') {
     const alvo = await deps.localizarParaReenvio(pedido.usuarioId);
     if (!alvo) return { status: 403, corpo: { erro: 'Esta conta não está ao seu alcance.' } };
+    // Contas de gestão só o master altera (como nas RPCs de desativar/reativar membro).
+    if (alvo.gestao && !conta.master)
+      return { status: 403, corpo: { erro: 'Contas de gestão só o master altera.' } };
     if (alvo.ativo)
       return { status: 409, corpo: { erro: 'Esta pessoa já fez o primeiro acesso.' } };
     let email = alvo.email;
@@ -175,7 +178,14 @@ export async function processarPedido(
 
   const falha = await deps.conceder(concessao(pedido, criada.usuarioId));
   if (falha) {
-    await deps.removerConta(criada.usuarioId);
+    try {
+      await deps.removerConta(criada.usuarioId);
+    } catch {
+      return {
+        status: 500,
+        corpo: { erro: `${falha} A conta ficou pendente: avise a administração do sistema.` },
+      };
+    }
     return { status: 400, corpo: { erro: `${falha} Nada foi criado.` } };
   }
 
