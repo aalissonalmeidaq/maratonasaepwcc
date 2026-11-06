@@ -69,7 +69,7 @@ export default defineConfig({
     include: [
       'src/**/*.test.{ts,tsx}',
       'supabase/functions/_shared/**/*.test.ts',
-      'scripts/ci/**/*.test.ts',
+      'scripts/**/*.test.ts',
     ],
     css: false,
     restoreMocks: true,

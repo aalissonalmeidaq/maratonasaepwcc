@@ -20,7 +20,7 @@ do catálogo se perder. Nenhuma migration antiga é editada; a nova só tem `dro
 
 ## Phase 1: Setup
 
-- [ ] T001 Registrar a linha de base antes de mexer: `npm run verify` (testes de unidade e build), `npx supabase db reset --local && npm run test:db` (arquivos e testes pgTAP) e `git grep -c -i premissa` por pasta; anotar os números em `specs/018-premissas-fora-do-site/quickstart.md` (seção de resultado)
+- [X] T001 Registrar a linha de base antes de mexer: `npm run verify` (testes de unidade e build), `npx supabase db reset --local && npm run test:db` (arquivos e testes pgTAP) e `git grep -c -i premissa` por pasta; anotar os números em `specs/018-premissas-fora-do-site/quickstart.md` (seção de resultado)
 
 ---
 
@@ -28,9 +28,9 @@ do catálogo se perder. Nenhuma migration antiga é editada; a nova só tem `dro
 
 **Goal**: as 32 premissas ficam em texto no repositório antes de o catálogo sair do código.
 
-- [ ] T002 Escrever `scripts/premissas-documento.test.ts` (RED, ambiente `node`, incluído no Vitest trocando em `vite.config.ts` o padrão `scripts/ci/**/*.test.ts` por `scripts/**/*.test.ts`; o working tree tem o ajuste solto `server.host` nesse arquivo, então commitar só este hunk com `git apply --cached`, como na spec 017): lê `docs/premissas.md` e confere P01–P32 sem lacunas nem repetição, cada uma com os seis campos (tema, pergunta terminando em `?`, premissa em uso, onde afeta, referência, resolução), temas dentre os seis válidos e resolução `spec 016` para P25 e `decisão do projeto de 06/11/2026` para as outras 31; ver falhar (arquivo inexistente)
-- [ ] T003 Gerar `docs/premissas.md` com um script descartável **não commitado** (por exemplo `node --experimental-strip-types` ou um teste temporário) que lê `CATALOGO_PREMISSAS` de `src/modules/demo/premissas.ts` (espelho da migration `20261109120000`) e escreve uma seção por tema, uma linha por premissa com código, pergunta, premissa em uso, onde afeta, opções, referência e resolução; apagar o script; `npx prettier --write docs/premissas.md`
-- [ ] T004 Conferir `docs/premissas.md` por amostragem contra a migration `20261109120000_premissas_em_validacao.sql` (P01, P13, P25, P32 e duas escolhidas ao acaso) e rodar `npm run test -- scripts/premissas-documento.test.ts` até ficar verde (GREEN); este teste **permanece** depois da remoção do módulo (lê só o documento)
+- [X] T002 Escrever `scripts/premissas-documento.test.ts` (RED, ambiente `node`, incluído no Vitest trocando em `vite.config.ts` o padrão `scripts/ci/**/*.test.ts` por `scripts/**/*.test.ts`; o working tree tem o ajuste solto `server.host` nesse arquivo, então commitar só este hunk com `git apply --cached`, como na spec 017): lê `docs/premissas.md` e confere P01–P32 sem lacunas nem repetição, cada uma com os seis campos (tema, pergunta terminando em `?`, premissa em uso, onde afeta, referência, resolução), temas dentre os seis válidos e resolução `spec 016` para P25 e `decisão do projeto de 06/11/2026` para as outras 31; ver falhar (arquivo inexistente)
+- [X] T003 Gerar `docs/premissas.md` com um script descartável **não commitado** (por exemplo `node --experimental-strip-types` ou um teste temporário) que lê `CATALOGO_PREMISSAS` de `src/modules/demo/premissas.ts` (espelho da migration `20261109120000`) e escreve uma seção por tema, uma linha por premissa com código, pergunta, premissa em uso, onde afeta, opções, referência e resolução; apagar o script; `npx prettier --write docs/premissas.md`
+- [X] T004 Conferir `docs/premissas.md` por amostragem contra a migration `20261109120000_premissas_em_validacao.sql` (P01, P13, P25, P32 e duas escolhidas ao acaso) e rodar `npm run test -- scripts/premissas-documento.test.ts` até ficar verde (GREEN); este teste **permanece** depois da remoção do módulo (lê só o documento)
 
 **Checkpoint**: registro preservado e guardado por teste; remoções liberadas.
 
