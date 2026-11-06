@@ -46,7 +46,7 @@ export const CATALOGO_PREMISSAS: ItemDoCatalogo[] = [
     'P02',
     'Identidade visual',
     2,
-    'Os 117 ícones redesenhados a partir das pranchas estão fiéis à identidade visual?',
+    'Os 118 ícones redesenhados a partir das pranchas estão fiéis à identidade visual?',
     'Ícones redesenhados à mão a partir das pranchas (não por rastreio automático), mais o ícone "Salvar" criado no mesmo estilo.',
     'Todos os ícones do menu, dos cartões e dos botões (galeria em docs/icones/galeria.html).',
     `${DOC} §1 e §2.1`,
