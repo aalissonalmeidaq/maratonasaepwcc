@@ -122,6 +122,10 @@ gh api -X PUT repos/<dono>/<repositorio>/branches/main/protection   -H "Accept: 
 
 Renomear uma verificação no `ci.yml` exige atualizar esta regra e este documento.
 
+**Estado atual:** regra aplicada no `main` em 2026-11-06 pela linha de comando acima (quatro
+verificações obrigatórias, branch atualizada, proposta obrigatória, sem force-push nem exclusão;
+administradores não são obrigados — `enforce_admins=false`).
+
 ## Primeiro master e unidades (spec 016)
 
 O master é quem cadastra unidades e contas de gestão. O **primeiro** só pode ser criado pela

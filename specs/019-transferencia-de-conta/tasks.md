@@ -86,7 +86,7 @@ antigas; fixtures do pgTAP com sufixos de uuid em **hexadecimal**; toda RPC nova
 - [x] T019 [P] Documentação: `docs/adr/0013-multiunidade.md` (nota sobre a transferência e o caminho único de mudança de unidade), `docs/decisoes-e-pendencias.md` (nova seção 6.16 da spec 019 com as decisões do usuário), `docs/operacao-e-homologacao.md` (como o master transfere; efeito sobre funções e vínculos; lembrar que a gestão do destino define as funções) e `src/modules/rede/README.md`
 - [x] T020 [P] Conferir que a varredura do 017 cobre as RPCs novas (guarda de conta ativa e política restritiva na tabela nova) sem ajuste; se faltar, corrigir a migration, não o teste
 - [x] T021 Portões completos: `npx supabase db reset --local`; `npm run test:db`; `npm run verify`; `npm run test:e2e`; com `supabase functions serve` e `E2E_SUPABASE_*`, `npm run test:e2e:supabase`; registrar contagens em `quickstart.md`; `npx prettier --write` só nos arquivos tocados (não reformatar `src/modules/pontuacao/domain/tipos.ts`)
-- [ ] T022 Commitar com `git add` explícito (sem `.specify/`, sem os ajustes soltos `dev:host`/`server.host` e sem a seção alheia de `docs/decisoes-e-pendencias.md` se ainda estiver só no working tree), abrir o PR para o `main` e aguardar as quatro verificações da CI verdes antes de pedir autorização para mesclar
+- [X] T022 Commitar com `git add` explícito (sem `.specify/`, sem os ajustes soltos `dev:host`/`server.host` e sem a seção alheia de `docs/decisoes-e-pendencias.md` se ainda estiver só no working tree), abrir o PR para o `main` e aguardar as quatro verificações da CI verdes antes de pedir autorização para mesclar
 
 ---
 
